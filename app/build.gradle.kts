@@ -51,6 +51,11 @@ dependencies {
 
     implementation("net.fabricmc:mapping-io:0.7.1")
 
+    // https://mvnrepository.com/artifact/com.mojang/logging
+    implementation("com.mojang:logging:1.5.10")
+
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation("org.slf4j:slf4j-api:2.0.16")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

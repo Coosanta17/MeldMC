@@ -1,12 +1,12 @@
 package net.coosanta.totalityloader;
 
+import com.mojang.logging.LogUtils;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
+import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,19 +19,65 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MinecraftClasses implements Serializable {
-    private static boolean isComplete = false;
-    private static byte version = 1;
-    private static final Map<String, String> classMappings = new ConcurrentHashMap<>();
-    private static final Map<String, Map<String, String>> methodMappings = new ConcurrentHashMap<>();
-    private static final Map<String, Map<String, String>> fieldMappings = new ConcurrentHashMap<>();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private static ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());;
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    private static final MinecraftClasses instance;
+
+    private static final String FILE = "yarnMappings-1.21.4.ser";
+
+    static {
+        try {
+            instance = new MinecraftClasses();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean isComplete = false;
+    private byte version = 1;
+
+    private final Map<String, String> classMappings = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, String>> methodMappings = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, String>> fieldMappings = new ConcurrentHashMap<>();
+
+    private static ExecutorService executorService = null;
 
     private static long totalMappings;
     private static AtomicLong processedMappings = new AtomicLong(0);
 
-    public static void initiate() throws IOException {
+    private MinecraftClasses() throws IOException {
+        LOGGER.info("loading Minecraft class mappings");
+        try (FileInputStream fileIn = new FileInputStream(FILE);
+             ObjectInputStream in = new ObjectInputStream(fileIn)) {
+
+            MinecraftClasses tempInstance = (MinecraftClasses) in.readObject();
+            this.classMappings.putAll(tempInstance.classMappings);
+            this.methodMappings.putAll(tempInstance.methodMappings);
+            this.fieldMappings.putAll(tempInstance.fieldMappings);
+            this.isComplete = tempInstance.isComplete;
+            this.version = tempInstance.version;
+
+            LOGGER.debug("Loaded mappings from file.");
+        } catch (IOException | ClassNotFoundException e) {
+            LOGGER.debug("Cannot find mapping cache file, creating one.");
+        }
+        this.initiate();
+    }
+
+    private void initiate() throws IOException {
         if (version == 1 && isComplete) return;
+
+        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        if (!classMappings.isEmpty() || !methodMappings.isEmpty() || !fieldMappings.isEmpty()) {
+            LOGGER.warn("Clearing incomplete mappings from unfinished session");
+            classMappings.clear();
+            methodMappings.clear();
+            fieldMappings.clear();
+        }
 
         MemoryMappingTree mappingTree = new MemoryMappingTree();
         Path mappingPath = MinecraftClasses.extractResourceToTempFile("/yarn-1.21.4-rc3_build4.tiny");
@@ -47,22 +93,34 @@ public class MinecraftClasses implements Serializable {
         }
     }
 
-    private static void loadMappings(MemoryMappingTree mappingTree) throws InterruptedException {
+    private void loadMappings(MemoryMappingTree mappingTree) throws InterruptedException {
         // Class mappings
         mappingTree.getClasses().forEach(classDef -> executorService.submit(() -> loadClassMappings(classDef)));
         executorService.shutdown();
+
         if (!executorService.awaitTermination(10, TimeUnit.MINUTES)) {
             isComplete = false;
             throw new RuntimeException("Mapping tasks did not finish in 10 minutes! Either your computer is too slow, or something got stuck.");
         }
         if (processedMappings.get() == totalMappings) {
             isComplete = true;
+            serialize();
         } else {
             throw new RuntimeException("Did not complete mappings. Completed " + processedMappings + "out of" + totalMappings + " classes.");
         }
     }
 
-    private static void loadClassMappings(MappingTree.ClassMapping classDef) {
+    private void serialize() {
+        try (FileOutputStream fileOut = new FileOutputStream(FILE);
+             ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
+            out.writeObject(this);
+            LOGGER.debug("Serialized mapping cache");
+        } catch (IOException e) {
+            LOGGER.error("Cannot save mappings to file. It will still work but it will have to reload them every time at startup.", e);
+        }
+    }
+
+    private void loadClassMappings(MappingTree.ClassMapping classDef) {
         try {
             String obfuscatedClassName = classDef.getName("official");
             String deobfuscatedClassName = classDef.getName("named");
@@ -82,7 +140,7 @@ public class MinecraftClasses implements Serializable {
         }
     }
 
-    private static void loadFieldMappings(MappingTree.ClassMapping classDef, String deobfuscatedClassName) {
+    private void loadFieldMappings(MappingTree.ClassMapping classDef, String deobfuscatedClassName) {
         try {
             Map<String, String> classFieldMappings = new ConcurrentHashMap<>();
             classDef.getFields().forEach(fieldDef -> {
@@ -94,11 +152,11 @@ public class MinecraftClasses implements Serializable {
             });
             fieldMappings.put(deobfuscatedClassName, classFieldMappings);
         } catch (Exception e) {
-            System.err.printf("Error loading fields for class \"%1$s\", %n%2$s", deobfuscatedClassName, e.getMessage());
+            LOGGER.error("Error loading fields for class \"{}\".\n{}", deobfuscatedClassName, e.getMessage());
         }
     }
 
-    private static void loadMethodMappings(MappingTree.ClassMapping classDef, String deobfuscatedClassName) {
+    private void loadMethodMappings(MappingTree.ClassMapping classDef, String deobfuscatedClassName) {
         try {
             Map<String, String> classMethodMappings = new ConcurrentHashMap<>();
             classDef.getMethods().forEach(methodDef -> {
@@ -110,36 +168,40 @@ public class MinecraftClasses implements Serializable {
             });
             methodMappings.put(deobfuscatedClassName, classMethodMappings);
         } catch (Exception e) {
-            System.err.printf("Error loading methods for class \"%1s\", %n%2s", deobfuscatedClassName, e.getMessage());
+            LOGGER.error("Error loading methods for class \"{}\".\n{}", deobfuscatedClassName, e.getMessage());
         }
     }
 
-    public static String getObfuscatedClassName(String deobfuscatedName) {
-        return classMappings.getOrDefault(deobfuscatedName, deobfuscatedName);
+    public static MinecraftClasses getInstance() {
+        return instance;
     }
 
-    public static Class<?> getObfuscatedClass(String deobfuscatedName) throws ClassNotFoundException {
+    public String getObfuscatedClassName(String deobfuscatedName) {
+        return this.classMappings.getOrDefault(deobfuscatedName, null);
+    }
+
+    public Class<?> getObfuscatedClass(String deobfuscatedName) throws ClassNotFoundException {
         String obfuscatedName = getObfuscatedClassName(deobfuscatedName);
         return Class.forName(obfuscatedName);
     }
 
-    public static String getObfuscatedMethodName(String className, String deobfuscatedMethodName) {
+    public String getObfuscatedMethodName(String className, String deobfuscatedMethodName) {
         Map<String, String> classMethodMappings = methodMappings.get(className);
         if (classMethodMappings != null) {
-            return classMethodMappings.getOrDefault(deobfuscatedMethodName, deobfuscatedMethodName);
+            return classMethodMappings.getOrDefault(deobfuscatedMethodName, null);
         }
         return deobfuscatedMethodName;
     }
 
-    public static String getObfuscatedFieldName(String className, String deobfuscatedFieldName) {
+    public String getObfuscatedFieldName(String className, String deobfuscatedFieldName) {
         Map<String, String> classFieldMappings = fieldMappings.get(className);
         if (classFieldMappings != null) {
-            return classFieldMappings.getOrDefault(deobfuscatedFieldName, deobfuscatedFieldName);
+            return classFieldMappings.getOrDefault(deobfuscatedFieldName, null);
         }
         return deobfuscatedFieldName;
     }
 
-    public static Method getObfusicatedMethod(Class<?> clazz, String deobfuscatedMethodName, Class<?>... parameterTypes) throws NoSuchMethodException {
+    public Method getObfusicatedMethod(Class<?> clazz, String deobfuscatedMethodName, Class<?>... parameterTypes) throws NoSuchMethodException {
         String obfuscatedMethodName = getObfuscatedMethodName(clazz.getName(), deobfuscatedMethodName);
         return clazz.getDeclaredMethod(obfuscatedMethodName, parameterTypes);
     }
@@ -157,7 +219,7 @@ public class MinecraftClasses implements Serializable {
         return tempFile;
     }
 
-    public static byte getVersion() {
+    public byte getVersion() {
         return version;
     }
 }

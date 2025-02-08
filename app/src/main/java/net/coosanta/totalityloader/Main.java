@@ -1,26 +1,27 @@
 package net.coosanta.totalityloader;
 
+import com.mojang.logging.LogUtils;
 import net.coosanta.totalityloader.gui.Gui;
+import org.slf4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
     private static Main instance;
 
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     // Contains session tokens, so I made it private even though it can be an inconvenience. (I don't want to think about reflection!!)
     private final ArrayList<String> jvmArgs;
     private final Dimension windowSize;
     private final ArrayList<String> gameArgs;
 
-    public Main(String[] args) {
+    private Main(String[] args) {
         int widthArgIndex = this.getGameArgs().indexOf("--width");
         int heightArgIndex = this.getGameArgs().indexOf("--height");
 
@@ -32,8 +33,14 @@ public class Main {
             width = 320;
             height = 240;
         } else {
-            width = Integer.parseInt(this.getGameArgs().get(widthArgIndex + 1));
-            height = Integer.parseInt(this.getGameArgs().get(heightArgIndex + 1));
+            try {
+                width = Integer.parseInt(this.getGameArgs().get(widthArgIndex + 1));
+                height = Integer.parseInt(this.getGameArgs().get(heightArgIndex + 1));
+            } catch (NumberFormatException e) {
+                LOGGER.error("Invalid window size arguments", e);
+                width = 320;
+                height = 240;
+            }
         }
 
         this.windowSize = new Dimension(width, height);
