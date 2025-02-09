@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ public class Main {
         int height;
 
         if (widthArgIndex == -1 || heightArgIndex == -1) {
-            // idk default values but I think these are it.
+            // I don't know default values, but I think these are it.
             width = 320;
             height = 240;
         } else {
@@ -45,36 +44,32 @@ public class Main {
 
         this.windowSize = new Dimension(width, height);
         this.jvmArgs =
-        new ArrayList<>(
-            List.of(
-                    ProcessHandle.current().info().commandLine().orElseThrow().split("\\s+")
-            )
-        );
+                new ArrayList<>(
+                        List.of(
+                                ProcessHandle.current().info().commandLine().orElseThrow().split("\\s+")
+                        )
+                );
         this.gameArgs = new ArrayList<>(List.of(args));
-    }
-
-    private void initialise() {
         SwingUtilities.invokeLater(() -> {
             try {
                 new Gui(windowSize);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
     public static void main(String[] args) {
-        Main mainInstance = Main.createInstance(args);
-        mainInstance.initialise();
+        Main.createInstance(args);
     }
 
     public static Main createInstance(String[] args) {
         if (instance == null) {
             instance = new Main(args);
-            return instance;
         } else {
-            throw new RuntimeException("Main instance already exists!");
+            LOGGER.warn("Main instance already exists");
         }
+        return instance;
     }
 
     public static Main getInstance() {

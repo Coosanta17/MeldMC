@@ -1,21 +1,24 @@
 package net.coosanta.totalityloader.gui;
 
 import net.coosanta.totalityloader.Main;
-import net.coosanta.totalityloader.server.ServerEntry;
+import net.coosanta.totalityloader.minecraft.ServerInfoWrapper;
 import net.querz.nbt.io.NBTUtil;
+import net.querz.nbt.tag.CompoundTag;
 import net.querz.nbt.tag.ListTag;
 import net.querz.nbt.tag.Tag;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ServerSelect extends JPanel {
     private final Main instance;
-    private Tag<?> serversDat;
-    private List<ServerEntry> serverList;
+    private List<ServerInfoWrapper> serverList;
     private Path gameDir;
 
     public ServerSelect() throws IOException {
@@ -26,35 +29,67 @@ public class ServerSelect extends JPanel {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        serverList.forEach((s) -> add(new ServerOption(s)));
+        serverList.forEach((s) -> {
+            try {
+                add(new ServerOption(s));
+            } catch (NoSuchFieldException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    @SuppressWarnings("unchecked")
-    private List<ServerEntry> getServersFromFile() throws IOException {
-        Path serverDatFile = gameDir.resolve("servers.dat");
-        this.serversDat = NBTUtil.read(serverDatFile.toFile()).getTag();
+    private ArrayList<ServerInfoWrapper> getServersFromFile() throws IOException {
+        CompoundTag serversDat;
 
-        if (!(serversDat instanceof ListTag<?> && ((ListTag<?>) serversDat).getTypeClass().equals(ServerEntry.class))) {
-            throw new IllegalArgumentException("Invalid NBT tag when getting servers");
+        File serversDatFile = gameDir.resolve("servers.dat").toFile();
+
+        if (!serversDatFile.isFile()) {
+            serversDat = new CompoundTag();
+            serversDat.put("servers", new ListTag<>(CompoundTag.class));
+            NBTUtil.write(serversDat, serversDatFile, false);
+        } else {
+            Tag<?> serversDatRaw = NBTUtil.read(serversDatFile).getTag();
+            if (serversDatRaw.getID() != 10)
+                throw new IllegalArgumentException("Invalid tags in servers.dat - Expected Compound");
+            serversDat = (CompoundTag) serversDatRaw;
         }
 
-        return (List<ServerEntry>) serversDat;
+        Tag<?> serverDatListTagRaw = serversDat.get("servers");
+        if (serverDatListTagRaw.getID() != 9)
+            throw new IllegalArgumentException("Invalid tags in servers.dat - Expected List");
+
+        ListTag<?> serverDatListTagUnchecked = (ListTag<?>) serverDatListTagRaw;
+        if (serverDatListTagUnchecked.getTypeClass() != CompoundTag.class)
+            throw new IllegalArgumentException("Invalid tags in servers.dat List - Expected Compound");
+
+        @SuppressWarnings("unchecked")
+        ListTag<CompoundTag> serversDatList = (ListTag<CompoundTag>) serverDatListTagUnchecked;
+
+        ArrayList<ServerInfoWrapper> serverListUnfinished = new ArrayList<>();
+        serversDatList.forEach((server) -> {
+            try {
+                serverListUnfinished.add(new ServerInfoWrapper(server.getString("name"), server.getString("ip"), "OTHER"));
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                     InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return serverListUnfinished;
     }
 
-    public class ServerOption extends JPanel {
-        ServerOption(ServerEntry server) {
+    public static class ServerOption extends JPanel {
+        ServerOption(ServerInfoWrapper server) throws NoSuchFieldException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
             setLayout(new BorderLayout());
 
-            JTextArea name = new JTextArea(server.getName());
-//            JPanel playerCountAndPing = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-//            playerCountAndPing.add(server.getServerStat().)
+            JTextArea name = new JTextArea(String.valueOf(server.getFieldValue("name")));
             add(name, BorderLayout.NORTH);
 
-            ImageIcon icon = new ImageIcon(server.getIcon());
+            ImageIcon icon = new ImageIcon(String.valueOf(server.callMethod("getFavicon")));
             JLabel iconLabel = new JLabel(icon);
             add(iconLabel, BorderLayout.WEST);
 
-            JTextArea ip = new JTextArea(server.getIp());
+            JTextArea ip = new JTextArea(String.valueOf(server.getFieldValue("address")));
             add(ip, BorderLayout.CENTER);
         }
     }

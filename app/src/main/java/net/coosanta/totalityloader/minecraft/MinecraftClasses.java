@@ -1,4 +1,4 @@
-package net.coosanta.totalityloader;
+package net.coosanta.totalityloader.minecraft;
 
 import com.mojang.logging.LogUtils;
 import net.fabricmc.mappingio.MappingReader;
@@ -7,6 +7,7 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import org.slf4j.Logger;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +47,7 @@ public class MinecraftClasses implements Serializable {
     private static ExecutorService executorService = null;
 
     private static long totalMappings;
-    private static AtomicLong processedMappings = new AtomicLong(0);
+    private static final AtomicLong processedMappings = new AtomicLong(0);
 
     private MinecraftClasses() throws IOException {
         LOGGER.info("loading Minecraft class mappings");
@@ -100,6 +101,7 @@ public class MinecraftClasses implements Serializable {
 
         if (!executorService.awaitTermination(10, TimeUnit.MINUTES)) {
             isComplete = false;
+            executorService.shutdownNow();
             throw new RuntimeException("Mapping tasks did not finish in 10 minutes! Either your computer is too slow, or something got stuck.");
         }
         if (processedMappings.get() == totalMappings) {
@@ -152,7 +154,7 @@ public class MinecraftClasses implements Serializable {
             });
             fieldMappings.put(deobfuscatedClassName, classFieldMappings);
         } catch (Exception e) {
-            LOGGER.error("Error loading fields for class \"{}\".\n{}", deobfuscatedClassName, e.getMessage());
+            LOGGER.error("Error loading fields for class \"{}\".\n{}", deobfuscatedClassName, e);
         }
     }
 
@@ -168,7 +170,7 @@ public class MinecraftClasses implements Serializable {
             });
             methodMappings.put(deobfuscatedClassName, classMethodMappings);
         } catch (Exception e) {
-            LOGGER.error("Error loading methods for class \"{}\".\n{}", deobfuscatedClassName, e.getMessage());
+            LOGGER.error("Error loading methods for class \"{}\".\n{}", deobfuscatedClassName, e);
         }
     }
 
@@ -176,16 +178,17 @@ public class MinecraftClasses implements Serializable {
         return instance;
     }
 
-    public String getObfuscatedClassName(String deobfuscatedName) {
+    private String getObfuscatedClassName(String deobfuscatedName) {
         return this.classMappings.getOrDefault(deobfuscatedName, null);
     }
 
     public Class<?> getObfuscatedClass(String deobfuscatedName) throws ClassNotFoundException {
         String obfuscatedName = getObfuscatedClassName(deobfuscatedName);
+        LOGGER.debug("Obfuscated class name: {}", deobfuscatedName);
         return Class.forName(obfuscatedName);
     }
 
-    public String getObfuscatedMethodName(String className, String deobfuscatedMethodName) {
+    private String getObfuscatedMethodName(String className, String deobfuscatedMethodName) {
         Map<String, String> classMethodMappings = methodMappings.get(className);
         if (classMethodMappings != null) {
             return classMethodMappings.getOrDefault(deobfuscatedMethodName, null);
@@ -193,7 +196,12 @@ public class MinecraftClasses implements Serializable {
         return deobfuscatedMethodName;
     }
 
-    public String getObfuscatedFieldName(String className, String deobfuscatedFieldName) {
+    public Method getObfuscatedMethod(Class<?> clazz, String deobfuscatedMethodName, Class<?>... parameterTypes) throws NoSuchMethodException {
+        String obfuscatedMethodName = getObfuscatedMethodName(clazz.getName(), deobfuscatedMethodName);
+        return clazz.getDeclaredMethod(obfuscatedMethodName, parameterTypes);
+    }
+
+    private String getObfuscatedFieldName(String className, String deobfuscatedFieldName) {
         Map<String, String> classFieldMappings = fieldMappings.get(className);
         if (classFieldMappings != null) {
             return classFieldMappings.getOrDefault(deobfuscatedFieldName, null);
@@ -201,9 +209,9 @@ public class MinecraftClasses implements Serializable {
         return deobfuscatedFieldName;
     }
 
-    public Method getObfusicatedMethod(Class<?> clazz, String deobfuscatedMethodName, Class<?>... parameterTypes) throws NoSuchMethodException {
-        String obfuscatedMethodName = getObfuscatedMethodName(clazz.getName(), deobfuscatedMethodName);
-        return clazz.getDeclaredMethod(obfuscatedMethodName, parameterTypes);
+    public Field getObfuscatedField(Class<?> clazz, String deobfuscatedFieldName) throws NoSuchFieldException {
+        String obfuscatedFieldName = getObfuscatedFieldName(clazz.getName(), deobfuscatedFieldName);
+        return clazz.getDeclaredField(obfuscatedFieldName);
     }
 
     private static Path extractResourceToTempFile(String resourcePath) throws IOException {
@@ -214,6 +222,7 @@ public class MinecraftClasses implements Serializable {
 
         Path tempFile = Files.createTempFile("mappings", ".tiny");
         Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+        tempFile.toFile().deleteOnExit();
         inputStream.close();
 
         return tempFile;

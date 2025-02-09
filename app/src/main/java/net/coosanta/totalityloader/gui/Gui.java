@@ -12,6 +12,9 @@ public class Gui extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        JTextArea heading = new JTextArea("Multiplayer");
+        add(heading, BorderLayout.NORTH);
+
         ServerSelect serverSelect = new ServerSelect();
         add(serverSelect, BorderLayout.CENTER);
     }

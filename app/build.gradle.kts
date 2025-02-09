@@ -38,17 +38,7 @@ dependencies {
     // NBT for server.dat
     implementation("com.github.Querz:NBT:6.1")
 
-    // Codecs
-    //implementation("com.mojang:datafixerupper:1.0.20") // official
-    implementation("com.mojang:datafixerupper:8.0.16") // Mavenrepository
-
-    // Player Profiles
-    compileOnly("com.mojang:authlib:3.13.56")
-
     // Mapping reader
-    // https://mvnrepository.com/artifact/net.fabricmc/tiny-remapper
-    implementation("net.fabricmc:tiny-remapper:0.11.0")
-
     implementation("net.fabricmc:mapping-io:0.7.1")
 
     // https://mvnrepository.com/artifact/com.mojang/logging
