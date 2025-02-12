@@ -2,6 +2,7 @@ package net.coosanta.totalityloader.gui;
 
 import net.coosanta.totalityloader.Main;
 import net.coosanta.totalityloader.minecraft.ServerInfoWrapper;
+import net.coosanta.totalityloader.minecraft.SharedConstantsWrapper;
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.tag.CompoundTag;
 import net.querz.nbt.tag.ListTag;
@@ -21,7 +22,7 @@ public class ServerSelect extends JPanel {
     private List<ServerInfoWrapper> serverList;
     private Path gameDir;
 
-    public ServerSelect() throws IOException {
+    public ServerSelect() throws IOException, NoSuchFieldException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.instance = Main.getInstance();
         this.gameDir = this.instance.getGameDir();
 
@@ -39,7 +40,7 @@ public class ServerSelect extends JPanel {
         });
     }
 
-    private ArrayList<ServerInfoWrapper> getServersFromFile() throws IOException {
+    private ArrayList<ServerInfoWrapper> getServersFromFile() throws IOException, NoSuchFieldException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         CompoundTag serversDat;
 
         File serversDatFile = gameDir.resolve("servers.dat").toFile();
@@ -66,13 +67,20 @@ public class ServerSelect extends JPanel {
         @SuppressWarnings("unchecked")
         ListTag<CompoundTag> serversDatList = (ListTag<CompoundTag>) serverDatListTagUnchecked;
 
+        try {
+            new SharedConstantsWrapper().callMethod("createGameVersion");
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | ClassNotFoundException |
+                 NoSuchFieldException | InstantiationException | IOException e) {
+            throw new RuntimeException("Error creating game version. ", e);
+        }
+
         ArrayList<ServerInfoWrapper> serverListUnfinished = new ArrayList<>();
         serversDatList.forEach((server) -> {
             try {
                 serverListUnfinished.add(new ServerInfoWrapper(server.getString("name"), server.getString("ip"), "OTHER"));
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                     InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                     InstantiationException | IllegalAccessException | IOException | NullPointerException e) {
+                throw new RuntimeException("Error getting server information. ", e.getCause());
             }
         });
         return serverListUnfinished;

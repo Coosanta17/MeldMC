@@ -15,12 +15,13 @@ public class Main {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    // Contains session tokens, so I made it private even though it can be an inconvenience. (I don't want to think about reflection!!)
-    private final ArrayList<String> jvmArgs;
+//    private final ArrayList<String> jvmArgs;
     private final Dimension windowSize;
     private final ArrayList<String> gameArgs;
 
     private Main(String[] args) {
+        this.gameArgs = new ArrayList<>(List.of(args));
+
         int widthArgIndex = this.getGameArgs().indexOf("--width");
         int heightArgIndex = this.getGameArgs().indexOf("--height");
 
@@ -43,13 +44,12 @@ public class Main {
         }
 
         this.windowSize = new Dimension(width, height);
-        this.jvmArgs =
-                new ArrayList<>(
-                        List.of(
-                                ProcessHandle.current().info().commandLine().orElseThrow().split("\\s+")
-                        )
-                );
-        this.gameArgs = new ArrayList<>(List.of(args));
+//        this.jvmArgs =
+//                new ArrayList<>(
+//                        List.of(
+//                                ProcessHandle.current().info().commandLine().orElseThrow().split("\\s+")
+//                        )
+//                );
         SwingUtilities.invokeLater(() -> {
             try {
                 new Gui(windowSize);
@@ -80,9 +80,9 @@ public class Main {
         return gameArgs;
     }
 
-    public ArrayList<String> getJvmArgs() {
-        return jvmArgs;
-    }
+//    public ArrayList<String> getJvmArgs() {
+//        return jvmArgs;
+//    }
 
     public Dimension getWindowSize() {
         return windowSize;

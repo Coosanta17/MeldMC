@@ -5,9 +5,13 @@
  * For more details on building Java & JVM projects, please refer to https://docs.gradle.org/8.8/userguide/building_java_projects.html in the Gradle documentation.
  */
 
+project.version = "0.0.1c"
+
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+
+    `maven-publish`
 }
 
 repositories {
@@ -63,4 +67,29 @@ application {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+tasks.jar {
+    archiveFileName.set("totality-loader-${project.version}.jar")
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "coosantaSnapshots"
+            url = uri("https://repo.coosanta.net/snapshots")
+            credentials(PasswordCredentials::class)
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "net.coosanta"
+            artifactId = "totality-loader"
+            version = project.version.toString()
+            from(components["java"])
+        }
+    }
 }

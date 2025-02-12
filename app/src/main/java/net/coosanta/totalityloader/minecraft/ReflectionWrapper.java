@@ -1,5 +1,6 @@
 package net.coosanta.totalityloader.minecraft;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -7,7 +8,7 @@ import java.lang.reflect.Method;
 public abstract class ReflectionWrapper {
     protected final MinecraftClasses mappings;
 
-    protected ReflectionWrapper() {
+    protected ReflectionWrapper() throws IOException {
         this.mappings = MinecraftClasses.getInstance();
     }
 
