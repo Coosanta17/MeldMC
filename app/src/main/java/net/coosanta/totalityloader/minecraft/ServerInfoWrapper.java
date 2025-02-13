@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 public class ServerInfoWrapper extends ReflectionWrapper {
+    private final String CLASS_NAME = "net/minecraft/client/network/ServerInfo";
     private final Object instance;
 
     public ServerInfoWrapper(String name, String address, String serverTypeName)
             throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
         super();
 
-        Class<?> serverInfoClass = mappings.getObfuscatedClass("net/minecraft/client/network/ServerInfo");
-        Class<?> rawServerTypeClass = mappings.getObfuscatedClass("net/minecraft/client/network/ServerInfo$ServerType");
+        Class<?> serverInfoClass = getClassFromMappings(CLASS_NAME);
+        Class<?> rawServerTypeClass = getClassFromMappings(CLASS_NAME + "$ServerType");
 
         if (!rawServerTypeClass.isEnum()) {
             throw new IllegalStateException("ServerType is not an enum! Possible wrong class called.");

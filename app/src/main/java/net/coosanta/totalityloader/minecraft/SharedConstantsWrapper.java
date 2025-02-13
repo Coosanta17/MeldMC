@@ -6,11 +6,12 @@ import java.lang.reflect.Method;
 
 public class SharedConstantsWrapper extends ReflectionWrapper {
     private final Object instance;
+    private final String CLASS_NAME = "net/minecraft/SharedConstants";
 
     public SharedConstantsWrapper() throws ClassNotFoundException, IOException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         super();
 
-        instance = mappings.getObfuscatedClass("net/minecraft/SharedConstants");
+        instance = getClassFromMappings(CLASS_NAME);
     }
 
     @Override
@@ -22,7 +23,7 @@ public class SharedConstantsWrapper extends ReflectionWrapper {
         }
 
         Class<?> targetClass = (Class<?>) getInstance();
-        Method method = getMappings().getObfuscatedMethod(targetClass, deobfuscatedMethodName, parameterTypes);
+        Method method = targetClass.getMethod(deobfuscatedMethodName, parameterTypes);
         return method.invoke(null, args); // invoke as a static method
     }
 
