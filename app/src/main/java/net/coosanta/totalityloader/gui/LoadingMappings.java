@@ -20,54 +20,22 @@ public class LoadingMappings extends JPanel {
         add(information);
         add(progressBar);
 
-        if (MinecraftClasses.isInitiated()) throw new RuntimeException("It already exists wtf!");
+        try {
+            MinecraftClasses.initiate();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        LOGGER.info("Loading Progress listener initiated.");
-
-        LoadingProgressListener loadingProgress = new LoadingProgressListener() {
-            @Override
-            public void onProcessingMappings(int max) {
-                LOGGER.info("Processing mappings from yarn tiny file");
-                SwingUtilities.invokeLater(() -> {
-                    progressBar.setMaximum(max);
-                    progressBar.setIndeterminate(false);
-                });
-            }
-
-            @Override
-            public void onProgressUpdate(int progress) {
-                SwingUtilities.invokeLater(() -> {
-                    progressBar.setValue(progress);
-                    progressBar.setString(progress + "/" + progressBar.getMaximum());
-                });
-            }
-
-            @Override
-            public void onComplete() {
-                LOGGER.info("Completed and closed loading progress listener");
-                SwingUtilities.invokeLater(() -> {
-                    try {
-                        parent.setContentPane(new ServerSelect());
-                        parent.revalidate();
-                        parent.repaint();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-        };
-        new Thread(() -> {
+        SwingUtilities.invokeLater(() -> {
             try {
-                MinecraftClasses.getInstance().initiate(loadingProgress);
-            } catch (IOException e) {
+                parent.setContentPane(new ServerSelect());
+                parent.revalidate();
+                parent.repaint();
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }).start();
-    }
+        });
 
-    public interface LoadingProgressListener {
-        void onProcessingMappings(int max);
-        void onProgressUpdate(int progress);
-        void onComplete();
+        LOGGER.info("Closed LoadingMappings JPanel");
     }
 }

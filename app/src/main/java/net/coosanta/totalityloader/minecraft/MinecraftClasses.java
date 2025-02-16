@@ -15,34 +15,26 @@ import java.util.Collections;
 public class MinecraftClasses {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String mappingsResourcesPath = "/yarn-1.21.4-rc3_build4.tiny";
-    private static final MappingTree mappings;
+    private static MappingTree mappings;
 
     public static final String SRC_NAMESPACE = "official";
     public static final String DST_NAMESPACE = "named";
 
-    static {
-        try {
-            mappings = initiate();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    public MinecraftClasses() {}
 
-    private MinecraftClasses() {}
-
-    public static MappingTree initiate() throws IOException {
+    public static void initiate() throws IOException {
         LOGGER.info("Loading mappings...");
 
         MemoryMappingTree mappingTree = new MemoryMappingTree();
         Path mappingPath = MinecraftClasses.extractResourceToTempFile(mappingsResourcesPath);
         MappingReader.read(mappingPath, mappingTree);
 
-        mappingTree.setSrcNamespace("named");
-        mappingTree.setDstNamespaces(Collections.singletonList("official"));
+        mappingTree.setSrcNamespace(SRC_NAMESPACE);
+        mappingTree.setDstNamespaces(Collections.singletonList(DST_NAMESPACE));
+
+        mappings = mappingTree;
 
         LOGGER.info("Finished loading mappings.");
-
-        return mappingTree;
     }
 
     public static MappingTree getMappings() {

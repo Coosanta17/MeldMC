@@ -15,9 +15,11 @@ public abstract class ReflectionWrapper {
     private final Map<String, Field> fieldCache = new ConcurrentHashMap<>();
 
     protected final MappingTree mappings;
-    protected String className;
+    protected final String deobfuscatedClassName;
+    protected String obfuscatedClassName;
 
-    protected ReflectionWrapper() {
+    protected ReflectionWrapper(String deobfuscatedClassName) {
+        this.deobfuscatedClassName = deobfuscatedClassName;
         this.mappings = MinecraftClasses.getMappings();
     }
 
@@ -27,12 +29,18 @@ public abstract class ReflectionWrapper {
         return this.mappings;
     }
 
-    public String getClassName() {
-        return className;
+    public String getDeobfuscatedClassName() {
+        return this.deobfuscatedClassName;
     }
 
+    /**
+     * Gets a class from the mappings.
+     * @param name The name of the class in slash notation (com/example/Class)
+     * @return The class
+     * @throws ClassNotFoundException If the class cannot be found
+     */
     protected Class<?> getClassFromMappings(String name) throws ClassNotFoundException {
-        MappingTree.ClassMapping classMapping = mappings.getClass(name);
+        MappingTree.ClassMapping classMapping = mappings.getClass(name, getMappings().getNamespaceId(MinecraftClasses.DST_NAMESPACE));
         if (classMapping == null) {
             throw new ClassNotFoundException("No mapping found for class: " + name);
         }
@@ -42,23 +50,12 @@ public abstract class ReflectionWrapper {
             clazz = Class.forName(classMapping.getName(MinecraftClasses.SRC_NAMESPACE));
             classCache.put(name, clazz);
         }
+        obfuscatedClassName = clazz.getName();
         return clazz;
     }
 
-    /**
-     * Calls an obfuscated method reflectively from mappings.
-     * @param deobfuscatedMethodName
-     * Format it as "com/example/Class"
-     * @param args
-     * Parameters the method uses.
-     * @return Return object of the method.
-     * @throws NoSuchMethodException If no mapping or method is found.
-     * @throws InvocationTargetException An exception wrapper if the underlying method throws an exception.
-     * @throws IllegalAccessException If it tries to call a method it doesn't have access to.
-     */
-    public Object callMethod(String deobfuscatedMethodName, Object... args)
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-
+    private Method getMethodFromMappings(String deobfuscatedMethodName, Object... args)
+            throws NoSuchMethodException {
         Class<?>[] paramTypes = Arrays.stream(args)
                 .map(arg -> arg == null ? null : arg.getClass())
                 .toArray(Class<?>[]::new);
@@ -66,59 +63,13 @@ public abstract class ReflectionWrapper {
         String descriptor = generateDescriptor(args);
 
         MappingTree.MethodMapping methodMapping =
-                getMappings().getMethod(getClassName(), deobfuscatedMethodName, descriptor);
+                getMappings().getMethod(getDeobfuscatedClassName(), deobfuscatedMethodName, descriptor, getMappings().getNamespaceId(MinecraftClasses.DST_NAMESPACE));
 
         if (methodMapping == null) {
             throw new NoSuchMethodException("No mapping found for method: " + deobfuscatedMethodName);
         }
 
-        // Get obfuscated method name
-        String obfuscatedMethodName = methodMapping.getDstName(getMappings().getNamespaceId(MinecraftClasses.DST_NAMESPACE));
-
-        if (obfuscatedMethodName == null) {
-            throw new NoSuchMethodException("Failed to find obfuscated method name from method mapping entry for method: " + deobfuscatedMethodName);
-        }
-
-        String cacheKey = obfuscatedMethodName + "#" + Arrays.toString(paramTypes);
-        Method method = methodCache.get(cacheKey);
-
-        if (method == null) {
-            method = getInstance().getClass().getMethod(obfuscatedMethodName, paramTypes);
-            methodCache.put(cacheKey, method);
-        }
-
-        // Invoke the method
-        return method.invoke(getInstance(), args);
-    }
-
-    /**
-     * Calls an obfuscated static method reflectively from mappings.
-     * @param deobfuscatedMethodName The deobfuscated name of the method.
-     * @param args The parameters the method uses.
-     * @return The return object of the method.
-     * @throws NoSuchMethodException If no mapping or method is found.
-     * @throws InvocationTargetException An exception wrapper if the underlying method throws an exception.
-     * @throws IllegalAccessException If it cannot access the method.
-     */
-    public Object callStaticMethod(String deobfuscatedMethodName, Object... args)
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-
-        // Infer parameter types; note: if any argument is null, this will yield null in the array.
-        Class<?>[] paramTypes = Arrays.stream(args)
-                .map(arg -> arg == null ? null : arg.getClass())
-                .toArray(Class<?>[]::new);
-
-        String descriptor = generateDescriptor(args);
-
-        MappingTree.MethodMapping methodMapping =
-                getMappings().getMethod(getClassName(), deobfuscatedMethodName, descriptor);
-
-        if (methodMapping == null) {
-            throw new NoSuchMethodException("No mapping found for method: " + deobfuscatedMethodName);
-        }
-
-        // Get obfuscated method name from the mapping
-        String obfuscatedMethodName = methodMapping.getDstName(getMappings().getNamespaceId(MinecraftClasses.DST_NAMESPACE));
+        String obfuscatedMethodName = methodMapping.getSrcName();
 
         if (obfuscatedMethodName == null) {
             throw new NoSuchMethodException("Failed to find obfuscated method name for: " + deobfuscatedMethodName);
@@ -128,9 +79,51 @@ public abstract class ReflectionWrapper {
         Method method = methodCache.get(cacheKey);
 
         if (method == null) {
-            method = getInstance().getClass().getMethod(obfuscatedMethodName, paramTypes);
+            Object instance = getInstance();
+            Class<?> targetClass;
+            if (instance instanceof Class<?>) {
+                targetClass = (Class<?>) instance;
+            } else {
+                targetClass = instance.getClass();
+            }
+            method = targetClass.getMethod(obfuscatedMethodName, paramTypes);
             methodCache.put(cacheKey, method);
         }
+
+        return method;
+    }
+
+    /**
+     * Calls an obfuscated method reflectively from mappings.
+     *
+     * @param deobfuscatedMethodName Format it as "com/example/Class"
+     * @param args                   Parameters the method uses.
+     * @return Return object of the method.
+     * @throws NoSuchMethodException     If no mapping or method is found.
+     * @throws InvocationTargetException An exception wrapper if the underlying method throws an exception.
+     * @throws IllegalAccessException    If it tries to call a method it doesn't have access to.
+     */
+    public Object callMethod(String deobfuscatedMethodName, Object... args)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
+        Method method = getMethodFromMappings(deobfuscatedMethodName, args);
+        return method.invoke(getInstance(), args);
+    }
+
+    /**
+     * Calls an obfuscated static method reflectively from mappings.
+     *
+     * @param deobfuscatedMethodName The deobfuscated name of the method.
+     * @param args                   The parameters the method uses.
+     * @return The return object of the method.
+     * @throws NoSuchMethodException     If no mapping or method is found.
+     * @throws InvocationTargetException An exception wrapper if the underlying method throws an exception.
+     * @throws IllegalAccessException    If it cannot access the method.
+     */
+    public Object callStaticMethod(String deobfuscatedMethodName, Object... args)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
+        Method method = getMethodFromMappings(deobfuscatedMethodName, args);
 
         // For static methods, the target object is null.
         return method.invoke(null, args);
@@ -138,24 +131,22 @@ public abstract class ReflectionWrapper {
 
     /**
      * Gets the value of an obfuscated field reflectively from mappings.
-     * @param deobfuscatedFieldName
-     * Format it as "com/example/Class"
+     *
+     * @param deobfuscatedFieldName Format it as "com/example/Class"
      * @return Field value
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      */
     public Object getFieldValue(String deobfuscatedFieldName) throws NoSuchFieldException, IllegalAccessException {
         MappingTree.FieldMapping fieldMapping =
-                getMappings().getField(getClassName(), deobfuscatedFieldName, null);
+                getMappings().getField(getDeobfuscatedClassName(), deobfuscatedFieldName, null, getMappings().getNamespaceId(MinecraftClasses.DST_NAMESPACE));
 
         if (fieldMapping == null) {
             throw new NoSuchFieldException("No mapping found for field: " + deobfuscatedFieldName);
         }
 
         // Get obfuscated field name
-        String obfuscatedFieldName = fieldMapping.getDstName(
-                getMappings().getNamespaceId(MinecraftClasses.DST_NAMESPACE)
-        );
+        String obfuscatedFieldName = fieldMapping.getSrcName();
 
         if (obfuscatedFieldName == null) {
             throw new NoSuchFieldException("Failed to find obfuscated field name from field mapping entry for field: " + deobfuscatedFieldName);

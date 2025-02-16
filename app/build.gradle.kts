@@ -76,8 +76,16 @@ tasks.jar {
 publishing {
     repositories {
         maven {
-            name = "coosantaSnapshots"
+            name = "snapshot"
             url = uri("https://repo.coosanta.net/snapshots")
+            credentials(PasswordCredentials::class)
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+        maven {
+            name = "releases"
+            url = uri("https://repo.coosanta.net/releases")
             credentials(PasswordCredentials::class)
             authentication {
                 create<BasicAuthentication>("basic")
