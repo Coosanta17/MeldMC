@@ -28,6 +28,12 @@ repositories {
     maven {
         url = uri("https://maven.fabricmc.net/")
     }
+    maven {
+        url = uri("https://repo.opencollab.dev/maven-snapshots/")
+    }
+    maven {
+        url = uri("https://repo.opencollab.dev/maven-releases/")
+    }
 }
 
 dependencies {
@@ -50,6 +56,8 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation("org.slf4j:slf4j-api:2.0.16")
+
+    implementation("org.geysermc.mcprotocollib:protocol:1.21.5-SNAPSHOT")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

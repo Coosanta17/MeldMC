@@ -36,5 +36,20 @@
       <option name="name" value="maven3" />
       <option name="url" value="https://maven.fabricmc.net/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="opencollab" />
+      <option name="name" value="opencollab" />
+      <option name="url" value="https://repo.opencollab.dev/main/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="opencollab" />
+      <option name="name" value="opencollab" />
+      <option name="url" value="https://repo.opencollab.dev/maven-snapshots/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven5" />
+      <option name="name" value="maven5" />
+      <option name="url" value="https://repo.opencollab.dev/maven-releases/" />
+    </remote-repository>
   </component>
 </project>
