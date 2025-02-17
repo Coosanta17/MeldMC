@@ -103,8 +103,7 @@ public class ServerInfo {
         return versionInfo;
     }
 
-    @Nullable
-    public PlayerInfo getPlayers() {
+    public @Nullable PlayerInfo getPlayers() {
         return players;
     }
 
@@ -114,6 +113,10 @@ public class ServerInfo {
 
     public Component getDescription() {
         return description;
+    }
+
+    public long getPing() {
+        return ping;
     }
 
     @Override

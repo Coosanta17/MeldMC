@@ -30,8 +30,8 @@ public class Main {
 
         if (widthArgIndex == -1 || heightArgIndex == -1) {
             // I don't know default values, but I think these are it.
-            width = 320;
-            height = 240;
+            width = 600;
+            height = 400;
         } else {
             try {
                 width = Integer.parseInt(this.getGameArgs().get(widthArgIndex + 1));
@@ -63,13 +63,12 @@ public class Main {
         Main.createInstance(args);
     }
 
-    public static Main createInstance(String[] args) {
+    public static void createInstance(String[] args) {
         if (instance == null) {
             instance = new Main(args);
         } else {
             LOGGER.warn("Main instance already exists");
         }
-        return instance;
     }
 
     public static Main getInstance() {

@@ -5,62 +5,79 @@ import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.network.factory.ClientNetworkSessionFactory;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
 
 public class Pinger {
     private static final Logger log = LoggerFactory.getLogger(Pinger.class);
 
-    public static ServerInfo ping(String host, int port) {
-        InetSocketAddress address = new InetSocketAddress(host, port);
+    public static CompletableFuture<Void> ping(ServerInfo serverInfo) {
+        log.info("Pinging {}", serverInfo.getAddress());
+        CompletableFuture<Void> future = new CompletableFuture<>();
+
+        InetSocketAddress address = getAddress(serverInfo.getAddress());
         MinecraftProtocol protocol = new MinecraftProtocol();
 
-        // Create a client session that will connect to the remote server
         ClientSession client = ClientNetworkSessionFactory.factory()
                 .setRemoteSocketAddress(address)
                 .setProtocol(protocol)
                 .create();
 
-        // Optional: If you need to handle authentication, set up your SessionService
-        // client.setFlag(MinecraftConstants.SESSION_SERVICE_KEY, new SessionService());
-
-        ServerInfo serverInfo = new ServerInfo(host, host);
-
         client.setFlag(MinecraftConstants.SERVER_INFO_HANDLER_KEY, (session, info) -> {
             serverInfo.addStatusInfo(info);
+//            log.info("Received server info {}", serverInfo.getDescription());
         });
-
         client.setFlag(MinecraftConstants.SERVER_PING_TIME_HANDLER_KEY, (session, pingTime) -> {
             serverInfo.setPing(pingTime);
+//            log.info("Received ping {}", serverInfo.getPing());
+            if (serverInfo.getPing() > 0) {
+                serverInfo.setStatus(ServerInfo.Status.SUCCESSFUL);
+            } else {
+                serverInfo.setStatus(ServerInfo.Status.UNREACHABLE);
+            }
+            future.complete(null);
         });
 
-        System.out.println("connecting...");
-        client.connect();
-//        System.out.println(client.isConnected());
+        serverInfo.setStatus(ServerInfo.Status.PINGING);
 
-        // Blocks thread until client disconnects
-        boolean init = true;
-        while (client.isConnected() || init) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                log.error("Interrupted while waiting for ping response.", e);
-                Thread.currentThread().interrupt();
-            }
-            System.out.print("e");
-            init = false;
+        try {
+            client.connect(true);
+        } catch (Exception e) {
+            serverInfo.setStatus(ServerInfo.Status.UNREACHABLE);
+            future.completeExceptionally(e);
         }
-        System.out.println("Returning object");
-        return serverInfo;
+
+        return future;
+    }
+
+    private static @NotNull InetSocketAddress getAddress(String addressAndPort) {
+        int port = 25565;
+        String[] parts = addressAndPort.split(":");
+
+        if (parts.length > 2) throw new IllegalArgumentException("Invalid address and port format in: " + addressAndPort);
+        else if (parts.length == 2) {
+            try {
+                port = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid port number: " + parts[1] + " in address: " + addressAndPort, e);
+            }
+        }
+
+        String host = parts[0];
+
+        return new InetSocketAddress(host, port);
     }
 
     public static void main(String[] args) {
-        // Replace with the remote server's address and port
-        System.out.println("pinging...");
-        ServerInfo info = ping("play.squirtlesquadmc.com", 25565);
-        System.out.println("Pingified!");
-        System.out.println(info);
+        log.info("pinging...");
+        ServerInfo info = new ServerInfo("Test", "mc.hypixel.net");
+        ping(info).thenAccept((unused -> {
+            log.info("Pingified!");
+            log.info(info.toString());
+        })).join();
     }
 }

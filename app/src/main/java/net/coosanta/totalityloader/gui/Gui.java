@@ -10,9 +10,8 @@ public class Gui extends JFrame {
         setSize(size);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
 
-        setContentPane(new LoadingMappings(this));
+        setContentPane(new ServerSelect());
 
         setVisible(true);
     }
