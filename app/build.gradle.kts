@@ -5,7 +5,7 @@
  * For more details on building Java & JVM projects, please refer to https://docs.gradle.org/8.8/userguide/building_java_projects.html in the Gradle documentation.
  */
 
-project.version = "0.0.1c"
+project.version = "0.0.1d"
 
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
@@ -48,16 +48,20 @@ dependencies {
     // NBT for server.dat
     implementation("com.github.Querz:NBT:6.1")
 
-    // Mapping reader
-    implementation("net.fabricmc:mapping-io:0.7.1")
-
-    // https://mvnrepository.com/artifact/com.mojang/logging
-    implementation("com.mojang:logging:1.5.10")
+//    // Mapping reader
+//    implementation("net.fabricmc:mapping-io:0.7.1")
+//
+//    // https://mvnrepository.com/artifact/com.mojang/logging
+//    implementation("com.mojang:logging:1.5.10")
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation("org.slf4j:slf4j-api:2.0.16")
 
-    implementation("org.geysermc.mcprotocollib:protocol:1.21.5-SNAPSHOT")
+//    implementation("org.geysermc.mcprotocollib:protocol:1.21.5-SNAPSHOT")
+
+    implementation("com.github.GeyserMC:MCProtocolLib:1.21.4-1")
+
+    implementation("net.kyori:adventure-text-minimessage:4.19.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -69,7 +73,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "net.coosanta.Main"
+    mainClass = "net.coosanta.totalityloader.Main"
 }
 
 tasks.named<Test>("test") {
@@ -78,6 +82,9 @@ tasks.named<Test>("test") {
 }
 
 tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "net.coosanta.totalityloader.Main"
+    }
     archiveFileName.set("totality-loader-${project.version}.jar")
 }
 

@@ -3,6 +3,8 @@ package net.coosanta.totalityloader.gui;
 import net.coosanta.totalityloader.Main;
 import net.coosanta.totalityloader.minecraft.ServerInfo;
 import net.coosanta.totalityloader.network.Pinger;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.tag.CompoundTag;
 import net.querz.nbt.tag.ListTag;
@@ -42,8 +44,6 @@ public class ServerSelect extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         serverList.forEach((s) -> add(new ServerOption(s)));
-
-        log.info("Loaded server selection screen.");
     }
 
     private ArrayList<ServerInfo> getServersFromFile() throws IOException {
@@ -79,26 +79,27 @@ public class ServerSelect extends JPanel {
         return serverListUnfinished;
     }
 
-    public class ServerOption extends JPanel {
-        ServerInfo server;
-        JLabel ping;
-        JLabel playerCount;
-        JLabel name;
-        ImageIcon icon;
+    private class ServerOption extends JPanel {
+        private ServerInfo server;
+        private JLabel ping;
+        private JLabel playerCount;
+        private JLabel name;
+        private JLabel motd = new JLabel();
+        private ImageIcon icon;
+        private JPanel header = new JPanel(new GridBagLayout());
+        private MiniMessage miniMessage = MiniMessage.miniMessage();
 
         ServerOption(ServerInfo serverIn) {
             this.server = serverIn;
 
+            setSize(300, 100);
             setLayout(new BorderLayout());
 
             name = new JLabel(server.getName());
             ping = new JLabel("Pinging...");
             playerCount = new JLabel("Unknown");
-            JPanel header = new JPanel(new FlowLayout());
-            header.add(name);
-            header.add(playerCount);
-            header.add(ping);
 
+            buildHeader();
             add(header, BorderLayout.NORTH);
 
             @Nullable byte[] favicon = server.getFavicon();
@@ -113,32 +114,65 @@ public class ServerSelect extends JPanel {
                 }
             }
             JLabel iconLabel = new JLabel(icon);
+            iconLabel.setSize(64, 64);
             add(iconLabel, BorderLayout.WEST);
 
-            JLabel ip = new JLabel(server.getAddress());
-            add(ip, BorderLayout.CENTER);
+            setDescription();
+            add(motd, BorderLayout.CENTER);
 
-            log.info("submitting pingtask");
             pingTask.submit(() -> {
-                log.info("running submitted pingtask");
                 Pinger.ping(server)
                         .thenAccept(unused -> SwingUtilities.invokeLater(this::updateComponents))
                         .exceptionally(throwable -> {
-                            log.error("Error duing ping", throwable);
+                            log.error("Error during ping", throwable);
                             return null;
                         });
-                log.info("completed submitted pingtask");
             });
-            log.info("submitted pingtask");
+        }
+
+        private void buildHeader() {
+            GridBagConstraints c = new GridBagConstraints();
+            c.insets = new Insets(5, 10, 5, 10);
+
+            c.gridx = 0;
+            c.gridy = 0;
+            c.weightx = 1.0;
+            c.fill = GridBagConstraints.HORIZONTAL;
+            name.setHorizontalAlignment(SwingConstants.CENTER);
+            header.add(name, c);
+
+            c.gridx = 1;
+            c.weightx = 0.0;
+            c.fill = GridBagConstraints.NONE;
+            header.add(playerCount, c);
+
+            c.gridx = 2;
+            header.add(ping, c);
+        }
+
+        private void setDescription() {
+            Component descriptionComp = server.getDescription();
+            String description = "";
+            if (descriptionComp == null) {
+                if (server.getStatus() == ServerInfo.Status.PINGING || server.getStatus() == ServerInfo.Status.INITIAL) {
+                    description = "Pinging..."; // Grey
+                } else if (server.getStatus() == ServerInfo.Status.UNREACHABLE) {
+                    description = "Can't connect to server"; // Red
+                }
+            } else {
+                description = miniMessage.serialize(server.getDescription());
+            }
+            motd.setText(description);
         }
 
         private void updateComponents() {
             ping.setText(server.getPing() + " ms");
             playerCount.setText(server.getPlayers() == null ? "unknown" : server.getPlayers().getOnlinePlayers() + "/" + server.getPlayers().getMaxPlayers());
             if (server.getFavicon() != null) icon.setImage(new ImageIcon(server.getFavicon()).getImage());
+            setDescription();
         }
 
-        public void cleanup() {
+        public void pingCleanup() {
             pingTask.shutdown();
             try {
                 if (!pingTask.awaitTermination(5, TimeUnit.SECONDS)) {

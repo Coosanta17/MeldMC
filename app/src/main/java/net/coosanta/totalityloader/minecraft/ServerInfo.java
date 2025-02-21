@@ -36,7 +36,7 @@ public class ServerInfo {
             try {
                 setFavicon(Base64.getDecoder().decode(root.getString("icon")));
             } catch (IllegalArgumentException e) {
-                log.warn("Malformed base64 server icon", e);
+                log.error("Malformed base64 server icon", e);
             }
         }
     }

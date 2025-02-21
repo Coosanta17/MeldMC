@@ -1,21 +1,25 @@
 package net.coosanta.totalityloader;
 
-import com.mojang.logging.LogUtils;
 import net.coosanta.totalityloader.gui.Gui;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 public class Main {
     private static Main instance;
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-//    private final ArrayList<String> jvmArgs;
+    //    private final ArrayList<String> jvmArgs;
     private final Dimension windowSize;
     private final ArrayList<String> gameArgs;
 
@@ -37,19 +41,36 @@ public class Main {
                 width = Integer.parseInt(this.getGameArgs().get(widthArgIndex + 1));
                 height = Integer.parseInt(this.getGameArgs().get(heightArgIndex + 1));
             } catch (NumberFormatException e) {
-                LOGGER.error("Invalid window size arguments", e);
+                log.error("Invalid window size arguments", e);
                 width = 320;
                 height = 240;
             }
         }
 
         this.windowSize = new Dimension(width, height);
-//        this.jvmArgs =
-//                new ArrayList<>(
-//                        List.of(
-//                                ProcessHandle.current().info().commandLine().orElseThrow().split("\\s+")
-//                        )
-//                );
+
+        try {
+            InputStream is = Main.class.getResourceAsStream("/mojangles.ttf");
+            if (is == null) {
+                throw new FileNotFoundException("Font file not found in resources.");
+            }
+
+            Font mojangles = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(12f);
+
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(mojangles);
+
+            Enumeration<Object> keys = UIManager.getDefaults().keys();
+            while (keys.hasMoreElements()) {
+                Object key = keys.nextElement();
+                Object value = UIManager.get (key);
+                if (value instanceof Font)
+                    UIManager.put (key, mojangles);
+            }
+        } catch (FontFormatException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
         SwingUtilities.invokeLater(() -> {
             try {
                 new Gui(windowSize);
@@ -67,7 +88,7 @@ public class Main {
         if (instance == null) {
             instance = new Main(args);
         } else {
-            LOGGER.warn("Main instance already exists");
+            log.error("Main instance already exists");
         }
     }
 
