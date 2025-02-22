@@ -28,14 +28,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ServerSelect extends JPanel {
+    private final int designWidth = 320;
+    private final int designHeight = 240;
     private final Main instance;
     private final List<ServerInfo> serverList;
     private final Path gameDir;
+
     private CompoundTag serversDat;
     private ExecutorService pingTask = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()));
     private Logger log = LoggerFactory.getLogger(ServerSelect.class);
 
     public ServerSelect() throws IOException {
+        setBackground(Color.YELLOW);
         this.instance = Main.getInstance();
         this.gameDir = this.instance.getGameDir();
 
@@ -80,19 +84,20 @@ public class ServerSelect extends JPanel {
     }
 
     private class ServerOption extends JPanel {
-        private ServerInfo server;
+        private final ServerInfo server;
+        private final JPanel header = new JPanel(new GridBagLayout());
+        private final MiniMessage miniMessage = MiniMessage.miniMessage();
+
         private JLabel ping;
         private JLabel playerCount;
         private JLabel name;
         private JLabel motd = new JLabel();
         private ImageIcon icon;
-        private JPanel header = new JPanel(new GridBagLayout());
-        private MiniMessage miniMessage = MiniMessage.miniMessage();
 
         ServerOption(ServerInfo serverIn) {
             this.server = serverIn;
 
-            setSize(300, 100);
+            setBackground(Color.BLUE);
             setLayout(new BorderLayout());
 
             name = new JLabel(server.getName());

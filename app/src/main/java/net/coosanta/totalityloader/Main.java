@@ -19,7 +19,6 @@ public class Main {
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    //    private final ArrayList<String> jvmArgs;
     private final Dimension windowSize;
     private final ArrayList<String> gameArgs;
 
@@ -29,22 +28,16 @@ public class Main {
         int widthArgIndex = this.getGameArgs().indexOf("--width");
         int heightArgIndex = this.getGameArgs().indexOf("--height");
 
-        int width;
-        int height;
+        int width = 850;
+        int height = 500;
 
-        if (widthArgIndex == -1 || heightArgIndex == -1) {
-            // I don't know default values, but I think these are it.
-            width = 600;
-            height = 400;
-        } else {
-            try {
+        try {
+            if (widthArgIndex != -1 && heightArgIndex != -1) {
                 width = Integer.parseInt(this.getGameArgs().get(widthArgIndex + 1));
                 height = Integer.parseInt(this.getGameArgs().get(heightArgIndex + 1));
-            } catch (NumberFormatException e) {
-                log.error("Invalid window size arguments", e);
-                width = 320;
-                height = 240;
             }
+        } catch (NumberFormatException e) {
+            log.error("Invalid window size arguments", e);
         }
 
         this.windowSize = new Dimension(width, height);
@@ -63,9 +56,9 @@ public class Main {
             Enumeration<Object> keys = UIManager.getDefaults().keys();
             while (keys.hasMoreElements()) {
                 Object key = keys.nextElement();
-                Object value = UIManager.get (key);
+                Object value = UIManager.get(key);
                 if (value instanceof Font)
-                    UIManager.put (key, mojangles);
+                    UIManager.put(key, mojangles);
             }
         } catch (FontFormatException | IOException e) {
             throw new RuntimeException(e);
