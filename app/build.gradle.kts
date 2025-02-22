@@ -8,7 +8,8 @@
 project.version = "0.0.1d"
 
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
+    java
+
     application
 
     `maven-publish`
