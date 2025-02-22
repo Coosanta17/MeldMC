@@ -39,7 +39,6 @@ public class ServerSelect extends JPanel {
     private Logger log = LoggerFactory.getLogger(ServerSelect.class);
 
     public ServerSelect() throws IOException {
-        setBackground(Color.YELLOW);
         this.instance = Main.getInstance();
         this.gameDir = this.instance.getGameDir();
 
@@ -97,7 +96,6 @@ public class ServerSelect extends JPanel {
         ServerOption(ServerInfo serverIn) {
             this.server = serverIn;
 
-            setBackground(Color.BLUE);
             setLayout(new BorderLayout());
 
             name = new JLabel(server.getName());
