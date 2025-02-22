@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = "TotalityLoader"
-include("app")
+include("launcher")
