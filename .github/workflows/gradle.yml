@@ -36,7 +36,6 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew build
 
-      # Upload the build artifact
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4.3.6
         with:
