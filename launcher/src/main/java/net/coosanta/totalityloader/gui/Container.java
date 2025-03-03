@@ -6,14 +6,20 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 public class Container extends JPanel {
+
     public Container(JPanel innerPanel) {
         JPanel container = this;
         setLayout(new GridBagLayout());
         add(innerPanel);
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 resizePreview(innerPanel, container);
+                SwingUtilities.invokeLater(() -> {
+                    container.revalidate();
+                    container.repaint();
+                });
             }
         });
     }
