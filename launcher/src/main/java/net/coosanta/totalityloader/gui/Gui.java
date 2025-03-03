@@ -18,4 +18,11 @@ public class Gui extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
+
+    public static void refreshGui(JComponent component) {
+        SwingUtilities.invokeLater(() -> {
+            component.revalidate();
+            component.repaint();
+        });
+    }
 }

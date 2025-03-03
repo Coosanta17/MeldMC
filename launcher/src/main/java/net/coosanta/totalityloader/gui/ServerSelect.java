@@ -27,9 +27,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class ServerSelect extends JPanel {
-    private final int designWidth = 320;
-    private final int designHeight = 240;
+import static net.coosanta.totalityloader.gui.Gui.refreshGui;
+
+public class ServerSelect extends JPanel implements ScalablePanel {
+    private final int designWidth = 850;
+    private final int designHeight = 500;
+    private double currentScale = 1.0;
+
     private final Main instance;
     private final List<ServerInfo> serverList;
     private final Path gameDir;
@@ -82,10 +86,41 @@ public class ServerSelect extends JPanel {
         return serverListUnfinished;
     }
 
+    @Override
+    public double getDesignWidth() {
+        return designWidth;
+    }
+
+    @Override
+    public double getDesignHeight() {
+        return designHeight;
+    }
+
+    @Override
+    public void applyScale(double scaleFactor) {
+        this.currentScale = scaleFactor;
+
+        // Apply to all components in the server list
+        for (java.awt.Component comp : getComponents()) {
+            if (comp instanceof ServerOption) {
+                ((ServerOption) comp).applyScale(scaleFactor);
+            }
+        }
+        refreshGui(this);
+    }
+
     private class ServerOption extends JPanel {
         private final ServerInfo server;
         private final JPanel header = new JPanel(new GridBagLayout());
         private final MiniMessage miniMessage = MiniMessage.miniMessage();
+
+        private Font originalNameFont;
+        private Font originalPingFont;
+        private Font originalPlayerCountFont;
+        private Font originalMotdFont;
+
+        private Image originalIconImage;
+        private int originalIconSize = 64;
 
         private JLabel ping;
         private JLabel playerCount;
@@ -107,15 +142,17 @@ public class ServerSelect extends JPanel {
 
             @Nullable byte[] favicon = server.getFavicon();
             if (favicon != null) {
-                icon = new ImageIcon(favicon);
+                originalIconImage = new ImageIcon(favicon).getImage();
             } else {
                 try {
                     BufferedImage unknownServerImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/unknown_server.png")));
-                    icon = new ImageIcon(unknownServerImage);
+                    originalIconImage = unknownServerImage;
                 } catch (IOException | NullPointerException e) {
                     throw new RuntimeException(e);
                 }
             }
+            icon = new ImageIcon(originalIconImage);
+
             JLabel iconLabel = new JLabel(icon);
             iconLabel.setSize(64, 64);
             add(iconLabel, BorderLayout.WEST);
@@ -131,6 +168,11 @@ public class ServerSelect extends JPanel {
                             return null;
                         });
             });
+
+            originalNameFont = name.getFont();
+            originalPingFont = ping.getFont();
+            originalPlayerCountFont = playerCount.getFont();
+            originalMotdFont = motd.getFont();
         }
 
         private void buildHeader() {
@@ -171,7 +213,16 @@ public class ServerSelect extends JPanel {
         private void updateComponents() {
             ping.setText(server.getPing() + " ms");
             playerCount.setText(server.getPlayers() == null ? "unknown" : server.getPlayers().getOnlinePlayers() + "/" + server.getPlayers().getMaxPlayers());
-            if (server.getFavicon() != null) icon.setImage(new ImageIcon(server.getFavicon()).getImage());
+
+            if (server.getFavicon() != null) {
+                originalIconImage = new ImageIcon(server.getFavicon()).getImage();
+                Image scaledImage = originalIconImage.getScaledInstance(
+                        (int) (originalIconSize * currentScale),
+                        (int) (originalIconSize * currentScale),
+                        Image.SCALE_SMOOTH);
+                icon.setImage(scaledImage);
+            }
+
             setDescription();
         }
 
@@ -185,6 +236,33 @@ public class ServerSelect extends JPanel {
                 pingTask.shutdownNow();
                 Thread.currentThread().interrupt();
             }
+        }
+
+        public void applyScale(double scale) {
+            name.setFont(originalNameFont.deriveFont((float) (originalNameFont.getSize() * scale)));
+            ping.setFont(originalPingFont.deriveFont((float) (originalPingFont.getSize() * scale)));
+            playerCount.setFont(originalPlayerCountFont.deriveFont((float) (originalPlayerCountFont.getSize() * scale)));
+            motd.setFont(originalMotdFont.deriveFont((float) (originalMotdFont.getSize() * scale)));
+
+            // Scale icon
+            int scaledSize = (int) (originalIconSize * scale);
+            if (originalIconImage != null) {
+                Image scaledImage = originalIconImage.getScaledInstance(
+                        scaledSize, scaledSize, Image.SCALE_SMOOTH);
+
+                // Update the icon with the scaled image
+                icon.setImage(scaledImage);
+
+                // Update component that contains the icon
+                for (java.awt.Component comp : getComponents()) {
+                    if (comp instanceof JLabel && ((JLabel) comp).getIcon() == icon) {
+                        ((JLabel) comp).setIcon(icon);
+                        comp.setPreferredSize(new Dimension(scaledSize, scaledSize));
+                    }
+                }
+            }
+
+            refreshGui(this);
         }
     }
 }

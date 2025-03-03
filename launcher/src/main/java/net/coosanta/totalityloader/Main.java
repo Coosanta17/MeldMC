@@ -10,8 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.List;
 
 public class Main {
@@ -20,7 +19,7 @@ public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     private final Dimension windowSize;
-    private final ArrayList<String> gameArgs;
+    private final List<String> gameArgs;
 
     private Main(String[] args) {
         this.gameArgs = new ArrayList<>(List.of(args));
@@ -42,8 +41,7 @@ public class Main {
 
         this.windowSize = new Dimension(width, height);
 
-        try {
-            InputStream is = Main.class.getResourceAsStream("/mojangles.ttf");
+        try (InputStream is = Main.class.getResourceAsStream("/mojangles.ttf")) {
             if (is == null) {
                 throw new FileNotFoundException("Font file not found in resources.");
             }
@@ -89,13 +87,9 @@ public class Main {
         return instance;
     }
 
-    public ArrayList<String> getGameArgs() {
-        return gameArgs;
+    public List<String> getGameArgs() {
+        return Collections.unmodifiableList(gameArgs);
     }
-
-//    public ArrayList<String> getJvmArgs() {
-//        return jvmArgs;
-//    }
 
     public Dimension getWindowSize() {
         return windowSize;
