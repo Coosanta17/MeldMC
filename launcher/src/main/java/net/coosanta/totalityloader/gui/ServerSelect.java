@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 import static net.coosanta.totalityloader.gui.Gui.refreshGui;
 
 public class ServerSelect extends JPanel implements ScalablePanel {
-    private final int designWidth = 850;
-    private final int designHeight = 500;
+    private final int designWidth = 600;
+    private final int designHeight = 400;
     private double currentScale = 1.0;
 
     private final Main instance;
@@ -130,7 +130,10 @@ public class ServerSelect extends JPanel implements ScalablePanel {
         ServerOption(ServerInfo serverIn) {
             this.server = serverIn;
 
-            setLayout(new BorderLayout());
+            setLayout(new BorderLayout(5, 0));
+            setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
+
+            int preferredHeight = 64;
 
             name = new JLabel(server.getName());
             ping = new JLabel("Pinging...");
@@ -176,7 +179,7 @@ public class ServerSelect extends JPanel implements ScalablePanel {
 
         private void buildHeader() {
             GridBagConstraints c = new GridBagConstraints();
-            c.insets = new Insets(5, 10, 5, 10);
+            c.insets = new Insets(2, 5, 2, 5);
 
             c.gridx = 0;
             c.gridy = 0;
@@ -263,6 +266,15 @@ public class ServerSelect extends JPanel implements ScalablePanel {
             }
 
             refreshGui(this);
+        }
+
+        @Override
+        public Dimension getMaximumSize() {
+            Dimension preferredSize = getPreferredSize();
+            return new Dimension(
+                    Integer.MAX_VALUE,  // Can stretch horizontally if needed
+                    preferredSize.height  // But maintain the preferred height
+            );
         }
     }
 }
