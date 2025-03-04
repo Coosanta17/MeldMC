@@ -9,12 +9,11 @@ public class Gui extends JFrame {
         setTitle("Minecraft - Select Server");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel contentPanel = new Container(new ServerSelect());
+        JComponent contentPanel = new ScrollableContainer(new ServerSelect());
 
-        getContentPane().add(contentPanel);
+        setContentPane(contentPanel);
 
         setSize(size);
-        setMinimumSize(size);
         setLocationRelativeTo(null);
         setVisible(true);
     }

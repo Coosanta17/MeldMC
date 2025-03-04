@@ -3,7 +3,6 @@ package net.coosanta.totalityloader.gui;
 import net.coosanta.totalityloader.Main;
 import net.coosanta.totalityloader.minecraft.ServerInfo;
 import net.coosanta.totalityloader.network.Pinger;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.tag.CompoundTag;
@@ -196,7 +195,8 @@ public class ServerSelect extends JPanel implements ScalablePanel {
         }
 
         private void setDescription() {
-            Component descriptionComp = server.getDescription();
+            // Because there are two different Component classes in this code I did the full thing instead of importing.
+            net.kyori.adventure.text.Component descriptionComp = server.getDescription();
             String description = "";
             if (descriptionComp == null) {
                 if (server.getStatus() == ServerInfo.Status.PINGING || server.getStatus() == ServerInfo.Status.INITIAL) {
