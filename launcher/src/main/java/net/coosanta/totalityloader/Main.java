@@ -1,14 +1,11 @@
 package net.coosanta.totalityloader;
 
-import net.coosanta.totalityloader.gui.Gui;
+import net.coosanta.totalityloader.gui.GuiFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
@@ -41,30 +38,9 @@ public class Main {
 
         this.windowSize = new Dimension(width, height);
 
-        try (InputStream is = Main.class.getResourceAsStream("/mojangles.ttf")) {
-            if (is == null) {
-                throw new FileNotFoundException("Font file not found in resources.");
-            }
-
-            Font mojangles = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(12f);
-
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(mojangles);
-
-            Enumeration<Object> keys = UIManager.getDefaults().keys();
-            while (keys.hasMoreElements()) {
-                Object key = keys.nextElement();
-                Object value = UIManager.get(key);
-                if (value instanceof Font)
-                    UIManager.put(key, mojangles);
-            }
-        } catch (FontFormatException | IOException e) {
-            throw new RuntimeException(e);
-        }
-
         SwingUtilities.invokeLater(() -> {
             try {
-                new Gui(windowSize);
+                new GuiFrame(windowSize);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

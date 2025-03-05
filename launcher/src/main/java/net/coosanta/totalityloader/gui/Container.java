@@ -7,12 +7,12 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import static net.coosanta.totalityloader.gui.Gui.refreshGui;
+import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
 public class Container extends JPanel {
-    private final double originalWidth;
-    private final double originalHeight;
-    private double scaleFactor = 1.0;
+    protected final double originalWidth;
+    protected final double originalHeight;
+    protected double scaleFactor = 1.0;
 
     public Container(JPanel innerPanel) {
         JPanel container = this;
@@ -29,23 +29,21 @@ public class Container extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                resizeAndScale(innerPanel, container);
+                scale(innerPanel, container);
                 refreshGui(container);
             }
         });
     }
 
-    private void resizeAndScale(JPanel innerPanel, JPanel container) {
+    protected void scale(JPanel innerPanel, JPanel container) {
         int w = container.getWidth();
         int h = container.getHeight();
         int size = Math.min(w, h);
 
-        // Calculate scaling factor based on original size
         scaleFactor = (double) size / Math.min(originalWidth, originalHeight);
 
-        innerPanel.setPreferredSize(new Dimension(size, size));
+        innerPanel.setPreferredSize(new Dimension(w, h));
 
-        // Apply scaling to the inner panel if it supports scaling
         if (innerPanel instanceof ScalablePanel) {
             ((ScalablePanel) innerPanel).applyScale(scaleFactor);
         }

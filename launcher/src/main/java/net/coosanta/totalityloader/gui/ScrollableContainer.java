@@ -5,13 +5,13 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import static net.coosanta.totalityloader.gui.Gui.refreshGui;
+import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
 public class ScrollableContainer extends JScrollPane {
-    private Container innerContainer;
+    private FixedRatioContainer innerContainer;
 
     public ScrollableContainer(JPanel content) {
-        innerContainer = new Container(content);
+        innerContainer = new FixedRatioContainer(content);
 
         setViewportView(innerContainer);
 

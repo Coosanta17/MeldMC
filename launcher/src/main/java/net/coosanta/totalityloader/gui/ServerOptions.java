@@ -26,9 +26,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static net.coosanta.totalityloader.gui.Gui.refreshGui;
+import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
-public class ServerSelect extends JPanel implements ScalablePanel {
+public class ServerOptions extends JPanel implements ScalablePanel {
     private final int designWidth = 600;
     private final int designHeight = 400;
     private double currentScale = 1.0;
@@ -39,9 +39,9 @@ public class ServerSelect extends JPanel implements ScalablePanel {
 
     private CompoundTag serversDat;
     private ExecutorService pingTask = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()));
-    private Logger log = LoggerFactory.getLogger(ServerSelect.class);
+    private Logger log = LoggerFactory.getLogger(ServerOptions.class);
 
-    public ServerSelect() throws IOException {
+    public ServerOptions() throws IOException {
         this.instance = Main.getInstance();
         this.gameDir = this.instance.getGameDir();
 
@@ -108,7 +108,7 @@ public class ServerSelect extends JPanel implements ScalablePanel {
         refreshGui(this);
     }
 
-    private class ServerOption extends JPanel {
+    private class ServerOption extends JPanel implements ScalablePanel {
         private final ServerInfo server;
         private final JPanel header = new JPanel(new GridBagLayout());
         private final MiniMessage miniMessage = MiniMessage.miniMessage();
@@ -241,6 +241,7 @@ public class ServerSelect extends JPanel implements ScalablePanel {
             }
         }
 
+        @Override
         public void applyScale(double scale) {
             name.setFont(originalNameFont.deriveFont((float) (originalNameFont.getSize() * scale)));
             ping.setFont(originalPingFont.deriveFont((float) (originalPingFont.getSize() * scale)));
@@ -275,6 +276,16 @@ public class ServerSelect extends JPanel implements ScalablePanel {
                     Integer.MAX_VALUE,  // Can stretch horizontally if needed
                     preferredSize.height  // But maintain the preferred height
             );
+        }
+
+        @Override
+        public double getDesignWidth() {
+            return designWidth;
+        }
+
+        @Override
+        public double getDesignHeight() {
+            return designHeight;
         }
     }
 }
