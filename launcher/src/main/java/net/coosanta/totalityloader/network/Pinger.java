@@ -16,7 +16,7 @@ public class Pinger {
     private static final Logger log = LoggerFactory.getLogger(Pinger.class);
 
     public static CompletableFuture<Void> ping(ServerInfo serverInfo) {
-        log.info("Pinging {}", serverInfo.getAddress());
+//        log.info("Pinging {}", serverInfo.getAddress());
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         InetSocketAddress address = getAddress(serverInfo.getAddress());
@@ -34,6 +34,7 @@ public class Pinger {
         client.setFlag(MinecraftConstants.SERVER_PING_TIME_HANDLER_KEY, (session, pingTime) -> {
             serverInfo.setPing(pingTime);
 //            log.info("Received ping {}", serverInfo.getPing());
+            // Problem: If you have such a fast internet it takes less than 0.5ms to ping the server then it will think the server is offline. Too Bad! (you get punished for having superfast internet I guess)
             if (serverInfo.getPing() > 0) {
                 serverInfo.setStatus(ServerInfo.Status.SUCCESSFUL);
             } else {

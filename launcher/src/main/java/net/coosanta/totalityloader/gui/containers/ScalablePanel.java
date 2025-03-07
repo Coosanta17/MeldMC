@@ -1,4 +1,4 @@
-package net.coosanta.totalityloader.gui;
+package net.coosanta.totalityloader.gui.containers;
 
 public interface ScalablePanel {
     double getDesignWidth();

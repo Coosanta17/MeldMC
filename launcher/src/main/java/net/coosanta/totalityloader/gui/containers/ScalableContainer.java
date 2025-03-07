@@ -1,4 +1,4 @@
-package net.coosanta.totalityloader.gui;
+package net.coosanta.totalityloader.gui.containers;
 
 import net.coosanta.totalityloader.Main;
 
@@ -9,12 +9,15 @@ import java.awt.event.ComponentEvent;
 
 import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
-public class Container extends JPanel {
+public class ScalableContainer extends JPanel implements ScalablePanel {
     protected final double originalWidth;
     protected final double originalHeight;
     protected double scaleFactor = 1.0;
+    protected final JPanel innerPanel;
 
-    public Container(JPanel innerPanel) {
+    public ScalableContainer(JPanel innerPanel) {
+        this.innerPanel = innerPanel;
+
         JPanel container = this;
         setLayout(new GridBagLayout());
         add(innerPanel);
@@ -49,5 +52,24 @@ public class Container extends JPanel {
         }
 
         refreshGui(container);
+    }
+
+    public double getScaleFactor() {
+        return scaleFactor;
+    }
+
+    @Override
+    public double getDesignWidth() {
+        return originalWidth;
+    }
+
+    @Override
+    public double getDesignHeight() {
+        return originalHeight;
+    }
+
+    @Override
+    public void applyScale(double scaleFactor) {
+        scale(innerPanel, this);
     }
 }

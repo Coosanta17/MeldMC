@@ -1,6 +1,8 @@
 package net.coosanta.totalityloader.gui;
 
 import net.coosanta.totalityloader.Main;
+import net.coosanta.totalityloader.gui.containers.ScalableContainer;
+import net.coosanta.totalityloader.gui.serverselection.SelectServerScreen;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +18,7 @@ public class GuiFrame extends JFrame {
 
         applyMojanglesFont();
 
-        JPanel contentPanel = new Container(new SelectServerScreen());
+        JPanel contentPanel = new ScalableContainer(new SelectServerScreen());
         setContentPane(contentPanel);
 
         setSize(size);

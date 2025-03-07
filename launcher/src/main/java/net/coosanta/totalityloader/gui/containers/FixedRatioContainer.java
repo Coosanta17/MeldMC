@@ -1,11 +1,11 @@
-package net.coosanta.totalityloader.gui;
+package net.coosanta.totalityloader.gui.containers;
 
 import javax.swing.*;
 import java.awt.*;
 
 import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
-public class FixedRatioContainer extends Container {
+public class FixedRatioContainer extends ScalableContainer {
     public FixedRatioContainer(JPanel innerPanel) {
         super(innerPanel);
     }

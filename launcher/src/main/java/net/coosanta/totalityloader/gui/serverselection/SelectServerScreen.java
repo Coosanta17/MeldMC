@@ -1,4 +1,7 @@
-package net.coosanta.totalityloader.gui;
+package net.coosanta.totalityloader.gui.serverselection;
+
+import net.coosanta.totalityloader.gui.containers.ScalablePanel;
+import net.coosanta.totalityloader.gui.containers.ScrollableFixedRatioContainer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +23,7 @@ public class SelectServerScreen extends JPanel implements ScalablePanel {
         title.setFont(originalTitleFont);
         add(title, BorderLayout.NORTH);
 
-        final JComponent serverOptions = new ScrollableContainer(new ServerOptions());
+        final JComponent serverOptions = new ScrollableFixedRatioContainer(new ServerOptions());
         add(serverOptions, BorderLayout.CENTER);
 
 //        final JPanel footer = new JPanel();
