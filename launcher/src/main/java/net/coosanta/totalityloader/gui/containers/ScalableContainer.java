@@ -1,6 +1,7 @@
 package net.coosanta.totalityloader.gui.containers;
 
 import net.coosanta.totalityloader.Main;
+import net.coosanta.totalityloader.gui.lookandfeel.TransparentPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +10,7 @@ import java.awt.event.ComponentEvent;
 
 import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
-public class ScalableContainer extends JPanel implements ScalablePanel {
+public class ScalableContainer extends TransparentPanel implements ScalablePanel {
     protected final double originalWidth;
     protected final double originalHeight;
     protected double scaleFactor = 1.0;

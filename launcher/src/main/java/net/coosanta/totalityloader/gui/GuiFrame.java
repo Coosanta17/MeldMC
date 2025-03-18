@@ -2,6 +2,7 @@ package net.coosanta.totalityloader.gui;
 
 import net.coosanta.totalityloader.Main;
 import net.coosanta.totalityloader.gui.containers.ScalableContainer;
+import net.coosanta.totalityloader.gui.lookandfeel.MinecraftPanel;
 import net.coosanta.totalityloader.gui.serverselection.SelectServerScreen;
 
 import javax.swing.*;
@@ -18,8 +19,13 @@ public class GuiFrame extends JFrame {
 
         applyMojanglesFont();
 
+        MinecraftPanel basePanel = new MinecraftPanel();
+        basePanel.setLayout(new BorderLayout());
+
         JPanel contentPanel = new ScalableContainer(new SelectServerScreen());
-        setContentPane(contentPanel);
+
+        basePanel.add(contentPanel, BorderLayout.CENTER);
+        setContentPane(basePanel);
 
         setSize(size);
         setLocationRelativeTo(null);
@@ -27,7 +33,7 @@ public class GuiFrame extends JFrame {
     }
 
     private void applyMojanglesFont() {
-        try (InputStream is = Main.class.getResourceAsStream("/mojangles.ttf")) {
+        try (InputStream is = Main.class.getResourceAsStream("/fonts/mojangles.ttf")) {
             if (is == null) {
                 throw new FileNotFoundException("Font file not found in resources.");
             }

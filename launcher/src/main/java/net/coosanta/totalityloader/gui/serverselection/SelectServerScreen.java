@@ -2,12 +2,13 @@ package net.coosanta.totalityloader.gui.serverselection;
 
 import net.coosanta.totalityloader.gui.containers.ScalablePanel;
 import net.coosanta.totalityloader.gui.containers.ScrollableFixedRatioContainer;
+import net.coosanta.totalityloader.gui.lookandfeel.TransparentPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
-public class SelectServerScreen extends JPanel implements ScalablePanel {
+public class SelectServerScreen extends TransparentPanel implements ScalablePanel {
     private final int designWidth = 600;
     private final int designHeight = 400;
 

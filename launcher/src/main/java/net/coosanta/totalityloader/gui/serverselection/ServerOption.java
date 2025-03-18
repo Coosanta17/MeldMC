@@ -1,6 +1,7 @@
 package net.coosanta.totalityloader.gui.serverselection;
 
 import net.coosanta.totalityloader.gui.containers.ScalablePanel;
+import net.coosanta.totalityloader.gui.lookandfeel.TransparentPanel;
 import net.coosanta.totalityloader.minecraft.ServerInfo;
 import net.coosanta.totalityloader.network.Pinger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -18,7 +19,7 @@ import java.util.concurrent.ExecutorService;
 
 import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
-public class ServerOption extends JPanel implements ScalablePanel {
+public class ServerOption extends TransparentPanel implements ScalablePanel {
     private Logger log = LoggerFactory.getLogger(ServerOption.class);
     private double currentScale = 1.0;
     private final int designWidth = 400;
@@ -26,7 +27,7 @@ public class ServerOption extends JPanel implements ScalablePanel {
     private final int originalTopBottomPadding = 25;
 
     private final ServerInfo server;
-    private final JPanel header = new JPanel(new GridBagLayout());
+    private final JPanel header = new TransparentPanel(new GridBagLayout());
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     private final Font originalNameFont;
@@ -63,7 +64,7 @@ public class ServerOption extends JPanel implements ScalablePanel {
             originalIconImage = new ImageIcon(favicon).getImage();
         } else {
             try {
-                BufferedImage unknownServerImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/unknown_server.png")));
+                BufferedImage unknownServerImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/icons/unknown_server.png")));
                 originalIconImage = unknownServerImage;
             } catch (IOException | NullPointerException e) {
                 throw new RuntimeException(e);
