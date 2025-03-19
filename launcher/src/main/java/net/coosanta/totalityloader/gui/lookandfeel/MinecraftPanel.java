@@ -34,10 +34,10 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
 
         this.foregroundPanel = foregroundPanel;
 
-        backgroundPanel = new Background();
+        backgroundPanel = new BackgroundPanel();
 
-        add(backgroundPanel);
         add(foregroundPanel);
+        add(backgroundPanel);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
         return foregroundPanel;
     }
 
-    private class Background extends JPanel implements ScalablePanel{
+    private class BackgroundPanel extends JPanel implements ScalablePanel {
         private double scaleFactor = 1.0;
 
         public void setScaleFactor(double scaleFactor) {
