@@ -10,15 +10,19 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.Objects;
 
+import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
+
 public class MinecraftPanel extends JPanel implements ScalablePanel {
     private Logger log = LoggerFactory.getLogger(MinecraftPanel.class);
     private Image background;
+    private JPanel backgroundPanel;
+    private JPanel foregroundPanel;
 
     private final int designWidth = 800;
     private final int designHeight = 600;
     private double scaleFactor = 1.0;
 
-    public MinecraftPanel() {
+    public MinecraftPanel(JPanel foregroundPanel) {
         super();
         setOpaque(false);
         try {
@@ -26,24 +30,14 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
         } catch (IOException e) {
             log.error("Cannot load background image dirt.png.\n{}", String.valueOf(e));
         }
-    }
+        setLayout(new OverlayLayout(this));
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        // Tile image with scaling
-        if (background != null) {
-            int scaledImgWidth = (int)(background.getWidth(this) * scaleFactor);
-            int scaledImgHeight = (int)(background.getHeight(this) * scaleFactor);
+        this.foregroundPanel = foregroundPanel;
 
-            if (scaledImgWidth > 0 && scaledImgHeight > 0) {
-                for (int x = 0; x < getWidth(); x += scaledImgWidth) {
-                    for (int y = 0; y < getHeight(); y += scaledImgHeight) {
-                        g.drawImage(background, x, y, scaledImgWidth, scaledImgHeight, this);
-                    }
-                }
-            }
-        }
+        backgroundPanel = new Background();
+
+        add(backgroundPanel);
+        add(foregroundPanel);
     }
 
     @Override
@@ -59,6 +53,64 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
     @Override
     public void applyScale(double scaleFactor) {
         this.scaleFactor = scaleFactor;
+
+        // Apply scaling to child components if needed
+        if (backgroundPanel instanceof ScalablePanel) {
+            ((ScalablePanel) backgroundPanel).applyScale(scaleFactor);
+        }
+
+        if (foregroundPanel instanceof ScalablePanel) {
+            ((ScalablePanel) foregroundPanel).applyScale(scaleFactor);
+        }
+
         repaint();
+    }
+
+    public JPanel getBackgroundPanel() {
+        return backgroundPanel;
+    }
+
+    public JPanel getForegroundPanel() {
+        return foregroundPanel;
+    }
+
+    private class Background extends JPanel implements ScalablePanel{
+        private double scaleFactor = 1.0;
+
+        public void setScaleFactor(double scaleFactor) {
+            this.scaleFactor = scaleFactor;
+            refreshGui(this);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (background != null) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                int width = (int) (background.getWidth(this) * scaleFactor);
+                int height = (int) (background.getHeight(this) * scaleFactor);
+                for (int x = 0; x < getWidth(); x += width) {
+                    for (int y = 0; y < getHeight(); y += height) {
+                        g2d.drawImage(background, x, y, width, height, this);
+                    }
+                }
+                g2d.dispose();
+            }
+        }
+
+        @Override
+        public double getDesignWidth() {
+            return designWidth;
+        }
+
+        @Override
+        public double getDesignHeight() {
+            return designHeight;
+        }
+
+        @Override
+        public void applyScale(double scaleFactor) {
+            setScaleFactor(scaleFactor);
+        }
     }
 }
