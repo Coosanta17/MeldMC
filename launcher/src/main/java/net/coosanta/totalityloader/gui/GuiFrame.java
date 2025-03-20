@@ -19,8 +19,8 @@ public class GuiFrame extends JFrame {
 
         applyMojanglesFont();
 
-        JPanel contentPanel = new ScalableContainer(new SelectServerScreen());
-        MinecraftPanel basePanel = new MinecraftPanel(contentPanel);
+        JPanel contentPanel = new SelectServerScreen();
+        JPanel basePanel = new ScalableContainer(new MinecraftPanel(contentPanel));
 
         setContentPane(basePanel);
 

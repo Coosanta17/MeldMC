@@ -76,19 +76,16 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
 
     private class BackgroundPanel extends JPanel implements ScalablePanel {
         private double scaleFactor = 1.0;
-
-        public void setScaleFactor(double scaleFactor) {
-            this.scaleFactor = scaleFactor;
-            refreshGui(this);
-        }
+        private final double scaleFactorFactor = 3.0;
+        private double scaleFactorModified = scaleFactor * scaleFactorFactor;
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (background != null) {
                 Graphics2D g2d = (Graphics2D) g.create();
-                int width = (int) (background.getWidth(this) * scaleFactor);
-                int height = (int) (background.getHeight(this) * scaleFactor);
+                int width = (int) (background.getWidth(this) * scaleFactorModified);
+                int height = (int) (background.getHeight(this) * scaleFactorModified);
                 for (int x = 0; x < getWidth(); x += width) {
                     for (int y = 0; y < getHeight(); y += height) {
                         g2d.drawImage(background, x, y, width, height, this);
@@ -110,7 +107,9 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
 
         @Override
         public void applyScale(double scaleFactor) {
-            setScaleFactor(scaleFactor);
+            this.scaleFactor = scaleFactor;
+            this.scaleFactorModified = scaleFactor * scaleFactorFactor;
+            refreshGui(this);
         }
     }
 }

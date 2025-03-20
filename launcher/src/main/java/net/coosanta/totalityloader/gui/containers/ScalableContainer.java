@@ -15,6 +15,7 @@ public class ScalableContainer extends TransparentPanel implements ScalablePanel
     protected final double originalHeight;
     protected double scaleFactor = 1.0;
     protected final JPanel innerPanel;
+    protected Timer resizeWait;
 
     public ScalableContainer(JPanel innerPanel) {
         this.innerPanel = innerPanel;
@@ -30,11 +31,17 @@ public class ScalableContainer extends TransparentPanel implements ScalablePanel
                 ? ((ScalablePanel) innerPanel).getDesignHeight()
                 : Main.getInstance().getWindowSize().getHeight();
 
+        resizeWait = new Timer(150, e -> scale(innerPanel, container));
+        resizeWait.setRepeats(false);
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                scale(innerPanel, container);
-                refreshGui(container);
+                if (resizeWait.isRunning()) {
+                    resizeWait.restart();
+                } else {
+                    resizeWait.start();
+                }
             }
         });
     }
