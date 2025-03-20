@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.util.Enumeration;
 
 public class GuiFrame extends JFrame {
+    public static final Dimension DEFAULT_SIZE = new Dimension(800, 600);
+
     public GuiFrame(Dimension size) throws IOException {
         setTitle("Minecraft - Select Server");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -44,8 +46,12 @@ public class GuiFrame extends JFrame {
             while (keys.hasMoreElements()) {
                 Object key = keys.nextElement();
                 Object value = UIManager.get(key);
-                if (value instanceof Font)
+                if (value instanceof Font) {
                     UIManager.put(key, mojangles);
+                }
+                if (key.toString().endsWith(".foreground")) {
+                    UIManager.put(key, Color.WHITE);
+                }
             }
         } catch (FontFormatException | IOException e) {
             throw new RuntimeException(e);

@@ -30,6 +30,7 @@ public class ServerOption extends TransparentPanel implements ScalablePanel {
     private final JPanel header = new TransparentPanel(new GridBagLayout());
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
+    // I know they're the same, but just in case they need changing individually.
     private final Font originalNameFont;
     private final Font originalPingFont;
     private final Font originalPlayerCountFont;
@@ -48,9 +49,6 @@ public class ServerOption extends TransparentPanel implements ScalablePanel {
         this.server = serverIn;
 
         setLayout(new BorderLayout(5, 5));
-//        setBorder(BorderFactory.createEmptyBorder(originalTopBottomPadding, 0, originalTopBottomPadding, 0));
-
-        int preferredHeight = 64;
 
         name = new JLabel(server.getName());
         ping = new JLabel("Pinging...");
@@ -64,8 +62,7 @@ public class ServerOption extends TransparentPanel implements ScalablePanel {
             originalIconImage = new ImageIcon(favicon).getImage();
         } else {
             try {
-                BufferedImage unknownServerImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/icons/unknown_server.png")));
-                originalIconImage = unknownServerImage;
+                originalIconImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/icons/unknown_server.png")));
             } catch (IOException | NullPointerException e) {
                 throw new RuntimeException(e);
             }

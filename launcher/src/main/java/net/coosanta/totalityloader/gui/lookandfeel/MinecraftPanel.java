@@ -14,7 +14,7 @@ import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
 public class MinecraftPanel extends JPanel implements ScalablePanel {
     private Logger log = LoggerFactory.getLogger(MinecraftPanel.class);
-    private Image background;
+
     private JPanel backgroundPanel;
     private JPanel foregroundPanel;
 
@@ -25,11 +25,6 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
     public MinecraftPanel(JPanel foregroundPanel) {
         super();
         setOpaque(false);
-        try {
-            background = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/icons/dirt.png")));
-        } catch (IOException e) {
-            log.error("Cannot load background image dirt.png.\n{}", String.valueOf(e));
-        }
         setLayout(new OverlayLayout(this));
 
         this.foregroundPanel = foregroundPanel;
@@ -75,9 +70,18 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
     }
 
     private class BackgroundPanel extends JPanel implements ScalablePanel {
-        private double scaleFactor = 1.0;
+        private Image background;
+
         private final double scaleFactorFactor = 3.0;
         private double scaleFactorModified = scaleFactor * scaleFactorFactor;
+
+        private BackgroundPanel() {
+            try {
+                background = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/icons/background.png")));
+            } catch (IOException e) {
+                log.error("Cannot load background image background.png.\n{}", String.valueOf(e));
+            }
+        }
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -107,7 +111,7 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
 
         @Override
         public void applyScale(double scaleFactor) {
-            this.scaleFactor = scaleFactor;
+            MinecraftPanel.this.scaleFactor = scaleFactor;
             this.scaleFactorModified = scaleFactor * scaleFactorFactor;
             refreshGui(this);
         }

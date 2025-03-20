@@ -115,6 +115,7 @@ public class ServerOptions extends TransparentPanel implements ScalablePanel {
         refreshGui(this);
     }
 
+    // Unused for now because IDK how to implement it properly. (Pinger runs 1ms behind fsr)
     public void pingCleanup() {
         pingTask.shutdown();
         try {
