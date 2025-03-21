@@ -12,7 +12,6 @@ import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -21,9 +20,8 @@ import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
 public class ServerOption extends TransparentPanel implements ScalablePanel {
     private Logger log = LoggerFactory.getLogger(ServerOption.class);
+    private final double SCALE_MODIFIER = 1.25; // That's right! I'm too lazy to figure out why the font size isn't changing!
     private double currentScale = 1.0;
-    private final int designWidth = 400;
-    private final int designHeight = 400;
     private final int originalTopBottomPadding = 25;
 
     private final ServerInfo server;
@@ -143,8 +141,8 @@ public class ServerOption extends TransparentPanel implements ScalablePanel {
         if (server.getFavicon() != null) {
             originalIconImage = new ImageIcon(server.getFavicon()).getImage();
             Image scaledImage = originalIconImage.getScaledInstance(
-                    (int) (originalIconSize * currentScale),
-                    (int) (originalIconSize * currentScale),
+                    (int) (originalIconSize * currentScale * SCALE_MODIFIER),
+                    (int) (originalIconSize * currentScale * SCALE_MODIFIER),
                     Image.SCALE_SMOOTH);
             icon.setImage(scaledImage);
         }
@@ -170,16 +168,16 @@ public class ServerOption extends TransparentPanel implements ScalablePanel {
     public void applyScale(double scale) {
         this.currentScale = scale;
 
-        name.setFont(originalNameFont.deriveFont((float) (originalNameFont.getSize() * scale)));
-        ping.setFont(originalPingFont.deriveFont((float) (originalPingFont.getSize() * scale)));
-        playerCount.setFont(originalPlayerCountFont.deriveFont((float) (originalPlayerCountFont.getSize() * scale)));
-        motd.setFont(originalMotdFont.deriveFont((float) (originalMotdFont.getSize() * scale)));
+        name.setFont(originalNameFont.deriveFont((float) (originalNameFont.getSize() * scale * SCALE_MODIFIER)));
+        ping.setFont(originalPingFont.deriveFont((float) (originalPingFont.getSize() * scale * SCALE_MODIFIER)));
+        playerCount.setFont(originalPlayerCountFont.deriveFont((float) (originalPlayerCountFont.getSize() * scale * SCALE_MODIFIER)));
+        motd.setFont(originalMotdFont.deriveFont((float) (originalMotdFont.getSize() * scale * SCALE_MODIFIER)));
 
-        int scaledTopBottom = (int) (originalTopBottomPadding * scale);
+        int scaledTopBottom = (int) (originalTopBottomPadding * scale * SCALE_MODIFIER);
         setBorder(BorderFactory.createEmptyBorder(scaledTopBottom, 0, scaledTopBottom, 0));
 
         // Scale icon
-        int scaledSize = (int) (originalIconSize * scale);
+        int scaledSize = (int) (originalIconSize * scale * SCALE_MODIFIER);
         if (originalIconImage != null && scaledSize != 0) {
             Image scaledImage = originalIconImage.getScaledInstance(
                     scaledSize, scaledSize, Image.SCALE_SMOOTH);
@@ -206,16 +204,6 @@ public class ServerOption extends TransparentPanel implements ScalablePanel {
             return new Dimension(getParent().getWidth() - 20, size.height);
         }
         return size;
-    }
-
-    @Override
-    public double getDesignWidth() {
-        return designWidth;
-    }
-
-    @Override
-    public double getDesignHeight() {
-        return designHeight;
     }
 
     @Override

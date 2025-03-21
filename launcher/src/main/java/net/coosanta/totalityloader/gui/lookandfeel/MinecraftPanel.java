@@ -18,8 +18,6 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
     private JPanel backgroundPanel;
     private JPanel foregroundPanel;
 
-    private final int designWidth = 800;
-    private final int designHeight = 600;
     private double scaleFactor = 1.0;
 
     public MinecraftPanel(JPanel foregroundPanel) {
@@ -33,16 +31,6 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
 
         add(foregroundPanel);
         add(backgroundPanel);
-    }
-
-    @Override
-    public double getDesignWidth() {
-        return designWidth;
-    }
-
-    @Override
-    public double getDesignHeight() {
-        return designHeight;
     }
 
     @Override
@@ -97,16 +85,6 @@ public class MinecraftPanel extends JPanel implements ScalablePanel {
                 }
                 g2d.dispose();
             }
-        }
-
-        @Override
-        public double getDesignWidth() {
-            return designWidth;
-        }
-
-        @Override
-        public double getDesignHeight() {
-            return designHeight;
         }
 
         @Override

@@ -25,8 +25,6 @@ import java.util.concurrent.TimeUnit;
 import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
 public class ServerOptions extends TransparentPanel implements ScalablePanel {
-    private final int designWidth = 600;
-    private final int designHeight = 400;
     private double currentScale = 1.0;
 
     private final Main instance;
@@ -90,16 +88,6 @@ public class ServerOptions extends TransparentPanel implements ScalablePanel {
                 component.invalidate();
             }
         }
-    }
-
-    @Override
-    public double getDesignWidth() {
-        return designWidth;
-    }
-
-    @Override
-    public double getDesignHeight() {
-        return designHeight;
     }
 
     @Override

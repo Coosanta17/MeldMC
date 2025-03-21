@@ -9,8 +9,6 @@ import java.awt.*;
 import java.io.IOException;
 
 public class SelectServerScreen extends TransparentPanel implements ScalablePanel {
-    private final int designWidth = 600;
-    private final int designHeight = 400;
 
     private JLabel title;
     private Font originalTitleFont;
@@ -29,16 +27,6 @@ public class SelectServerScreen extends TransparentPanel implements ScalablePane
 
 //        final JPanel footer = new JPanel();
 //        add(footer, BorderLayout.SOUTH);
-    }
-
-    @Override
-    public double getDesignWidth() {
-        return designWidth;
-    }
-
-    @Override
-    public double getDesignHeight() {
-        return designHeight;
     }
 
     @Override
