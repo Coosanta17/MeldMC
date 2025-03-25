@@ -20,7 +20,7 @@ import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
 public class ServerOption extends TransparentPanel implements ScalablePanel {
     private Logger log = LoggerFactory.getLogger(ServerOption.class);
-    private final double SCALE_MODIFIER = 1.25; // That's right! I'm too lazy to figure out why the font size isn't changing!
+    private final double SCALE_MODIFIER = 2.0; // That's right! I'm too lazy to figure out why the font size isn't changing!
     private double currentScale = 1.0;
     private final int originalTopBottomPadding = 25;
 
