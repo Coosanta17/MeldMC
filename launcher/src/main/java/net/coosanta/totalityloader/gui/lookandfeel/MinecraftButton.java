@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Objects;
 
 public class MinecraftButton extends JButton implements ScalablePanel {
     private Logger log = LoggerFactory.getLogger(MinecraftButton.class);
@@ -19,41 +20,84 @@ public class MinecraftButton extends JButton implements ScalablePanel {
 
     private BufferedImage normalIcon;
     private BufferedImage hoverIcon;
+    private BufferedImage disabledIcon;
+
+    private BufferedImage originalNormalIcon;
+    private BufferedImage originalHoverIcon;
+    private BufferedImage originalDisabledIcon;
+
     private BufferedImage currentIcon;
+
+    private boolean active;
 
     // Size of the left and right borders of the button in pixels.
     private static final int BORDER_SIZE = 2;
 
-    public MinecraftButton(String text, Dimension designSize) {
+    public MinecraftButton(String text, boolean active) {
+        this(text, null, active);
+    }
+
+    public MinecraftButton(String text, Dimension designSize, boolean active) {
         super(text);
         setContentAreaFilled(false);
         setBorderPainted(false);
         setFocusPainted(false);
         setOpaque(false);
 
-        this.designSize = designSize;
+        this.designSize = designSize != null ? designSize : new Dimension(200, 20);
+        this.active = active;
 
         try {
-            normalIcon = ImageIO.read(getClass().getResourceAsStream("/button/button.png"));
-            hoverIcon = ImageIO.read(getClass().getResourceAsStream("/button/button_highlighted.png"));
-            currentIcon = normalIcon;
+            originalNormalIcon = ImageIO.read(Objects.requireNonNull(
+                    getClass().getResourceAsStream("/icons/button/button.png")));
+            originalHoverIcon = ImageIO.read(Objects.requireNonNull(
+                    getClass().getResourceAsStream("/icons/button/button_highlighted.png")));
+            originalDisabledIcon = ImageIO.read(Objects.requireNonNull(
+                    getClass().getResourceAsStream("/icons/button/button_disabled.png")));
+
+            currentIcon = (active) ? normalIcon : disabledIcon;
         } catch (IOException e) {
             log.error("Failed to load button icons.\n{}", e.getMessage());
+        } catch (NullPointerException e) {
+            throw new RuntimeException("Cannot find button icons.", e);
         }
+
+        normalIcon = originalNormalIcon;
+        hoverIcon = originalHoverIcon;
+        disabledIcon = originalDisabledIcon;
+        currentIcon = (active) ? normalIcon : disabledIcon;
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                currentIcon = hoverIcon;
-                repaint();
+                if (active) {
+                    currentIcon = hoverIcon;
+                    repaint();
+                }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                currentIcon = normalIcon;
-                repaint();
+                if (active) {
+                    currentIcon = normalIcon;
+                    repaint();
+                }
             }
         });
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+        if (!active) {
+            currentIcon = disabledIcon;
+        } else {
+            currentIcon = normalIcon;
+        }
+        repaint();
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     @Override
@@ -91,6 +135,8 @@ public class MinecraftButton extends JButton implements ScalablePanel {
             );
 
             g2d.dispose();
+        } else {
+            log.error("currentIcon is null!");
         }
 
         Graphics2D g2d = (Graphics2D) g.create();
@@ -107,12 +153,32 @@ public class MinecraftButton extends JButton implements ScalablePanel {
 
     @Override
     public Dimension getPreferredSize() {
+        if (designSize != null) {
+            return new Dimension(
+                    (int) (designSize.width * currentScale),
+                    (int) (designSize.height * currentScale)
+            );
+        }
+
         if (normalIcon != null) {
-            int width = (int)(normalIcon.getWidth() * currentScale);
-            int height = (int)(normalIcon.getHeight() * currentScale);
+            int width = (int) (normalIcon.getWidth() * currentScale);
+            int height = (int) (normalIcon.getHeight() * currentScale);
             return new Dimension(width, height);
         }
+
         return super.getPreferredSize();
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        // Allow the button to be resized to any size
+        return new Dimension(10, 10);
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        // Return parent's size to fill available space
+        return getParent() != null ? getParent().getSize() : super.getMaximumSize();
     }
 
     @Override
@@ -125,11 +191,36 @@ public class MinecraftButton extends JButton implements ScalablePanel {
         return designSize.getHeight();
     }
 
+    private static BufferedImage scaleImage(BufferedImage original, double scale) {
+        if (original == null) return null;
+
+        int newWidth = (int) (original.getWidth() * scale);
+        int newHeight = (int) (original.getHeight() * scale);
+
+        // Prevents scaling to zero dimensions
+        newWidth = Math.max(1, newWidth);
+        newHeight = Math.max(1, newHeight);
+
+        BufferedImage scaled = new BufferedImage(newWidth, newHeight, original.getType());
+        Graphics2D g2d = scaled.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.drawImage(original, 0, 0, newWidth, newHeight, null);
+        g2d.dispose();
+
+        return scaled;
+    }
+
     @Override
     public void applyScale(double scaleFactor) {
         this.currentScale = scaleFactor;
 
-        setFont(getFont().deriveFont((float)(getFont().getSize() * scaleFactor)));
+        setFont(getFont().deriveFont((float) (getFont().getSize() * scaleFactor)));
+
+        normalIcon = scaleImage(originalNormalIcon, scaleFactor);
+        hoverIcon = scaleImage(originalHoverIcon, scaleFactor);
+        disabledIcon = scaleImage(originalDisabledIcon, scaleFactor);
+
+        currentIcon = active ? normalIcon : disabledIcon;
 
         revalidate();
         repaint();
