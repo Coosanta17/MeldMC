@@ -18,6 +18,8 @@ public class Main {
     private final Dimension windowSize;
     private final List<String> gameArgs;
 
+    private GuiFrame guiFrame;
+
     private Main(String[] args) {
         this.gameArgs = new ArrayList<>(List.of(args));
 
@@ -40,7 +42,7 @@ public class Main {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                new GuiFrame(windowSize);
+                this.guiFrame = new GuiFrame(windowSize);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -77,4 +79,7 @@ public class Main {
         return Path.of(instance.getGameArgs().get(gameDirArgIndex + 1));
     }
 
+    public GuiFrame getGuiFrame() {
+        return guiFrame;
+    }
 }

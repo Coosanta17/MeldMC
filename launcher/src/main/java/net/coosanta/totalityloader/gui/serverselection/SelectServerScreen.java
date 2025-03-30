@@ -1,5 +1,6 @@
 package net.coosanta.totalityloader.gui.serverselection;
 
+import net.coosanta.totalityloader.gui.containers.FixedRatioContainer;
 import net.coosanta.totalityloader.gui.containers.ScalablePanel;
 import net.coosanta.totalityloader.gui.containers.ScrollableFixedRatioContainer;
 import net.coosanta.totalityloader.gui.lookandfeel.TransparentPanel;
@@ -9,28 +10,33 @@ import java.awt.*;
 import java.io.IOException;
 
 public class SelectServerScreen extends TransparentPanel implements ScalablePanel {
-
-    private JLabel title;
-    private Font originalTitleFont;
+    private final JLabel title;
+    private final Font originalTitleFont;
+    private final JComponent mainContent;
+    private final JComponent footer;
 
     public SelectServerScreen() throws IOException {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 5));
 
-        title = new JLabel("Select Server");
+        this.title = new JLabel("Select Server");
         title.setHorizontalAlignment(SwingConstants.CENTER);
         originalTitleFont = new Font(title.getFont().getName(), title.getFont().getStyle(), 24);
         title.setFont(originalTitleFont);
         add(title, BorderLayout.NORTH);
 
-        final JComponent serverOptions = new ScrollableFixedRatioContainer(new ServerOptions());
-        add(serverOptions, BorderLayout.CENTER);
+        this.mainContent = new ScrollableFixedRatioContainer(new ServerOptions());
+        add(mainContent, BorderLayout.CENTER);
 
-//        final JPanel footer = new JPanel();
-//        add(footer, BorderLayout.SOUTH);
+        this.footer = new FixedRatioContainer(new OptionsPanel(), 10, 1);
+        add(footer, BorderLayout.SOUTH);
+    }
+
+    public double getMainContentScaleFactor() {
+        return ((ScrollableFixedRatioContainer) mainContent).getScaleFactor();
     }
 
     @Override
     public void applyScale(double scaleFactor) {
-        title.setFont(originalTitleFont.deriveFont((float)(originalTitleFont.getSize() * scaleFactor)));
+        title.setFont(originalTitleFont.deriveFont((float) (originalTitleFont.getSize() * scaleFactor)));
     }
 }

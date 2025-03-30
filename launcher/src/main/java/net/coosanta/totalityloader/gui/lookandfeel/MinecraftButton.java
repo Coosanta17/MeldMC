@@ -14,215 +14,140 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class MinecraftButton extends JButton implements ScalablePanel {
-    private Logger log = LoggerFactory.getLogger(MinecraftButton.class);
-    private final Dimension designSize;
-    private double currentScale = 1.0;
+    private static final Logger log = LoggerFactory.getLogger(MinecraftButton.class);
 
-    private BufferedImage normalIcon;
-    private BufferedImage hoverIcon;
-    private BufferedImage disabledIcon;
+    private final BufferedImage originalDefaultIcon;
+    private final BufferedImage originalDisabledIcon;
+    private final BufferedImage originalHighlightedIcon;
+    private final Font originalTextFont;
 
-    private BufferedImage originalNormalIcon;
-    private BufferedImage originalHoverIcon;
-    private BufferedImage originalDisabledIcon;
+    private final double widthHeightRatio;
+    private double currentScaleFactor = 1.0;
 
-    private BufferedImage currentIcon;
-
-    private boolean active;
-
-    // Size of the left and right borders of the button in pixels.
-    private static final int BORDER_SIZE = 2;
-
-    public MinecraftButton(String text, boolean active) {
-        this(text, null, active);
+    public MinecraftButton(String text, boolean enabled) {
+        this(text, enabled, new Dimension(200, 20));
     }
 
-    public MinecraftButton(String text, Dimension designSize, boolean active) {
+    public MinecraftButton(String text, boolean enabled, Dimension widthHeightFactor) {
         super(text);
-        setContentAreaFilled(false);
-        setBorderPainted(false);
-        setFocusPainted(false);
-        setOpaque(false);
 
-        this.designSize = designSize != null ? designSize : new Dimension(200, 20);
-        this.active = active;
+        this.originalTextFont = getFont();
+
+        this.widthHeightRatio = (double) (widthHeightFactor.width / widthHeightFactor.height);
 
         try {
-            originalNormalIcon = ImageIO.read(Objects.requireNonNull(
-                    getClass().getResourceAsStream("/icons/button/button.png")));
-            originalHoverIcon = ImageIO.read(Objects.requireNonNull(
-                    getClass().getResourceAsStream("/icons/button/button_highlighted.png")));
-            originalDisabledIcon = ImageIO.read(Objects.requireNonNull(
-                    getClass().getResourceAsStream("/icons/button/button_disabled.png")));
-
-            currentIcon = (active) ? normalIcon : disabledIcon;
-        } catch (IOException e) {
-            log.error("Failed to load button icons.\n{}", e.getMessage());
-        } catch (NullPointerException e) {
-            throw new RuntimeException("Cannot find button icons.", e);
+            this.originalDefaultIcon = loadImage("/icons/button/button.png");
+            this.originalDisabledIcon = loadImage("/icons/button/button_disabled.png");
+            this.originalHighlightedIcon = loadImage("/icons/button/button_highlighted.png");
+        } catch (IOException | NullPointerException e) {
+            log.error("Failed to load button images", e);
+            throw new RuntimeException("Failed to load button images", e);
         }
 
-        normalIcon = originalNormalIcon;
-        hoverIcon = originalHoverIcon;
-        disabledIcon = originalDisabledIcon;
-        currentIcon = (active) ? normalIcon : disabledIcon;
+        setEnabled(enabled);
+        setBorderPainted(false);
+        setContentAreaFilled(false);
+        setFocusPainted(false);
+        setHorizontalTextPosition(SwingConstants.CENTER);
+        setVerticalTextPosition(SwingConstants.CENTER);
+
+        updateButtonAppearance();
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                if (active) {
-                    currentIcon = hoverIcon;
-                    repaint();
+                if (isEnabled()) {
+                    setIcon(new ImageIcon(createResizedImage(originalHighlightedIcon)));
                 }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                if (active) {
-                    currentIcon = normalIcon;
-                    repaint();
-                }
+                updateButtonAppearance();
             }
         });
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-        if (!active) {
-            currentIcon = disabledIcon;
+    private BufferedImage createResizedImage(BufferedImage original) {
+        if (original == null) {
+            log.error("Original image is null");
+            throw new NullPointerException();
+        }
+
+        double ratio = Math.min(widthHeightRatio, 10.0);
+        if (widthHeightRatio > 10.0) {
+            log.error("Width-to-height ratio {} exceeds maximum 10:1, capping at 10:1", widthHeightRatio);
+        }
+
+        int originalHeight = original.getHeight();
+
+        int targetHeight = (int) Math.round(originalHeight * currentScaleFactor);
+        int targetWidth = (int) Math.round(targetHeight * ratio);
+
+        targetHeight = Math.max(targetHeight, 1);
+        targetWidth = Math.max(targetWidth, 4);
+
+        BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = resized.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        int borderWidth = Math.max(1, Math.round((float)(2 * currentScaleFactor)));
+
+        // Draw left border
+        g.drawImage(
+                original.getSubimage(0, 0, 2, original.getHeight()),
+                0, 0, borderWidth, targetHeight,
+                null
+        );
+
+        // Draw right border
+        g.drawImage(
+                original.getSubimage(original.getWidth() - 2, 0, 2, original.getHeight()),
+                targetWidth - borderWidth, 0, borderWidth, targetHeight,
+                null
+        );
+
+        // Draw middle section
+        g.drawImage(
+                original.getSubimage(2, 0, original.getWidth() - 4, original.getHeight()),
+                borderWidth, 0, targetWidth - (2 * borderWidth), targetHeight,
+                null
+        );
+
+        g.dispose();
+        return resized;
+    }
+
+    private void updateButtonAppearance() {
+        if (isEnabled()) {
+            setIcon(new ImageIcon(createResizedImage(originalDefaultIcon)));
         } else {
-            currentIcon = normalIcon;
+            setIcon(new ImageIcon(createResizedImage(originalDisabledIcon)));
         }
-        repaint();
-    }
+        float newSize = (float) (originalTextFont.getSize() * currentScaleFactor);
+        setFont(new Font(getFont().getName(), getFont().getStyle(), Math.round(newSize)));
 
-    public boolean isActive() {
-        return active;
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        if (currentIcon != null) {
-            Graphics2D g2d = (Graphics2D) g.create();
-
-            int width = getWidth();
-            int height = getHeight();
-            int imageWidth = currentIcon.getWidth();
-            int imageHeight = currentIcon.getHeight();
-
-            // Draw left border
-            g2d.drawImage(
-                    currentIcon,
-                    0, 0, BORDER_SIZE, height,
-                    0, 0, BORDER_SIZE, imageHeight,
-                    this
-            );
-
-            // Draw right border
-            g2d.drawImage(
-                    currentIcon,
-                    width - BORDER_SIZE, 0, width, height,
-                    imageWidth - BORDER_SIZE, 0, imageWidth, imageHeight,
-                    this
-            );
-
-            // Draw middle section
-            g2d.drawImage(
-                    currentIcon,
-                    BORDER_SIZE, 0, width - BORDER_SIZE, height,
-                    BORDER_SIZE, 0, imageWidth - BORDER_SIZE, imageHeight,
-                    this
-            );
-
-            g2d.dispose();
-        } else {
-            log.error("currentIcon is null!");
+        Icon icon = getIcon();
+        if (icon != null) {
+            setPreferredSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
         }
+    }
 
-        Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-        FontMetrics fm = g2d.getFontMetrics();
-        int textX = (getWidth() - fm.stringWidth(getText())) / 2;
-        int textY = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
-
-        g2d.setColor(getForeground());
-        g2d.drawString(getText(), textX, textY);
-        g2d.dispose();
+    private BufferedImage loadImage(String path) throws IOException {
+        return ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(path)));
     }
 
     @Override
-    public Dimension getPreferredSize() {
-        if (designSize != null) {
-            return new Dimension(
-                    (int) (designSize.width * currentScale),
-                    (int) (designSize.height * currentScale)
-            );
-        }
-
-        if (normalIcon != null) {
-            int width = (int) (normalIcon.getWidth() * currentScale);
-            int height = (int) (normalIcon.getHeight() * currentScale);
-            return new Dimension(width, height);
-        }
-
-        return super.getPreferredSize();
-    }
-
-    @Override
-    public Dimension getMinimumSize() {
-        // Allow the button to be resized to any size
-        return new Dimension(10, 10);
-    }
-
-    @Override
-    public Dimension getMaximumSize() {
-        // Return parent's size to fill available space
-        return getParent() != null ? getParent().getSize() : super.getMaximumSize();
-    }
-
-    @Override
-    public double getDesignWidth() {
-        return designSize.getWidth();
-    }
-
-    @Override
-    public double getDesignHeight() {
-        return designSize.getHeight();
-    }
-
-    private static BufferedImage scaleImage(BufferedImage original, double scale) {
-        if (original == null) return null;
-
-        int newWidth = (int) (original.getWidth() * scale);
-        int newHeight = (int) (original.getHeight() * scale);
-
-        // Prevents scaling to zero dimensions
-        newWidth = Math.max(1, newWidth);
-        newHeight = Math.max(1, newHeight);
-
-        BufferedImage scaled = new BufferedImage(newWidth, newHeight, original.getType());
-        Graphics2D g2d = scaled.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2d.drawImage(original, 0, 0, newWidth, newHeight, null);
-        g2d.dispose();
-
-        return scaled;
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        updateButtonAppearance();
     }
 
     @Override
     public void applyScale(double scaleFactor) {
-        this.currentScale = scaleFactor;
-
-        setFont(getFont().deriveFont((float) (getFont().getSize() * scaleFactor)));
-
-        normalIcon = scaleImage(originalNormalIcon, scaleFactor);
-        hoverIcon = scaleImage(originalHoverIcon, scaleFactor);
-        disabledIcon = scaleImage(originalDisabledIcon, scaleFactor);
-
-        currentIcon = active ? normalIcon : disabledIcon;
-
-        revalidate();
-        repaint();
+        System.out.println("Button '" + getText() + "' scale changed: " +
+                this.currentScaleFactor + " -> " + scaleFactor);
+        this.currentScaleFactor = scaleFactor;
+        updateButtonAppearance();
     }
 }

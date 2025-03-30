@@ -8,8 +8,8 @@ package net.coosanta.totalityloader.gui.containers;
     import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
     public class ScrollableFixedRatioContainer extends FixedRatioContainer {
-        private JScrollPane scrollPane;
-        private JPanel contentPanel;
+        private final JScrollPane scrollPane;
+        private final JPanel contentPanel;
 
         public ScrollableFixedRatioContainer(JPanel content) {
             super(new TransparentPanel(new BorderLayout()));
@@ -37,9 +37,7 @@ package net.coosanta.totalityloader.gui.containers;
             int size = Math.min(getWidth(), getHeight());
             scrollPane.setPreferredSize(new Dimension(size, size));
 
-            if (contentPanel instanceof ScalablePanel) {
-                ((ScalablePanel) contentPanel).applyScale(getScaleFactor());
-            }
+            applyScaleToInnerPanels(contentPanel);
 
             refreshGui(this);
         }

@@ -22,6 +22,11 @@ public class FixedRatioContainer extends ScalableContainer {
 
     @Override
     protected void scale(JPanel innerPanel, JPanel container) {
+        double parentScaleFactor = 1.0;
+        if (container.getParent() instanceof ScalableContainer) {
+            parentScaleFactor = ((ScalableContainer) container.getParent()).getScaleFactor();
+        }
+
         int w = container.getWidth();
         int h = container.getHeight();
 
@@ -47,9 +52,7 @@ public class FixedRatioContainer extends ScalableContainer {
 
         innerPanel.setPreferredSize(new Dimension(newWidth, newHeight));
 
-        if (innerPanel instanceof ScalablePanel) {
-            ((ScalablePanel) innerPanel).applyScale(scaleFactor);
-        }
+        applyScaleToInnerPanels(innerPanel);
 
         refreshGui(container);
     }

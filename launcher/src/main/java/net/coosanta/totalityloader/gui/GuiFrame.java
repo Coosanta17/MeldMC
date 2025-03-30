@@ -14,14 +14,19 @@ import java.util.Enumeration;
 
 public class GuiFrame extends JFrame {
     public static final Dimension DEFAULT_SIZE = new Dimension(800, 600);
+    private static GuiFrame instance;
+
+    private final JPanel contentPanel;
 
     public GuiFrame(Dimension size) throws IOException {
+        instance = this;
+
         setTitle("Minecraft - Select Server");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         applyMojanglesFont();
 
-        JPanel contentPanel = new SelectServerScreen();
+        this.contentPanel = new SelectServerScreen();
         JPanel basePanel = new ScalableContainer(new MinecraftPanel(contentPanel));
 
         setContentPane(basePanel);
@@ -63,5 +68,13 @@ public class GuiFrame extends JFrame {
             component.revalidate();
             component.repaint();
         });
+    }
+
+    public static GuiFrame getInstance() {
+        return instance;
+    }
+
+    public JPanel getContentPanel() {
+        return contentPanel;
     }
 }

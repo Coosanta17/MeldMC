@@ -20,7 +20,6 @@ public class ScalableContainer extends TransparentPanel implements ScalablePanel
     public ScalableContainer(JPanel innerPanel) {
         this.innerPanel = innerPanel;
 
-        JPanel container = this;
         setLayout(new GridBagLayout());
         add(innerPanel);
 
@@ -31,7 +30,7 @@ public class ScalableContainer extends TransparentPanel implements ScalablePanel
                 ? ((ScalablePanel) innerPanel).getDesignHeight()
                 : Main.getInstance().getWindowSize().getHeight();
 
-        resizeWait = new Timer(150, e -> scale(innerPanel, container));
+        resizeWait = new Timer(150, e -> scale(innerPanel, this));
         resizeWait.setRepeats(false);
 
         addComponentListener(new ComponentAdapter() {
@@ -49,17 +48,30 @@ public class ScalableContainer extends TransparentPanel implements ScalablePanel
     protected void scale(JPanel innerPanel, JPanel container) {
         int w = container.getWidth();
         int h = container.getHeight();
-        int size = Math.min(w, h);
 
-        scaleFactor = (double) size / Math.min(originalWidth, originalHeight);
+        double widthScaleFactor = (double) w / originalWidth;
+        double heightScaleFactor = (double) h / originalHeight;
+
+        double oldScaleFactor = scaleFactor;
+        scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
+
+        System.out.println("ScalableContainer debug:");
+        System.out.println("  Container size: " + w + "x" + h);
+        System.out.println("  Original dimensions: " + originalWidth + "x" + originalHeight);
+        System.out.println("  Scale factor changed from " + oldScaleFactor + " to " + scaleFactor);
+
 
         innerPanel.setPreferredSize(new Dimension(w, h));
 
-        if (innerPanel instanceof ScalablePanel) {
-            ((ScalablePanel) innerPanel).applyScale(scaleFactor);
-        }
+        applyScaleToInnerPanels(innerPanel);
 
         refreshGui(container);
+    }
+
+    protected void applyScaleToInnerPanels(JComponent innerComponent) {
+        if (innerComponent instanceof ScalablePanel) {
+            ((ScalablePanel) innerComponent).applyScale(getScaleFactor());
+        }
     }
 
     public double getScaleFactor() {
