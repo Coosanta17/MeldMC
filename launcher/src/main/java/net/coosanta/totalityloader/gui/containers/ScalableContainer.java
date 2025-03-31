@@ -52,14 +52,7 @@ public class ScalableContainer extends TransparentPanel implements ScalablePanel
         double widthScaleFactor = (double) w / originalWidth;
         double heightScaleFactor = (double) h / originalHeight;
 
-        double oldScaleFactor = scaleFactor;
         scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
-
-        System.out.println("ScalableContainer debug:");
-        System.out.println("  Container size: " + w + "x" + h);
-        System.out.println("  Original dimensions: " + originalWidth + "x" + originalHeight);
-        System.out.println("  Scale factor changed from " + oldScaleFactor + " to " + scaleFactor);
-
 
         innerPanel.setPreferredSize(new Dimension(w, h));
 

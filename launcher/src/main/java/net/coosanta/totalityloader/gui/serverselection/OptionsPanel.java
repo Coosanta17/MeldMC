@@ -1,5 +1,6 @@
 package net.coosanta.totalityloader.gui.serverselection;
 
+import net.coosanta.totalityloader.gui.GuiFrame;
 import net.coosanta.totalityloader.gui.containers.ScalablePanel;
 import net.coosanta.totalityloader.gui.lookandfeel.MinecraftButton;
 import net.coosanta.totalityloader.gui.lookandfeel.TransparentPanel;
@@ -85,12 +86,12 @@ public class OptionsPanel extends TransparentPanel implements ScalablePanel {
         refresh.applyScale(scaleFactor);
         settings.applyScale(scaleFactor);
 
-        // FIXME: scale cannot become larger than 1.0, due to preferredSize being used in calculations.
+        // FIXME: Size not updating when vertical resize
+        int preferredHeight = GuiFrame.getInstance().getSize().height / 5;
         setPreferredSize(new Dimension(
                 super.getPreferredSize().width,
-                (int) Math.round(getDesignHeight())));
-
-        System.out.println("Rescaled to factor: " + scaleFactor);
+                preferredHeight
+        ));
     }
 
     @Override
