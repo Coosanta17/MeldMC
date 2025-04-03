@@ -12,7 +12,11 @@ package net.coosanta.totalityloader.gui.containers;
         private final JPanel contentPanel;
 
         public ScrollableFixedRatioContainer(JPanel content) {
-            super(new TransparentPanel(new BorderLayout()));
+            this(content, 1, 1);
+        }
+
+        public ScrollableFixedRatioContainer(JPanel content, double widthFactor, double heightFactor) {
+            super(new TransparentPanel(new BorderLayout()), widthFactor, heightFactor);
             this.contentPanel = content;
 
             scrollPane = new JScrollPane(content);

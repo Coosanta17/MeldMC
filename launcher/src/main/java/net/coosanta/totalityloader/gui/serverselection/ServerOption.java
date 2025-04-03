@@ -20,9 +20,9 @@ import static net.coosanta.totalityloader.gui.GuiFrame.refreshGui;
 
 public class ServerOption extends TransparentPanel implements ScalablePanel {
     private Logger log = LoggerFactory.getLogger(ServerOption.class);
-    private final double SCALE_MODIFIER = 2.0; // That's right! I'm too lazy to figure out why the font size isn't changing!
+    private final double SCALE_MODIFIER = 1.5; // It works ok?
     private double currentScale = 1.0;
-    private final int originalTopBottomPadding = 25;
+    private final int originalPadding = 25;
 
     private final ServerInfo server;
     private final JPanel header = new TransparentPanel(new GridBagLayout());
@@ -173,8 +173,8 @@ public class ServerOption extends TransparentPanel implements ScalablePanel {
         playerCount.setFont(originalPlayerCountFont.deriveFont((float) (originalPlayerCountFont.getSize() * scale * SCALE_MODIFIER)));
         motd.setFont(originalMotdFont.deriveFont((float) (originalMotdFont.getSize() * scale * SCALE_MODIFIER)));
 
-        int scaledTopBottom = (int) (originalTopBottomPadding * scale * SCALE_MODIFIER);
-        setBorder(BorderFactory.createEmptyBorder(scaledTopBottom, 0, scaledTopBottom, 0));
+        int scaledPadding = (int) (originalPadding * scale * SCALE_MODIFIER);
+        setBorder(BorderFactory.createEmptyBorder(scaledPadding, scaledPadding, scaledPadding, scaledPadding));
 
         // Scale icon
         int scaledSize = (int) (originalIconSize * scale * SCALE_MODIFIER);

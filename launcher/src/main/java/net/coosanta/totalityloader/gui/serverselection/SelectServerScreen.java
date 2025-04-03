@@ -24,7 +24,7 @@ public class SelectServerScreen extends TransparentPanel implements ScalablePane
         title.setFont(originalTitleFont);
         add(title, BorderLayout.NORTH);
 
-        this.mainContent = new ScrollableFixedRatioContainer(new ServerOptions());
+        this.mainContent = new ScrollableFixedRatioContainer(new ServerOptions(), 4, 3);
         add(mainContent, BorderLayout.CENTER);
 
         this.footer = new FixedRatioContainer(new OptionsPanel(), 10, 1);

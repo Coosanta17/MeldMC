@@ -22,7 +22,7 @@ public class MinecraftButton extends JButton implements ScalablePanel {
     private final Font originalTextFont;
 
     private final double widthHeightRatio;
-    private double currentScaleFactor = 1.0;
+    private double currentScaleFactor = 1.5;
 
     public MinecraftButton(String text, boolean enabled) {
         this(text, enabled, new Dimension(200, 20));
@@ -32,11 +32,12 @@ public class MinecraftButton extends JButton implements ScalablePanel {
         super(text);
 
         this.originalTextFont = getFont();
-
-        this.widthHeightRatio = (double) (widthHeightFactor.width / widthHeightFactor.height);
+        setOpaque(false);
+        this.widthHeightRatio = (double) widthHeightFactor.width / widthHeightFactor.height;
 
         try {
             this.originalDefaultIcon = loadImage("/icons/button/button.png");
+            // FIXME: Wrong colours in button_disabled
             this.originalDisabledIcon = loadImage("/icons/button/button_disabled.png");
             this.originalHighlightedIcon = loadImage("/icons/button/button_highlighted.png");
         } catch (IOException | NullPointerException e) {
@@ -89,7 +90,8 @@ public class MinecraftButton extends JButton implements ScalablePanel {
 
         BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = resized.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setComposite(AlphaComposite.Src);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
         int borderWidth = Math.max(1, Math.round((float)(2 * currentScaleFactor)));
 
@@ -134,7 +136,14 @@ public class MinecraftButton extends JButton implements ScalablePanel {
     }
 
     private BufferedImage loadImage(String path) throws IOException {
-        return ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(path)));
+        BufferedImage original = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(path)));
+        BufferedImage converted = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g = converted.createGraphics();
+        g.drawImage(original, 0, 0, null);
+        g.dispose();
+
+        return converted;
     }
 
     @Override
