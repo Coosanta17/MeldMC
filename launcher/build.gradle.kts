@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.util.*
 
 project.version = "0.0.1d"
+val mainClassName = "net.coosanta.meldmc.Main"
 
 plugins {
     java
@@ -29,6 +30,7 @@ apply(plugin = "org.openjfx.javafxplugin")
 
 javafx {
     modules("javafx.controls", "javafx.fxml")
+    setPlatform(platform.classifier)
 }
 
 repositories {
@@ -90,61 +92,28 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "net.coosanta.meldmc.Main"
+    mainClass = "mainClassName"
 }
 
-val platforms = listOf("win", "mac", "linux")
-
-platforms.forEach { platform ->
-    tasks.register<ShadowJar>("shadowJar${platform.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}") {
-        archiveClassifier.set(platform)
-        group = "build"
-
-        doFirst {
-            javafx.setPlatform(platform)
-        }
-
-        // Includes only JavaFX modules in the shadow jar
-        dependencies {
-            include { dependency ->
-                dependency.moduleGroup == "org.openjfx"
-            }
-        }
-
-        manifest {
-            attributes["Main-Class"] = "net.coosanta.meldmc.Main"
-        }
-
-        archiveFileName.set("meld-loader-${project.version}-$platform-javafx.jar")
-    }
-}
-
-
+// Append `-Pplatform=<win|mac|linux>` if needed.
 tasks.named<ShadowJar>("shadowJar") {
-    val currentPlatform = when {
-        org.gradle.internal.os.OperatingSystem.current().isWindows -> "win"
-        org.gradle.internal.os.OperatingSystem.current().isMacOsX -> "mac"
-        org.gradle.internal.os.OperatingSystem.current().isLinux -> "linux"
-        else -> throw GradleException("Unsupported platform")
-    }
     group = "build"
-    archiveClassifier.set(currentPlatform)
+
+    archiveClassifier.set(javafx.platform.classifier)
 
     doFirst {
-        javafx.setPlatform(currentPlatform)
+        println("Building for ${javafx.platform.classifier}")
     }
 
     dependencies {
-        include { dependency ->
-            dependency.moduleGroup == "org.openjfx"
-        }
+        include { it.moduleGroup == "org.openjfx" }
     }
 
     manifest {
-        attributes["Main-Class"] = "net.coosanta.meldmc.Main"
+        attributes["Main-Class"] = mainClassName
     }
 
-    archiveFileName.set("meld-loader-${project.version}-$currentPlatform-javafx.jar")
+    archiveFileName.set("meld-loader-${project.version}-${javafx.platform.classifier}-javafx.jar")
 }
 
 tasks.named<Test>("test") {
@@ -154,7 +123,7 @@ tasks.named<Test>("test") {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "net.coosanta.meldmc.Main"
+        attributes["Main-Class"] = "mainClassName"
     }
     archiveFileName.set("meldmc-loader-${project.version}.jar")
 }
