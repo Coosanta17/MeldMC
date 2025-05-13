@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import java.util.*
 
 project.version = "0.0.1d"
 val mainClassName = "net.coosanta.meldmc.Main"
@@ -30,7 +29,6 @@ apply(plugin = "org.openjfx.javafxplugin")
 
 javafx {
     modules("javafx.controls", "javafx.fxml")
-    setPlatform(platform.classifier)
 }
 
 repositories {
@@ -95,14 +93,33 @@ application {
     mainClass = "mainClassName"
 }
 
-// Append `-Pplatform=<win|mac|linux>` if needed.
+val supportedPlatforms: () -> List<String> = {
+    listOf(
+        "win",
+        "mac",
+        "mac-aarch64",
+        "linux",
+        "linux-aarch64"
+    )
+}
+
+// Append `-Pplatform=<win|mac|mac-aarch64|linux|linux-aarch64>` if needed. No support for win-aarch64 yet.
 tasks.named<ShadowJar>("shadowJar") {
+    val configuredBuildPlatform: String = project.findProperty("platform") as? String
+        ?: javafx.platform.classifier
+
+    if (configuredBuildPlatform !in configuredBuildPlatform) {
+        throw IllegalArgumentException("Unsupported platform: $configuredBuildPlatform. Supported platforms are: $supportedPlatforms")
+    }
+
+    javafx.setPlatform(configuredBuildPlatform)
+
     group = "build"
 
-    archiveClassifier.set(javafx.platform.classifier)
+    archiveClassifier.set(configuredBuildPlatform)
 
     doFirst {
-        println("Building for ${javafx.platform.classifier}")
+        println("Building for $configuredBuildPlatform")
     }
 
     dependencies {
@@ -113,7 +130,7 @@ tasks.named<ShadowJar>("shadowJar") {
         attributes["Main-Class"] = mainClassName
     }
 
-    archiveFileName.set("meld-loader-${project.version}-${javafx.platform.classifier}-javafx.jar")
+    archiveFileName.set("meld-loader-${project.version}-$configuredBuildPlatform-javafx.jar")
 }
 
 tasks.named<Test>("test") {
