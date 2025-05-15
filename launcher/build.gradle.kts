@@ -28,7 +28,7 @@ buildscript {
 apply(plugin = "org.openjfx.javafxplugin")
 
 javafx {
-    modules("javafx.controls", "javafx.fxml")
+    modules("javafx.controls", "javafx.graphics")
 }
 
 repositories {
@@ -79,6 +79,9 @@ dependencies {
     implementation("com.github.GeyserMC:MCProtocolLib:1.21.4-1")
 
     implementation("net.kyori:adventure-text-minimessage:4.19.0")
+
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+    implementation("ch.qos.logback:logback-classic:1.5.18")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -90,7 +93,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "mainClassName"
+    mainClass = mainClassName
 }
 
 val supportedPlatforms: () -> List<String> = {
@@ -108,7 +111,7 @@ tasks.named<ShadowJar>("shadowJar") {
     val configuredBuildPlatform: String = project.findProperty("platform") as? String
         ?: javafx.platform.classifier
 
-    if (configuredBuildPlatform !in configuredBuildPlatform) {
+    if (configuredBuildPlatform !in supportedPlatforms()) {
         throw IllegalArgumentException("Unsupported platform: $configuredBuildPlatform. Supported platforms are: $supportedPlatforms")
     }
 
@@ -140,7 +143,7 @@ tasks.named<Test>("test") {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "mainClassName"
+        attributes["Main-Class"] = mainClassName
     }
     archiveFileName.set("meldmc-loader-${project.version}.jar")
 }
