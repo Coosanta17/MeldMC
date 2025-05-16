@@ -1,0 +1,12 @@
+@font-face {
+    font-family: Minecraft Seven v2;
+    src: url('../fonts/merged_minecraft_seven+unifont.otf');
+}
+
+.root {
+    -fx-font-family: 'Minecraft Seven v2';
+}
+
+.header {
+    -fx-font-size: 24px;
+}
