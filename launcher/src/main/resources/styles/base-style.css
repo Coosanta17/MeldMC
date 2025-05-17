@@ -9,4 +9,5 @@
 
 .header {
     -fx-font-size: 24px;
+    -fx-text-fill: #FFFFFF;
 }
