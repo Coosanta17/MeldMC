@@ -7,8 +7,11 @@ import javafx.stage.Stage;
 import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.gui.serverselection.SelectionPanel;
 import net.coosanta.meldmc.utility.ResourceUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MainWindow extends Application {
+    private static final Logger log = LoggerFactory.getLogger(MainWindow.class);
     private static final int DESIGN_WIDTH = Main.getWindowsSize().width;
     private static final int DESIGN_HEIGHT = Main.getWindowsSize().height;
 
@@ -31,10 +34,10 @@ public class MainWindow extends Application {
         stage.setMinWidth(DESIGN_WIDTH);
         stage.setMinHeight(DESIGN_HEIGHT);
 
-        stage.widthProperty().addListener((obs, old, newWidth) ->
+        scene.widthProperty().addListener((obs, old, newWidth) ->
                 background.resize(newWidth.doubleValue(), scene.getHeight()));
 
-        stage.heightProperty().addListener((obs, old, newHeight) ->
+        scene.heightProperty().addListener((obs, old, newHeight) ->
                 background.resize(scene.getWidth(), newHeight.doubleValue()));
 
         stage.setOnCloseRequest(event -> {
