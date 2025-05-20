@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import java.util.concurrent.ExecutorService;
 
 public class ServerEntry extends BorderPane {
+    private static final Label unknownLabel = new Label("unknown");
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final ServerInfo server;
@@ -33,17 +34,20 @@ public class ServerEntry extends BorderPane {
     private final Label motd;
 
     public ServerEntry(ServerInfo server, ExecutorService pingTask) {
+        setPadding(new Insets(5, 10, 5, 10));
+
         this.server = server;
 
         this.name = new Label(server.getName());
         this.ping = new Label("Pinging...");
-        this.playercount = new HBox(new Label("unknown"));
-        this.motd = new Label(formatDescription()); // TODO: Grey unless otherwise stated
+        this.playercount = new HBox(unknownLabel);
+        this.motd = new Label();
+
+        updateMotd();
 
         name.getStyleClass().add("server-name");
         ping.getStyleClass().add("server-ping");
-        playercount.getStyleClass().add("server-playercount");
-        motd.getStyleClass().add("server-motd");
+        unknownLabel.getStyleClass().add("player-separator");
 
         this.header = buildHeader();
 
@@ -58,9 +62,9 @@ public class ServerEntry extends BorderPane {
         this.icon.setFitWidth(64);
         this.icon.setFitHeight(64);
         this.icon.setPreserveRatio(false);
+        BorderPane.setMargin(icon, new Insets(0, 5, 0, 0));
 
-        setTop(header);
-        setCenter(motd);
+        setCenter(buildCentre());
         setLeft(icon);
 
         pingTask.submit(() -> {
@@ -69,10 +73,16 @@ public class ServerEntry extends BorderPane {
         });
     }
 
+    private VBox buildCentre() {
+        VBox centre = new VBox(5);
+        centre.getChildren().addAll(header, motd);
+        return centre;
+    }
+
     private GridPane buildHeader() {
         GridPane header = new GridPane();
 
-        header.setPadding(new Insets(2, 5, 2, 5));
+        header.setHgap(10);
 
         ColumnConstraints column1 = new ColumnConstraints();
         column1.setHgrow(Priority.ALWAYS);
@@ -95,28 +105,41 @@ public class ServerEntry extends BorderPane {
         playercount.getChildren().clear();
         PlayerInfo serverPlayers = server.getPlayers();
         if (serverPlayers == null) {
-            playercount.getChildren().add(new Label("unknown"));
+            playercount.getChildren().add(unknownLabel);
         } else {
+            Label online = new Label(String.valueOf(serverPlayers.getOnlinePlayers()));
+            Label separator = new Label("/");
+            Label maxPlayers = new Label(String.valueOf(serverPlayers.getMaxPlayers()));
+
+            online.getStyleClass().add("player-number");
+            separator.getStyleClass().add("player-separator");
+            maxPlayers.getStyleClass().add("player-number");
+
             playercount.getChildren().addAll(
-                    new Label(String.valueOf(serverPlayers.getOnlinePlayers())),
-                    new Label("/"), // TODO: Grey
-                    new Label(String.valueOf(serverPlayers.getMaxPlayers())));
+                    online,
+                    separator,
+                    maxPlayers
+            );
         }
     }
 
-    private String formatDescription() {
+    private void updateMotd() {
+        motd.getStyleClass().clear();
+
         Component descriptionComp = server.getDescription();
-        String description = "";
+
         if (descriptionComp == null) {
             if (server.getStatus() == ServerInfo.Status.PINGING || server.getStatus() == ServerInfo.Status.INITIAL) {
-                description = "Pinging..."; // TODO: Grey
+                motd.setText("Pinging...");
+                motd.getStyleClass().add("server-pinging");
             } else if (server.getStatus() == ServerInfo.Status.UNREACHABLE) {
-                description = "Cannot connect to server"; // TODO: Red
+                motd.setText("Cannot connect to server");
+                motd.getStyleClass().add("pinger-error");
             }
         } else {
-            description = miniMessage.serialize(server.getDescription());
+            motd.setText(miniMessage.serialize(server.getDescription()));
+            motd.getStyleClass().add("server-motd");
         }
-        return description;
     }
 
     private void updateComponents() {
@@ -134,6 +157,6 @@ public class ServerEntry extends BorderPane {
             icon.setImage(ResourceUtil.imageFromByteArray(server.getFavicon()));
         }
 
-        motd.setText(formatDescription());
+        updateMotd();
     }
 }

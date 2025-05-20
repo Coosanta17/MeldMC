@@ -22,12 +22,27 @@
     -fx-text-fill: #F0F0F0;
 }
 
-.server-playercount {
+.server-pinging {
     -fx-font-size: 18px;
-    -fx-text-fill: #F0F0F0;
+    -fx-text-fill: #7a7a7a;
+}
+
+.pinger-error {
+    -fx-font-size: 18px;
+    -fx-text-fill: #dd0000;
 }
 
 .server-motd {
     -fx-font-size: 18px;
-    -fx-text-fill: #f0f0f0;
+    -fx-text-fill: #a5a5a5;
+}
+
+.player-number {
+    -fx-text-fill: #a5a5a5;
+    -fx-font-size: 18px;
+}
+
+.player-separator {
+    -fx-font-size: 18px;
+    -fx-text-fill: #555555;
 }
