@@ -10,10 +10,15 @@ import net.coosanta.meldmc.utility.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Dimension;
+
+import static net.coosanta.meldmc.Main.DESIGN_HEIGHT;
+import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
+
 public class MainWindow extends Application {
     private static final Logger log = LoggerFactory.getLogger(MainWindow.class);
-    private static final int DESIGN_WIDTH = Main.getWindowsSize().width;
-    private static final int DESIGN_HEIGHT = Main.getWindowsSize().height;
+
+    private static final Dimension windowDimension = Main.getWindowsSize();
 
     private final StackPane root = new StackPane();
     private SelectionPanel contentPanel;
@@ -21,12 +26,12 @@ public class MainWindow extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        background = new Background(DESIGN_WIDTH, DESIGN_HEIGHT);
+        background = new Background(windowDimension.width, windowDimension.height);
         contentPanel = new SelectionPanel();
 
         root.getChildren().addAll(background, contentPanel);
 
-        Scene scene = new Scene(root, DESIGN_WIDTH, DESIGN_HEIGHT);
+        Scene scene = new Scene(root, windowDimension.width, windowDimension.height);
         scene.getStylesheets().add(ResourceUtil.loadResource("/styles/base-style.css").toExternalForm());
 
         stage.setTitle("Minecraft - Meld");

@@ -12,6 +12,10 @@ import java.util.List;
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
+    public static final int DESIGN_WIDTH = 850;
+    public static final int DESIGN_HEIGHT = 500;
+    public static int SCALE_FACTOR = 1;
+
     private static Dimension windowsSize;
     private static List<String> gameArgs;
 
@@ -21,8 +25,8 @@ public class Main {
         int widthArgIndex = gameArgs.indexOf("--width");
         int heightArgIndex = gameArgs.indexOf("--height");
 
-        int width = 850;
-        int height = 500;
+        int width = DESIGN_WIDTH;
+        int height = DESIGN_HEIGHT;
 
         try {
             if (widthArgIndex != -1 && heightArgIndex != -1) {

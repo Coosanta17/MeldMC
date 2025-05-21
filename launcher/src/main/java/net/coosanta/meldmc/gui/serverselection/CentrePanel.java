@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static net.coosanta.meldmc.Main.*;
+
 public class CentrePanel extends VBox {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ExecutorService pingTask = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()));
@@ -26,6 +28,11 @@ public class CentrePanel extends VBox {
     private CompoundTag serversDat;
 
     public CentrePanel() {
+        setPrefSize(DESIGN_WIDTH, DESIGN_HEIGHT);
+        setMaxSize(DESIGN_WIDTH, DESIGN_HEIGHT);
+
+        setManaged(true);
+
         try {
             List<ServerEntry> serverList = getServersFromFile();
             getChildren().addAll(serverList);
