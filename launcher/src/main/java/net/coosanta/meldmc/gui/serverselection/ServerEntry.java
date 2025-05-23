@@ -97,8 +97,7 @@ public class ServerEntry extends BorderPane {
         setLeft(icon);
 
         pingTask.submit(() -> {
-            Pinger.ping(server)
-                    .thenAccept(unused -> Platform.runLater(this::updateComponents));
+            Pinger.ping(server, this);
         });
     }
 
@@ -215,7 +214,7 @@ public class ServerEntry extends BorderPane {
         currentText.setLength(0);
     }
 
-    private void updateComponents() {
+    public void updateComponents() {
         updatePlayerCount();
 
         if (server.getStatus() == ServerInfo.Status.SUCCESSFUL) {

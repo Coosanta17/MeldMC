@@ -1,5 +1,7 @@
 package net.coosanta.meldmc.network;
 
+import javafx.application.Platform;
+import net.coosanta.meldmc.gui.serverselection.ServerEntry;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.network.factory.ClientNetworkSessionFactory;
@@ -17,7 +19,7 @@ import java.util.concurrent.TimeoutException;
 public class Pinger {
     private static final Logger log = LoggerFactory.getLogger(Pinger.class);
 
-    public static CompletableFuture<Void> ping(ServerInfo serverInfo) {
+    public static CompletableFuture<Void> ping(ServerInfo serverInfo, ServerEntry serverEntry) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         InetSocketAddress address = getAddress(serverInfo.getAddress());
@@ -52,6 +54,9 @@ public class Pinger {
         }
 
         return future.orTimeout(10, TimeUnit.SECONDS)
+                .thenAccept(unused ->
+                        Platform.runLater(serverEntry::updateComponents)
+                )
                 .exceptionally(e -> {
                     if (e instanceof TimeoutException || e.getCause() instanceof TimeoutException) {
                         serverInfo.setStatus(ServerInfo.Status.UNREACHABLE);
@@ -84,12 +89,12 @@ public class Pinger {
         return new InetSocketAddress(host, port);
     }
 
-    public static void main(String[] args) {
-        log.info("pinging...");
-        ServerInfo info = new ServerInfo("Test", "mc.hypixel.net");
-        ping(info).thenAccept((unused -> {
-            log.info("Successfully pinged!");
-            log.info(info.toString());
-        })).join();
-    }
+//    public static void main(String[] args) {
+//        log.info("pinging...");
+//        ServerInfo info = new ServerInfo("Test", "mc.hypixel.net");
+//        ping(info).thenAccept((unused -> {
+//            log.info("Successfully pinged!");
+//            log.info(info.toString());
+//        })).join();
+//    }
 }
