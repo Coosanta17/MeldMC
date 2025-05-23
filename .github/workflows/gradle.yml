@@ -35,13 +35,3 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build
-
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4.3.6
-        with:
-          name: build-artifact
-          path: launcher/build/libs
-          if-no-files-found: warn
-          retention-days: 90
-          compression-level: 6
-          overwrite: false # what does this do?
