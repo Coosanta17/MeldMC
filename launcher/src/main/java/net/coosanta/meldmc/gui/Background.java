@@ -5,9 +5,19 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import net.coosanta.meldmc.utility.ResourceUtil;
 
+import java.io.IOException;
+
 public class Background extends Canvas {
     private static final int TILE_SIZE = 100;
-    private static final Image backgroundImage = new Image(ResourceUtil.loadResource("/icons/background.png").toExternalForm());
+    private static final Image backgroundImage;
+
+    static {
+        try {
+            backgroundImage = new Image(ResourceUtil.loadResource("/icons/background.png").toExternalForm());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Background(double width, double height) {
         super(width, height);

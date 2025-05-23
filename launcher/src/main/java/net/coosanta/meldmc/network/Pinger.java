@@ -19,7 +19,7 @@ import java.util.concurrent.TimeoutException;
 public class Pinger {
     private static final Logger log = LoggerFactory.getLogger(Pinger.class);
 
-    public static CompletableFuture<Void> ping(ServerInfo serverInfo, ServerEntry serverEntry) {
+    public static void ping(ServerInfo serverInfo, ServerEntry serverEntry) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         InetSocketAddress address = getAddress(serverInfo.getAddress());
@@ -53,7 +53,7 @@ public class Pinger {
             future.completeExceptionally(e);
         }
 
-        return future.orTimeout(10, TimeUnit.SECONDS)
+        future.orTimeout(10, TimeUnit.SECONDS)
                 .thenAccept(unused ->
                         Platform.runLater(serverEntry::updateComponents)
                 )
@@ -66,6 +66,7 @@ public class Pinger {
                         serverInfo.setStatus(ServerInfo.Status.UNREACHABLE);
                         log.error("Error pinging server {}: {}", serverInfo.getAddress(), e.getMessage(), e);
                     }
+                    Platform.runLater(serverEntry::updateComponents);
                     return null;
                 });
     }

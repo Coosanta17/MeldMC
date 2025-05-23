@@ -1,13 +1,13 @@
 package net.coosanta.meldmc.utility;
 
-import io.jsonwebtoken.io.IOException;
+import java.io.IOException;
 import javafx.scene.image.Image;
 
 import java.io.ByteArrayInputStream;
 import java.net.URL;
 
 public class ResourceUtil {
-    public static URL loadResource(String path) {
+    public static URL loadResource(String path) throws IOException {
         URL resource = ResourceUtil.class.getResource(path);
         if (resource == null) {
             throw new IOException("Failed to load resource '" + path + "'");

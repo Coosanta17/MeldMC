@@ -1,6 +1,5 @@
 package net.coosanta.meldmc.gui.serverselection;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -19,12 +18,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class ServerEntry extends BorderPane {
-    private static final Label unknownLabel = new Label("unknown");
+    private final Label unknownLabel = new Label("unknown");
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final ServerInfo server;
@@ -85,7 +85,11 @@ public class ServerEntry extends BorderPane {
         if (favicon != null) {
             rawIcon = ResourceUtil.imageFromByteArray(favicon);
         } else {
-            rawIcon = new Image(ResourceUtil.loadResource("/icons/unknown_server.png").toExternalForm());
+            try {
+                rawIcon = new Image(ResourceUtil.loadResource("/icons/unknown_server.png").toExternalForm());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         this.icon = new ImageView(rawIcon);
         this.icon.setFitWidth(64);
@@ -96,9 +100,7 @@ public class ServerEntry extends BorderPane {
         setCenter(buildCentre());
         setLeft(icon);
 
-        pingTask.submit(() -> {
-            Pinger.ping(server, this);
-        });
+        pingTask.submit(() -> Pinger.ping(server, this));
     }
 
     private VBox buildCentre() {
