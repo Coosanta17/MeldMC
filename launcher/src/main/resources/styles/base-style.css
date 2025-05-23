@@ -1,4 +1,4 @@
-@font-face {
+@font-face { /* TODO: Implement bold and italic fonts */
     font-family: Minecraft Seven v2;
     src: url('../fonts/merged_minecraft_seven+unifont.otf');
 }
@@ -22,21 +22,6 @@
     -fx-text-fill: #F0F0F0;
 }
 
-.server-pinging {
-    -fx-font-size: 18px;
-    -fx-text-fill: #7a7a7a;
-}
-
-.pinger-error {
-    -fx-font-size: 18px;
-    -fx-text-fill: #dd0000;
-}
-
-.server-motd {
-    -fx-font-size: 18px;
-    -fx-text-fill: #a5a5a5;
-}
-
 .player-number {
     -fx-text-fill: #a5a5a5;
     -fx-font-size: 18px;
@@ -50,4 +35,119 @@
 .scroll-pane {
     -fx-background: transparent;
     -fx-background-color: transparent;
+}
+
+.server-motd {
+    -fx-font-size: 18px;
+    -fx-fill: #a5a5a5;
+}
+
+.server-motd-pinging {
+    -fx-font-size: 18px;
+    -fx-fill: #7a7a7a;
+}
+
+.pinger-motd-ping-error {
+    -fx-font-size: 18px;
+    -fx-fill: #dd0000;
+}
+
+/* §0 */
+.mc-black {
+    -fx-fill: #000000;
+}
+
+/* §1 */
+.mc-dark-blue {
+    -fx-fill: #0000AA;
+}
+
+/* §2 */
+.mc-dark-green {
+    -fx-fill: #00AA00;
+}
+
+/* §3 */
+.mc-dark-aqua {
+    -fx-fill: #00AAAA;
+}
+
+/* §4 */
+.mc-dark-red {
+    -fx-fill: #AA0000;
+}
+
+/* §5 */
+.mc-dark-purple {
+    -fx-fill: #AA00AA;
+}
+
+/* §6 */
+.mc-gold {
+    -fx-fill: #FFAA00;
+}
+
+/* §7 */
+.mc-gray {
+    -fx-fill: #AAAAAA;
+}
+
+/* §8 */
+.mc-dark-gray {
+    -fx-fill: #555555;
+}
+
+/* §9 */
+.mc-blue {
+    -fx-fill: #5555FF;
+}
+
+/* §a */
+.mc-green {
+    -fx-fill: #55FF55;
+}
+
+/* §b */
+.mc-aqua {
+    -fx-fill: #55FFFF;
+}
+
+/* §c */
+.mc-red {
+    -fx-fill: #FF5555;
+}
+
+/* §d */
+.mc-light-purple {
+    -fx-fill: #FF55FF;
+}
+
+/* §e */
+.mc-yellow {
+    -fx-fill: #FFFF55;
+}
+
+/* §f */
+.mc-white {
+    -fx-fill: #FFFFFF;
+}
+
+/* §l */
+.mc-bold {
+    -fx-font-weight: bold;
+}
+
+/* §o */
+.mc-italic {
+    -fx-font-style: italic;
+}
+
+/* §n */
+.mc-underline {
+    -fx-underline: true;
+}
+
+/* §m */
+.mc-strikethrough {
+    -fx-strikethrough: true;
 }
