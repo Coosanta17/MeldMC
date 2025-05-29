@@ -1,34 +1,51 @@
-@font-face { /* TODO: Implement bold and italic fonts */
-    font-family: Minecraft Seven v2;
+@font-face {
+    font-family: 'Minecraft Seven v2';
     src: url('../fonts/merged_minecraft_seven+unifont.otf');
+}
+
+/* FIXME: Loading as Sans Serif */
+@font-face {
+    font-family: 'Minecraft Seven v2 Bold';
+    src: url('../fonts/merged_minecraft_seven+unifont-bold.otf');
+}
+
+@font-face {
+    font-family: 'Minecraft Seven v2 Italic';
+    src: url('../fonts/merged_minecraft_seven+unifont-italic.otf');
+}
+
+@font-face {
+    font-family: 'Minecraft Seven v2 BoldItalic';
+    src: url('../fonts/merged_minecraft_seven+unifont-bolditalic.otf');
 }
 
 .root {
     -fx-font-family: 'Minecraft Seven v2';
+    -fx-font-size: 24px;
+}
+
+.background-tiles {
+    -tile-size: 100;
 }
 
 .header {
-    -fx-font-size: 24px;
+    -fx-font-size: 30px;
     -fx-text-fill: #FFFFFF;
 }
 
 .server-name {
-    -fx-font-size: 18px;
     -fx-text-fill: #FFFFFF;
 }
 
 .server-ping {
-    -fx-font-size: 18px;
     -fx-text-fill: #F0F0F0;
 }
 
 .player-number {
     -fx-text-fill: #a5a5a5;
-    -fx-font-size: 18px;
 }
 
 .player-separator {
-    -fx-font-size: 18px;
     -fx-text-fill: #555555;
 }
 
@@ -38,17 +55,14 @@
 }
 
 .server-motd {
-    -fx-font-size: 18px;
     -fx-fill: #a5a5a5;
 }
 
 .server-motd-pinging {
-    -fx-font-size: 18px;
     -fx-fill: #7a7a7a;
 }
 
 .pinger-motd-ping-error {
-    -fx-font-size: 18px;
     -fx-fill: #dd0000;
 }
 
@@ -134,12 +148,16 @@
 
 /* §l */
 .mc-bold {
-    -fx-font-weight: bold;
+    -fx-font-family: 'Minecraft Seven v2 Bold';
 }
 
 /* §o */
 .mc-italic {
-    -fx-font-style: italic;
+    -fx-font-family: 'Minecraft Seven v2 Italic';
+}
+
+.mc-bold.mc-italic {
+    -fx-font-family: "Minecraft Seven v2 BoldItalic";
 }
 
 /* §n */

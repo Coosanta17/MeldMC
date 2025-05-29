@@ -7,8 +7,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.transform.Scale;
-import net.coosanta.meldmc.Main;
 
 public class SelectionPanel extends BorderPane {
     private CentrePanel centrePanel;
@@ -31,13 +29,6 @@ public class SelectionPanel extends BorderPane {
         centreScrollPane.setFitToHeight(true);
 
         setCenter(centreScrollPane);
-        setScaleFactor(Main.SCALE_FACTOR);
-    }
-
-    public void setScaleFactor(int scaleFactor) {
-        centrePanel.getTransforms().clear();
-        centrePanel.getTransforms().add(new Scale(
-                scaleFactor, scaleFactor, 0, 0));
     }
 
     private Node createHeader() {

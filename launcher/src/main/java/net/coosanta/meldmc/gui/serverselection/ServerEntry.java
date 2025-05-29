@@ -170,6 +170,7 @@ public class ServerEntry extends BorderPane {
                 motdFlow.getChildren().add(text);
             }
         } else {
+            // TODO: Modern minecraft styling.
             String motdString = miniMessage.serialize(server.getDescription());
             parseFormattedText(motdString);
         }
