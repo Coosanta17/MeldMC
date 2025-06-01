@@ -24,8 +24,8 @@
     -fx-font-size: 24px;
 }
 
-.background-tiles {
-    -tile-size: 100;
+.texture-scale {
+    -factor: 6;
 }
 
 .header {
