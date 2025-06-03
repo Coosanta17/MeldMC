@@ -66,6 +66,12 @@
     -fx-fill: #dd0000;
 }
 
+.minecraft-button-text {
+    -fx-font-family: "Minecraft";
+    -fx-text-fill: white;
+    -fx-alignment: center;
+}
+
 /* §0 */
 .mc-black {
     -fx-fill: #000000;

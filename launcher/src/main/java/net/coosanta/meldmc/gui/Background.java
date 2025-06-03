@@ -12,68 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Background extends Canvas {
-    // CSS handling
-    private final StyleableIntegerProperty scaleFactor = new StyleableIntegerProperty(6) {
-        @Override
-        public Object getBean() {
-            return Background.this;
-        }
-
-        @Override
-        public String getName() {
-            return "factor";
-        }
-
-        @Override
-        public CssMetaData<? extends Styleable, Number> getCssMetaData() {
-            return StyleableProperties.SCALE_FACTOR;
-        }
-    };
-
-    public int getScaleFactor() {
-        return scaleFactor.get();
-    }
-
-    public StyleableIntegerProperty scaleFactorProperty() {
-        return scaleFactor;
-    }
-
-    public void setScaleFactor(int factor) {
-        scaleFactor.set(factor);
-    }
-
-    private static class StyleableProperties {
-        private static final CssMetaData<Background, Number> SCALE_FACTOR =
-                new CssMetaData<>("-factor", SizeConverter.getInstance(), 6.0) {
-
-                    @Override
-                    public boolean isSettable(Background node) {
-                        return !node.scaleFactor.isBound();
-                    }
-
-                    @Override
-                    public StyleableProperty<Number> getStyleableProperty(Background node) {
-                        return node.scaleFactor;
-                    }
-                };
-
-        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-
-        static {
-            List<CssMetaData<? extends Styleable, ?>> styleables =
-                    new ArrayList<>(Canvas.getClassCssMetaData());
-            styleables.add(SCALE_FACTOR);
-            STYLEABLES = Collections.unmodifiableList(styleables);
-        }
-    }
-
-    @Override
-    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
-        return StyleableProperties.STYLEABLES;
-    }
-    // Finish CSS handling.
-
+public class Background extends Canvas implements ScaleFactorCssProperty.ScaleFactorContainer {
+    private final ScaleFactorCssProperty scaleFactorProperty;
     private static final Image backgroundImage;
     private static final int BASE_TEXTURE_SIZE = 16;
 
@@ -87,6 +27,7 @@ public class Background extends Canvas {
 
     public Background(double width, double height) {
         super(width, height);
+        scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
         getStyleClass().add("texture-scale");
         redraw();
     }
@@ -96,6 +37,31 @@ public class Background extends Canvas {
         setWidth(width);
         setHeight(height);
         redraw();
+    }
+
+    public int getScaleFactor() {
+        return scaleFactorProperty.get();
+    }
+
+    public void setScaleFactor(int factor) {
+        scaleFactorProperty.set(factor);
+    }
+
+    public StyleableIntegerProperty scaleFactorProperty() {
+        return scaleFactorProperty.property();
+    }
+
+    @Override
+    public StyleableProperty<Number> getScaleFactorProperty() {
+        return scaleFactorProperty.property();
+    }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        List<CssMetaData<? extends Styleable, ?>> styleables =
+                new ArrayList<>(Canvas.getClassCssMetaData());
+        styleables.add(ScaleFactorCssProperty.getCssMetaData());
+        return Collections.unmodifiableList(styleables);
     }
 
     public int calculateTileSize() {
