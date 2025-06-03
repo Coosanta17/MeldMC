@@ -11,6 +11,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.Skin;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
@@ -248,6 +249,3 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
         return getClassCssMetaData();
     }
 }
-
-
-

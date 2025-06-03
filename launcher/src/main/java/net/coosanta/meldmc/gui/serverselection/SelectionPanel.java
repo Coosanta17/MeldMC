@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
 public class SelectionPanel extends BorderPane {
@@ -29,6 +30,9 @@ public class SelectionPanel extends BorderPane {
         centreScrollPane.setFitToHeight(true);
 
         setCenter(centreScrollPane);
+
+        GridPane buttonPane = new ButtonPanel();
+        setBottom(buttonPane);
     }
 
     private Node createHeader() {
