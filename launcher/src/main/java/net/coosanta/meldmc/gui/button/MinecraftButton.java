@@ -13,7 +13,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
-import net.coosanta.meldmc.gui.ScaleFactorCssProperty;
+import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +68,7 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
         getChildren().add(contentPane);
 
         scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
-        getStyleClass().add("texture-scale");
+        ScaleFactorCssProperty.applyStandardTextureScale(this);
 
         setupEventHandling();
 
@@ -77,6 +77,11 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
         scaleFactorProperty.property().addListener((obs, oldVal, newVal) -> redraw());
 
         setPrefSize(200, 20);
+    }
+
+    @Override
+    public StyleableProperty<Number> getScaleFactorProperty() {
+        return scaleFactorProperty.property();
     }
 
     private void setupEventHandling() {
@@ -89,11 +94,6 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
             hovered = false;
             redraw();
         });
-    }
-
-    @Override
-    public StyleableProperty<Number> getScaleFactorProperty() {
-        return scaleFactorProperty.property();
     }
 
     public String getText() {

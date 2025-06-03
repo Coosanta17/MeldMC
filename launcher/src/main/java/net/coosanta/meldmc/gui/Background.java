@@ -1,11 +1,11 @@
 package net.coosanta.meldmc.gui;
 
 import javafx.css.*;
-import javafx.css.converter.SizeConverter;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import net.coosanta.meldmc.utility.ResourceUtil;
+import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class Background extends Canvas implements ScaleFactorCssProperty.ScaleFa
     public Background(double width, double height) {
         super(width, height);
         scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
-        getStyleClass().add("texture-scale");
+        ScaleFactorCssProperty.applyStandardTextureScale(this);
         redraw();
     }
 

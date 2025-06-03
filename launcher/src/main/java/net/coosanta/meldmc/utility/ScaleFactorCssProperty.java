@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.gui;
+package net.coosanta.meldmc.utility;
 
 import javafx.beans.property.Property;
 import javafx.css.CssMetaData;
@@ -6,6 +6,8 @@ import javafx.css.Styleable;
 import javafx.css.StyleableIntegerProperty;
 import javafx.css.StyleableProperty;
 import javafx.css.converter.SizeConverter;
+import javafx.scene.Node;
+import net.coosanta.meldmc.gui.Background;
 
 /**
  * ScaleFactorCssProperty provides a reusable mechanism for JavaFX components
@@ -43,13 +45,13 @@ public class ScaleFactorCssProperty {
             public boolean isSettable(Styleable node) {
                 @SuppressWarnings("unchecked")
                 boolean result = node instanceof ScaleFactorCssProperty.ScaleFactorContainer &&
-                        !((Property<Number>)((ScaleFactorCssProperty.ScaleFactorContainer)node).getScaleFactorProperty()).isBound();
+                        !((Property<Number>) ((ScaleFactorCssProperty.ScaleFactorContainer) node).getScaleFactorProperty()).isBound();
                 return result;
             }
 
             @Override
             public StyleableProperty<Number> getStyleableProperty(Styleable node) {
-                return ((ScaleFactorCssProperty.ScaleFactorContainer)node).getScaleFactorProperty();
+                return ((ScaleFactorCssProperty.ScaleFactorContainer) node).getScaleFactorProperty();
             }
         };
     }
@@ -73,7 +75,7 @@ public class ScaleFactorCssProperty {
     /**
      * Creates a new ScaleFactorCssProperty.
      *
-     * @param owner The Styleable component that owns this property
+     * @param owner        The Styleable component that owns this property
      * @param propertyName The name of the property (used for binding)
      */
     public ScaleFactorCssProperty(Styleable owner, String propertyName) {
@@ -132,5 +134,23 @@ public class ScaleFactorCssProperty {
      */
     public static CssMetaData<? extends Styleable, Number> getCssMetaData() {
         return CSS_META_DATA;
+    }
+
+    /**
+     * Applies the standard texture scaling to the provided Styleable component.
+     * This is a convenience method that adds the "texture-scale" CSS class to the component,
+     * which is defined with the standard scaling factor of 6 in the base-style.css.
+     *
+     * <p>Use this method when you want to apply the standard texture scaling
+     * without having to manually add the CSS class.
+     *
+     * @param styleable The component to apply the texture scaling to
+     * @return The component with texture scaling applied (for method chaining)
+     */
+    public static Styleable applyStandardTextureScale(Styleable styleable) {
+        if (styleable instanceof Node node) {
+            node.getStyleClass().add("texture-scale");
+        }
+        return styleable;
     }
 }
