@@ -23,7 +23,7 @@ public class ButtonPanel extends GridPane {
 
         for (int i = 0; i < 3; i++) {
             MinecraftButton button = new MinecraftButton("Button " + (i + 1));
-            button.setPrefHeight(60);
+            button.setPrefHeight(50);
             button.setMaxWidth(Double.MAX_VALUE);
             GridPane.setFillWidth(button, true);
             add(button, i * 4, 0, 4, 1);
@@ -31,7 +31,7 @@ public class ButtonPanel extends GridPane {
 
         for (int i = 0; i < 4; i++) {
             MinecraftButton button = new MinecraftButton("Button " + (i + 4));
-            button.setPrefHeight(45);
+            button.setPrefHeight(50);
             button.setMaxWidth(Double.MAX_VALUE);
             GridPane.setFillWidth(button, true);
             add(button, i * 3, 1, 3, 1);

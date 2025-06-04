@@ -2,44 +2,32 @@ package net.coosanta.meldmc.gui.button;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
-import javafx.geometry.Pos;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Skin;
 import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
 import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MinecraftButton extends Control implements ScaleFactorCssProperty.ScaleFactorContainer {
-    private final Canvas canvas;
-    private final Label textLabel;
-    private final StackPane contentPane;
+public class MinecraftButton extends ButtonBase implements ScaleFactorCssProperty.ScaleFactorContainer {
+    static final int ORIGINAL_WIDTH = 200;
+    static final int ORIGINAL_HEIGHT = 20;
+
+    static final int LEFT_BORDER = 2;
+    static final int RIGHT_BORDER = 2;
+    static final int TOP_BORDER = 2;
+    static final int BOTTOM_BORDER = 3;
 
     private final ScaleFactorCssProperty scaleFactorProperty;
 
     private final ObjectProperty<Image> buttonImage = new SimpleObjectProperty<>();
     private final ObjectProperty<Image> hoverButtonImage = new SimpleObjectProperty<>();
     private final ObjectProperty<Image> disabledButtonImage = new SimpleObjectProperty<>();
-
-    private static final int ORIGINAL_WIDTH = 200;
-    private static final int ORIGINAL_HEIGHT = 20;
-
-    private boolean hovered = false;
-
-    private static final int LEFT_BORDER = 2;
-    private static final int RIGHT_BORDER = 2;
-    private static final int TOP_BORDER = 2;
-    private static final int BOTTOM_BORDER = 3;
 
     public MinecraftButton() {
         this("");
@@ -50,10 +38,15 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
     }
 
     public MinecraftButton(String text, boolean disabled) {
+        super();
+        setText(text);
         setDisable(disabled);
-        canvas = new Canvas();
-        textLabel = new Label(text);
-        textLabel.getStyleClass().add("minecraft-button-text");
+
+        scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
+        getStyleClass().add("mc-button");
+
+        setMaxWidth(Double.MAX_VALUE);
+        setMaxHeight(Double.MAX_VALUE);
 
         try {
             buttonImage.set(new Image("/icons/button/button.png"));
@@ -63,24 +56,7 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
             throw new RuntimeException("Failed to load button images", e);
         }
 
-        contentPane = new StackPane();
-        contentPane.getChildren().addAll(canvas, textLabel);
-        contentPane.setAlignment(Pos.CENTER);
-
-        scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
-        ScaleFactorCssProperty.applyStandardTextureScale(this);
-
-        setupEventHandling();
-
-        widthProperty().addListener((obs, oldVal, newVal) -> redraw());
-        heightProperty().addListener((obs, oldVal, newVal) -> redraw());
-        scaleFactorProperty.property().addListener((obs, oldVal, newVal) -> redraw());
-
-        setMaxWidth(Double.MAX_VALUE);
-        setMaxHeight(Double.MAX_VALUE);
-
-        setFillWidth(true);
-        setFillHeight(true);
+        scaleFactorProperty.property().addListener((obs, oldVal, newVal) -> requestLayout());
     }
 
     public void setFillWidth(boolean fill) {
@@ -96,187 +72,73 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
         return scaleFactorProperty.property();
     }
 
-    private void setupEventHandling() {
-        setOnMouseEntered(e -> {
-            hovered = true;
-            redraw();
-        });
-
-        setOnMouseExited(e -> {
-            hovered = false;
-            redraw();
-        });
+    public int getScaleFactor() {
+        return scaleFactorProperty.get();
     }
 
-    public String getText() {
-        return textLabel.getText();
+    public Image getButtonImage() {
+        return buttonImage.get();
     }
 
-    public void setText(String value) {
-        textLabel.setText(value);
+    public Image getHoverButtonImage() {
+        return hoverButtonImage.get();
     }
 
-    public StringProperty textProperty() {
-        return textLabel.textProperty();
-    }
-
-    @Override
-    protected void layoutChildren() {
-        super.layoutChildren();
-        contentPane.resize(getWidth(), getHeight());
-        canvas.setWidth(getWidth());
-        canvas.setHeight(getHeight());
-        redraw();
+    public Image getDisabledButtonImage() {
+        return disabledButtonImage.get();
     }
 
     @Override
     protected double computePrefWidth(double height) {
-        return Math.max(ORIGINAL_WIDTH * scaleFactorProperty.get(), getMinWidth());
+        return Math.max(ORIGINAL_WIDTH * getScaleFactor(), computeMinWidth(height));
     }
 
     @Override
     protected double computePrefHeight(double width) {
-        return Math.max(ORIGINAL_HEIGHT * scaleFactorProperty.get(), getMinHeight());
+        return Math.max(ORIGINAL_HEIGHT * getScaleFactor(), computeMinHeight(width));
     }
 
     @Override
-    public double computeMinWidth(double height) {
-        return LEFT_BORDER * scaleFactorProperty.get() + RIGHT_BORDER * scaleFactorProperty.get() + 20;
+    protected double computeMinWidth(double height) {
+        int scaleFactor = getScaleFactor();
+        return (LEFT_BORDER + RIGHT_BORDER) * scaleFactor + 20;
     }
 
     @Override
-    public double computeMinHeight(double width) {
-        return TOP_BORDER * scaleFactorProperty.get() + BOTTOM_BORDER * scaleFactorProperty.get() + 10;
+    protected double computeMinHeight(double width) {
+        int scaleFactor = getScaleFactor();
+        return (TOP_BORDER + BOTTOM_BORDER) * scaleFactor + 10;
     }
 
-    private void redraw() {
-        if (canvas.getWidth() <= 0 || canvas.getHeight() <= 0) {
-            return;
-        }
-
-        Image image;
-        if (isDisable()) {
-            image = disabledButtonImage.get();
-        } else if (hovered) {
-            image = hoverButtonImage.get();
-        } else {
-            image = buttonImage.get();
-        }
-
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.setImageSmoothing(false);
-
-        int scaleFactor = scaleFactorProperty.get();
-
-        int scaledLeft = LEFT_BORDER * scaleFactor;
-        int scaledRight = RIGHT_BORDER * scaleFactor;
-        int scaledTop = TOP_BORDER * scaleFactor;
-        int scaledBottom = BOTTOM_BORDER * scaleFactor;
-
-        // Ensure borders snap to pixels perfectly
-        scaledLeft = snapToScale(scaledLeft, scaleFactor);
-        scaledRight = snapToScale(scaledRight, scaleFactor);
-        scaledTop = snapToScale(scaledTop, scaleFactor);
-        scaledBottom = snapToScale(scaledBottom, scaleFactor);
-
-        // Calculate center regions dimensions
-        double centerWidth = getWidth() - scaledLeft - scaledRight;
-        double centerHeight = getHeight() - scaledTop - scaledBottom;
-
-        // Top-left corner
-        gc.drawImage(
-                image,
-                0, 0, LEFT_BORDER, TOP_BORDER,
-                0, 0, scaledLeft, scaledTop
-        );
-
-        // Top edge
-        gc.drawImage(
-                image,
-                LEFT_BORDER, 0, ORIGINAL_WIDTH - LEFT_BORDER - RIGHT_BORDER, TOP_BORDER,
-                scaledLeft, 0, centerWidth, scaledTop
-        );
-
-        // Top-right corner
-        gc.drawImage(
-                image,
-                ORIGINAL_WIDTH - RIGHT_BORDER, 0, RIGHT_BORDER, TOP_BORDER,
-                scaledLeft + centerWidth, 0, scaledRight, scaledTop
-        );
-
-        // Left edge
-        gc.drawImage(
-                image,
-                0, TOP_BORDER, LEFT_BORDER, ORIGINAL_HEIGHT - TOP_BORDER - BOTTOM_BORDER,
-                0, scaledTop, scaledLeft, centerHeight
-        );
-
-        // Center
-        gc.drawImage(
-                image,
-                LEFT_BORDER, TOP_BORDER, ORIGINAL_WIDTH - LEFT_BORDER - RIGHT_BORDER, ORIGINAL_HEIGHT - TOP_BORDER - BOTTOM_BORDER,
-                scaledLeft, scaledTop, centerWidth, centerHeight
-        );
-
-        // Right edge
-        gc.drawImage(
-                image,
-                ORIGINAL_WIDTH - RIGHT_BORDER, TOP_BORDER, RIGHT_BORDER, ORIGINAL_HEIGHT - TOP_BORDER - BOTTOM_BORDER,
-                scaledLeft + centerWidth, scaledTop, scaledRight, centerHeight
-        );
-
-        // Bottom-left corner
-        gc.drawImage(
-                image,
-                0, ORIGINAL_HEIGHT - BOTTOM_BORDER, LEFT_BORDER, BOTTOM_BORDER,
-                0, scaledTop + centerHeight, scaledLeft, scaledBottom
-        );
-
-        // Bottom edge
-        gc.drawImage(
-                image,
-                LEFT_BORDER, ORIGINAL_HEIGHT - BOTTOM_BORDER, ORIGINAL_WIDTH - LEFT_BORDER - RIGHT_BORDER, BOTTOM_BORDER,
-                scaledLeft, scaledTop + centerHeight, centerWidth, scaledBottom
-        );
-
-        // Bottom-right corner
-        gc.drawImage(
-                image,
-                ORIGINAL_WIDTH - RIGHT_BORDER, ORIGINAL_HEIGHT - BOTTOM_BORDER, RIGHT_BORDER, BOTTOM_BORDER,
-                scaledLeft + centerWidth, scaledTop + centerHeight, scaledRight, scaledBottom
-        );
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getControlCssMetaData() {
+        return getClassCssMetaData();
     }
 
-    private int snapToScale(int value, int scaleFactor) {
-        return (int) (Math.round((double) value / scaleFactor) * scaleFactor);
+    @Override
+    protected Skin<?> createDefaultSkin() {
+        return new MinecraftButtonSkin(this);
+    }
+
+    @Override
+    public void fire() {
+        if (!isDisabled()) {
+            arm();
+            fireEvent(new javafx.event.ActionEvent(this, null));
+            javafx.application.Platform.runLater(this::disarm);
+        }
     }
 
     // CSS integration
-
     private static final List<CssMetaData<? extends Styleable, ?>> CSS_META_DATA;
 
     static {
-        List<CssMetaData<? extends Styleable, ?>> cssMetaData = new ArrayList<>(Control.getClassCssMetaData());
+        List<CssMetaData<? extends Styleable, ?>> cssMetaData = new ArrayList<>(ButtonBase.getClassCssMetaData());
         cssMetaData.add(ScaleFactorCssProperty.getCssMetaData());
         CSS_META_DATA = Collections.unmodifiableList(cssMetaData);
     }
 
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         return CSS_META_DATA;
-    }
-
-    @Override
-    protected List<CssMetaData<? extends Styleable, ?>> getControlCssMetaData() {
-        return getClassCssMetaData();
-    }
-
-    StackPane getContentPane() {
-        return contentPane;
-    }
-
-    @Override
-    protected Skin<?> createDefaultSkin() {
-        return new MinecraftButtonSkin(this);
     }
 }

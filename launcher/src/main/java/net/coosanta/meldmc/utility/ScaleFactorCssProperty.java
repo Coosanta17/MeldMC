@@ -14,10 +14,10 @@ import net.coosanta.meldmc.gui.Background;
  * to expose a CSS-styleable integer property for controlling scale factors.
  *
  * <p>This class helps create components that can have their scaling controlled via CSS
- * using the "-factor" property. For example, in CSS you could write:
+ * using the "-scale-factor" property. For example, in CSS you could write:
  * <pre>
  * .texture-scale {
- *     -factor: 4;
+ *     -scale-factor: 4;
  * }
  * </pre>
  *
@@ -40,7 +40,7 @@ public class ScaleFactorCssProperty {
     private static final CssMetaData<Styleable, Number> CSS_META_DATA;
 
     static {
-        CSS_META_DATA = new CssMetaData<>("-factor", SizeConverter.getInstance(), 6.0) {
+        CSS_META_DATA = new CssMetaData<>("-scale-factor", SizeConverter.getInstance(), 6.0) {
             @Override
             public boolean isSettable(Styleable node) {
                 @SuppressWarnings("unchecked")

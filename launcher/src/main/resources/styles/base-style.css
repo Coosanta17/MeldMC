@@ -25,7 +25,16 @@
 }
 
 .texture-scale {
-    -factor: 6;
+    -scale-factor: 5;
+}
+
+.mc-button {
+    -scale-factor: 3;
+}
+
+.mc-button-text {
+    -fx-font-size: 1em;
+    -fx-text-fill: #FFFFFF;
 }
 
 .header {
@@ -64,12 +73,6 @@
 
 .pinger-motd-ping-error {
     -fx-fill: #dd0000;
-}
-
-.minecraft-button-text {
-    -fx-font-family: "Minecraft";
-    -fx-text-fill: white;
-    -fx-alignment: center;
 }
 
 /* §0 */
