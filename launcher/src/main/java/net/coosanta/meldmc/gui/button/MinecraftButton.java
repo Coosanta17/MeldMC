@@ -66,7 +66,6 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
         contentPane = new StackPane();
         contentPane.getChildren().addAll(canvas, textLabel);
         contentPane.setAlignment(Pos.CENTER);
-        getChildren().add(contentPane);
 
         scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
         ScaleFactorCssProperty.applyStandardTextureScale(this);
@@ -77,7 +76,19 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
         heightProperty().addListener((obs, oldVal, newVal) -> redraw());
         scaleFactorProperty.property().addListener((obs, oldVal, newVal) -> redraw());
 
-        setPrefSize(200, 20);
+        setMaxWidth(Double.MAX_VALUE);
+        setMaxHeight(Double.MAX_VALUE);
+
+        setFillWidth(true);
+        setFillHeight(true);
+    }
+
+    public void setFillWidth(boolean fill) {
+        setMaxWidth(fill ? Double.MAX_VALUE : USE_PREF_SIZE);
+    }
+
+    public void setFillHeight(boolean fill) {
+        setMaxHeight(fill ? Double.MAX_VALUE : USE_PREF_SIZE);
     }
 
     @Override
@@ -120,12 +131,22 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
 
     @Override
     protected double computePrefWidth(double height) {
-        return ORIGINAL_WIDTH * scaleFactorProperty.get();
+        return Math.max(ORIGINAL_WIDTH * scaleFactorProperty.get(), getMinWidth());
     }
 
     @Override
     protected double computePrefHeight(double width) {
-        return ORIGINAL_HEIGHT * scaleFactorProperty.get();
+        return Math.max(ORIGINAL_HEIGHT * scaleFactorProperty.get(), getMinHeight());
+    }
+
+    @Override
+    public double computeMinWidth(double height) {
+        return LEFT_BORDER * scaleFactorProperty.get() + RIGHT_BORDER * scaleFactorProperty.get() + 20;
+    }
+
+    @Override
+    public double computeMinHeight(double width) {
+        return TOP_BORDER * scaleFactorProperty.get() + BOTTOM_BORDER * scaleFactorProperty.get() + 10;
     }
 
     private void redraw() {
@@ -144,6 +165,7 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.setImageSmoothing(false);
 
         int scaleFactor = scaleFactorProperty.get();
 
@@ -247,5 +269,14 @@ public class MinecraftButton extends Control implements ScaleFactorCssProperty.S
     @Override
     protected List<CssMetaData<? extends Styleable, ?>> getControlCssMetaData() {
         return getClassCssMetaData();
+    }
+
+    StackPane getContentPane() {
+        return contentPane;
+    }
+
+    @Override
+    protected Skin<?> createDefaultSkin() {
+        return new MinecraftButtonSkin(this);
     }
 }
