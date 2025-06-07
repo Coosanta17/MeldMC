@@ -1,5 +1,6 @@
 package net.coosanta.meldmc.gui.serverselection;
 
+import javafx.css.StyleableProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -11,6 +12,7 @@ import javafx.scene.text.TextFlow;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import net.coosanta.meldmc.network.Pinger;
 import net.coosanta.meldmc.utility.ResourceUtil;
+import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;
@@ -19,18 +21,20 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 
-public class ServerEntry extends BorderPane {
+public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.ScaleFactorContainer {
     private final Label unknownLabel = new Label("unknown");
     private final Logger log = LoggerFactory.getLogger(getClass());
+    private final ScaleFactorCssProperty scaleFactorProperty;
 
     private final ServerInfo server;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     private final ImageView icon;
+    private final int defaultIconSize = 64;
+    private final double scaleFactor;
     private final Label name;
     private final Label ping;
     private final HBox playercount;
@@ -61,6 +65,11 @@ public class ServerEntry extends BorderPane {
     );
 
     public ServerEntry(ServerInfo server, ExecutorService pingTask) {
+        scaleFactorProperty = new ScaleFactorCssProperty(this, "scale-factor");
+        this.getStyleClass().add("server-icon");
+        scaleFactor = scaleFactorProperty.get(); // TODO: Scale factor boken :(
+        log.debug("Scale factor: {}", scaleFactor);
+
         setPadding(new Insets(5, 10, 5, 10));
 
         this.server = server;
@@ -92,8 +101,9 @@ public class ServerEntry extends BorderPane {
             }
         }
         this.icon = new ImageView(rawIcon);
-        this.icon.setFitWidth(64);
-        this.icon.setFitHeight(64);
+        this.icon.setFitWidth(defaultIconSize * scaleFactor);
+        this.icon.setFitHeight(defaultIconSize * scaleFactor);
+        this.icon.setSmooth(false); // Boken :(
         this.icon.setPreserveRatio(false);
         BorderPane.setMargin(icon, new Insets(0, 5, 0, 0));
 
@@ -223,9 +233,7 @@ public class ServerEntry extends BorderPane {
         if (server.getStatus() == ServerInfo.Status.SUCCESSFUL) {
             ping.setText(server.getPing() + " ms");
         } else if (server.getStatus() == ServerInfo.Status.UNREACHABLE) {
-            ping.setText("Can't connect");
-        } else {
-            ping.setText("Pinging...");
+            ping.setText("-- ms");
         }
 
         if (server.getFavicon() != null) {
@@ -234,4 +242,10 @@ public class ServerEntry extends BorderPane {
 
         updateMotd();
     }
+
+    @Override
+    public StyleableProperty<Number> getScaleFactorProperty() {
+        return scaleFactorProperty.property();
+    }
 }
+

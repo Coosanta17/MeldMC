@@ -25,7 +25,7 @@ buildscript {
 apply(plugin = "org.openjfx.javafxplugin")
 
 javafx {
-    modules("javafx.controls", "javafx.graphics", "javafx.base")
+    modules("javafx.controls", "javafx.graphics", "javafx.base", "javafx.media")
 }
 
 repositories {
@@ -33,18 +33,18 @@ repositories {
     mavenCentral()
 
     // For NBT and Minecraft
-    maven {
-        url = uri("https://libraries.minecraft.net")
-    }
+//    maven {
+//        url = uri("https://libraries.minecraft.net")
+//    }
     maven {
         url = uri("https://jitpack.io/")
     }
     maven {
         url = uri("https://maven.fabricmc.net/")
     }
-//    maven {
-//        url = uri("https://repo.opencollab.dev/maven-snapshots/")
-//    }
+    maven {
+        url = uri("https://repo.opencollab.dev/maven-snapshots/")
+    }
     maven {
         url = uri("https://repo.opencollab.dev/maven-releases/")
     }
@@ -59,7 +59,7 @@ dependencies {
     // This dependency is used by the application.
     implementation(libs.guava)
 
-    // NBT for server.dat
+    // jitpack
     implementation("com.github.Querz:NBT:6.1")
 
 //    // Mapping reader
@@ -73,15 +73,16 @@ dependencies {
 
 //    implementation("org.geysermc.mcprotocollib:protocol:1.21.5-SNAPSHOT")
 
-    implementation("com.github.GeyserMC:MCProtocolLib:1.21.4-1")
+    // https://repo.opencollab.dev/maven-snapshots/ dependencies: https://repo.opencollab.dev/maven-releases/
+    implementation("org.geysermc.mcprotocollib:protocol:1.21.6-SNAPSHOT")
 
+    // https://mvnrepository.com/artifact/net.kyori/adventure-text-minimessage/4.19.0
     implementation("net.kyori:adventure-text-minimessage:4.19.0")
 
     // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
     implementation("ch.qos.logback:logback-classic:1.5.18")
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -89,7 +90,6 @@ java {
 }
 
 application {
-    // Define the main class for the application.
     mainClass = mainClassName
 }
 
@@ -134,7 +134,6 @@ tasks.named<ShadowJar>("shadowJar") {
 }
 
 tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
 

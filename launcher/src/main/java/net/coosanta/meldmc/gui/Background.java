@@ -39,7 +39,7 @@ public class Background extends Canvas implements ScaleFactorCssProperty.ScaleFa
         redraw();
     }
 
-    public int getScaleFactor() {
+    public double getScaleFactor() {
         return scaleFactorProperty.get();
     }
 
@@ -47,7 +47,7 @@ public class Background extends Canvas implements ScaleFactorCssProperty.ScaleFa
         scaleFactorProperty.set(factor);
     }
 
-    public StyleableIntegerProperty scaleFactorProperty() {
+    public StyleableDoubleProperty scaleFactorProperty() {
         return scaleFactorProperty.property();
     }
 
@@ -65,7 +65,7 @@ public class Background extends Canvas implements ScaleFactorCssProperty.ScaleFa
     }
 
     public int calculateTileSize() {
-        return BASE_TEXTURE_SIZE * getScaleFactor();
+        return (int) (BASE_TEXTURE_SIZE * getScaleFactor());
     }
 
     private void redraw() {

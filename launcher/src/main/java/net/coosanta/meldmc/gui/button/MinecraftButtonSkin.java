@@ -76,12 +76,12 @@ public class MinecraftButtonSkin extends SkinBase<MinecraftButton> {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.setImageSmoothing(false);
 
-        int scaleFactor = button.getScaleFactor();
+        double scaleFactor = button.getScaleFactor();
 
-        int scaledLeft = MinecraftButton.LEFT_BORDER * scaleFactor;
-        int scaledRight = MinecraftButton.RIGHT_BORDER * scaleFactor;
-        int scaledTop = MinecraftButton.TOP_BORDER * scaleFactor;
-        int scaledBottom = MinecraftButton.BOTTOM_BORDER * scaleFactor;
+        double scaledLeft = MinecraftButton.LEFT_BORDER * scaleFactor;
+        double scaledRight = MinecraftButton.RIGHT_BORDER * scaleFactor;
+        double scaledTop = MinecraftButton.TOP_BORDER * scaleFactor;
+        double scaledBottom = MinecraftButton.BOTTOM_BORDER * scaleFactor;
 
         double centerWidth = canvas.getWidth() - scaledLeft - scaledRight;
         double centerHeight = canvas.getHeight() - scaledTop - scaledBottom;
@@ -90,9 +90,9 @@ public class MinecraftButtonSkin extends SkinBase<MinecraftButton> {
     }
 
     private void drawButton(GraphicsContext gc, Image image,
-                            int scaledLeft, int scaledTop,
+                            double scaledLeft, double scaledTop,
                             double centerWidth, double centerHeight) {
-        int scaleFactor = getSkinnable().getScaleFactor();
+        double scaleFactor = getSkinnable().getScaleFactor();
 
         // Top-left corner
         drawTextureTiles(gc, image,
@@ -181,7 +181,7 @@ public class MinecraftButtonSkin extends SkinBase<MinecraftButton> {
     private void drawTextureTiles(GraphicsContext gc, Image image,
                                   double sx, double sy, double sw, double sh,
                                   double dx, double dy, double dw, double dh,
-                                  int scaleFactor) {
+                                  double scaleFactor) {
         int tilesX = (int) Math.ceil(dw / (sw * scaleFactor));
         int tilesY = (int) Math.ceil(dh / (sh * scaleFactor));
 

@@ -3,7 +3,7 @@ package net.coosanta.meldmc.utility;
 import javafx.beans.property.Property;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
-import javafx.css.StyleableIntegerProperty;
+import javafx.css.StyleableDoubleProperty;
 import javafx.css.StyleableProperty;
 import javafx.css.converter.SizeConverter;
 import javafx.scene.Node;
@@ -11,13 +11,13 @@ import net.coosanta.meldmc.gui.Background;
 
 /**
  * ScaleFactorCssProperty provides a reusable mechanism for JavaFX components
- * to expose a CSS-styleable integer property for controlling scale factors.
+ * to expose a CSS-styleable double property for controlling scale factors.
  *
  * <p>This class helps create components that can have their scaling controlled via CSS
  * using the "-scale-factor" property. For example, in CSS you could write:
  * <pre>
  * .texture-scale {
- *     -scale-factor: 4;
+ *     -scale-factor: 4.5;
  * }
  * </pre>
  *
@@ -29,18 +29,60 @@ import net.coosanta.meldmc.gui.Background;
  *   <li>Add ScaleFactorCssProperty.getCssMetaData() to your component's CSS metadata</li>
  * </ol>
  *
- * <p>The default scale factor value is 6.
+ * <p>The default scale factor value is 1.0.
+ *
+ * <p>Example implementation:
+ * <pre>
+ * public class ScalableComponent extends Region implements ScaleFactorContainer {
+ *     private final ScaleFactorCssProperty scaleFactorProperty;
+ *
+ *     public ScalableComponent() {
+ *         // Initialize the scale factor property
+ *         scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
+ *
+ *         // Apply default texture scaling if desired
+ *         ScaleFactorCssProperty.applyStandardTextureScale(this);
+ *
+ *         // Listen for scale factor changes and update layout
+ *         scaleFactorProperty.property().addListener((obs, oldVal, newVal) -> requestLayout());
+ *     }
+ *
+ *     // Implement the ScaleFactorContainer interface
+ *     public StyleableProperty&lt;Number&gt; getScaleFactorProperty() {
+ *         return scaleFactorProperty.property();
+ *     }
+ *
+ *     // Get the current scale factor value
+ *     public double getScaleFactor() {
+ *         return scaleFactorProperty.get();
+ *     }
+ *
+ *     // Add CSS metadata for styling
+ *     public List&lt;CssMetaData&lt;? extends Styleable, ?&gt;&gt; getCssMetaData() {
+ *         List&lt;CssMetaData&lt;? extends Styleable, ?&gt;&gt; cssMetaData =
+ *                 new ArrayList&lt;&gt;(Region.getClassCssMetaData());
+ *         cssMetaData.add(ScaleFactorCssProperty.getCssMetaData());
+ *         return Collections.unmodifiableList(cssMetaData);
+ *     }
+ *
+ *     protected double computePrefWidth(double height) {
+ *         // Use scale factor in layout calculations
+ *         return ORIGINAL_WIDTH * getScaleFactor();
+ *     }
+ * }
+ * </pre>
  *
  * @see ScaleFactorContainer
  * @see Background For an example implementation
+ * @see net.coosanta.meldmc.gui.button.MinecraftButton For another example implementation
  */
 public class ScaleFactorCssProperty {
     private final Styleable owner;
-    private final StyleableIntegerProperty property;
+    private final StyleableDoubleProperty property;
     private static final CssMetaData<Styleable, Number> CSS_META_DATA;
 
     static {
-        CSS_META_DATA = new CssMetaData<>("-scale-factor", SizeConverter.getInstance(), 6.0) {
+        CSS_META_DATA = new CssMetaData<>("-scale-factor", SizeConverter.getInstance(), 1.0) {
             @Override
             public boolean isSettable(Styleable node) {
                 @SuppressWarnings("unchecked")
@@ -80,7 +122,7 @@ public class ScaleFactorCssProperty {
      */
     public ScaleFactorCssProperty(Styleable owner, String propertyName) {
         this.owner = owner;
-        this.property = new StyleableIntegerProperty(6) {
+        this.property = new StyleableDoubleProperty(1) {
             @Override
             public Object getBean() {
                 return owner;
@@ -103,16 +145,16 @@ public class ScaleFactorCssProperty {
      *
      * @return The current integer scale factor
      */
-    public int get() {
+    public double get() {
         return property.get();
     }
 
     /**
-     * Returns the underlying StyleableIntegerProperty.
+     * Returns the underlying StyleableDoubleProperty.
      *
-     * @return The StyleableIntegerProperty controlling the scale factor
+     * @return The StyleableDoubleProperty controlling the scale factor
      */
-    public StyleableIntegerProperty property() {
+    public StyleableDoubleProperty property() {
         return property;
     }
 
@@ -121,7 +163,7 @@ public class ScaleFactorCssProperty {
      *
      * @param value The new scale factor value
      */
-    public void set(int value) {
+    public void set(double value) {
         property.set(value);
     }
 
@@ -139,7 +181,7 @@ public class ScaleFactorCssProperty {
     /**
      * Applies the standard texture scaling to the provided Styleable component.
      * This is a convenience method that adds the "texture-scale" CSS class to the component,
-     * which is defined with the standard scaling factor of 6 in the base-style.css.
+     * which is defined with the standard scaling factor of 1 in the base-style.css.
      *
      * <p>Use this method when you want to apply the standard texture scaling
      * without having to manually add the CSS class.

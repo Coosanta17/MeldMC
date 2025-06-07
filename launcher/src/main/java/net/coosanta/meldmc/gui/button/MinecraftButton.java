@@ -1,14 +1,20 @@
 package net.coosanta.meldmc.gui.button;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
+import javafx.event.ActionEvent;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Skin;
 import javafx.scene.image.Image;
+import javafx.scene.media.AudioClip;
+import net.coosanta.meldmc.utility.ResourceUtil;
 import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,12 +28,14 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
     static final int RIGHT_BORDER = 2;
     static final int TOP_BORDER = 2;
     static final int BOTTOM_BORDER = 3;
+    private static final Logger log = LoggerFactory.getLogger(MinecraftButton.class);
 
     private final ScaleFactorCssProperty scaleFactorProperty;
 
     private final ObjectProperty<Image> buttonImage = new SimpleObjectProperty<>();
     private final ObjectProperty<Image> hoverButtonImage = new SimpleObjectProperty<>();
     private final ObjectProperty<Image> disabledButtonImage = new SimpleObjectProperty<>();
+    private final AudioClip clickSound;
 
     public MinecraftButton() {
         this("");
@@ -52,8 +60,9 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
             buttonImage.set(new Image("/icons/button/button.png"));
             hoverButtonImage.set(new Image("/icons/button/button_highlighted.png"));
             disabledButtonImage.set(new Image("/icons/button/button_disabled.png"));
+            clickSound = new AudioClip(ResourceUtil.loadResource("/sounds/click.wav").toExternalForm());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load button images", e);
+            throw new RuntimeException("Failed to load button resources", e);
         }
 
         scaleFactorProperty.property().addListener((obs, oldVal, newVal) -> requestLayout());
@@ -72,7 +81,7 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
         return scaleFactorProperty.property();
     }
 
-    public int getScaleFactor() {
+    public double getScaleFactor() {
         return scaleFactorProperty.get();
     }
 
@@ -100,13 +109,13 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
 
     @Override
     protected double computeMinWidth(double height) {
-        int scaleFactor = getScaleFactor();
+        double scaleFactor = getScaleFactor();
         return (LEFT_BORDER + RIGHT_BORDER) * scaleFactor + 20;
     }
 
     @Override
     protected double computeMinHeight(double width) {
-        int scaleFactor = getScaleFactor();
+        double scaleFactor = getScaleFactor();
         return (TOP_BORDER + BOTTOM_BORDER) * scaleFactor + 10;
     }
 
@@ -123,9 +132,11 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
     @Override
     public void fire() {
         if (!isDisabled()) {
+            log.debug("Button fired"); // TODO: remove debug
+            clickSound.play();
             arm();
-            fireEvent(new javafx.event.ActionEvent(this, null));
-            javafx.application.Platform.runLater(this::disarm);
+            fireEvent(new ActionEvent(this, null));
+            Platform.runLater(this::disarm);
         }
     }
 

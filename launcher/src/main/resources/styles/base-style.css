@@ -32,6 +32,10 @@
     -scale-factor: 3;
 }
 
+.server-icon {
+    -scale-factor: 3;
+}
+
 .mc-button-text {
     -fx-font-size: 1em;
     -fx-text-fill: #FFFFFF;
