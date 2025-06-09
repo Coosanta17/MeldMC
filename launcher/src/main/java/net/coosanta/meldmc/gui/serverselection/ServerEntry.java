@@ -1,5 +1,8 @@
 package net.coosanta.meldmc.gui.serverselection;
 
+import javafx.application.Platform;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -34,7 +37,6 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
 
     private final ImageView icon;
     private final int defaultIconSize = 64;
-    private final double scaleFactor;
     private final Label name;
     private final Label ping;
     private final HBox playercount;
@@ -65,10 +67,10 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     );
 
     public ServerEntry(ServerInfo server, ExecutorService pingTask) {
-        scaleFactorProperty = new ScaleFactorCssProperty(this, "scale-factor");
+        scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
         this.getStyleClass().add("server-icon");
-        scaleFactor = scaleFactorProperty.get(); // TODO: Scale factor boken :(
-        log.debug("Scale factor: {}", scaleFactor);
+        scaleFactorProperty.property().addListener((obs, oldVal, newVal) ->
+                updateIconSize());
 
         setPadding(new Insets(5, 10, 5, 10));
 
@@ -101,16 +103,21 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
             }
         }
         this.icon = new ImageView(rawIcon);
-        this.icon.setFitWidth(defaultIconSize * scaleFactor);
-        this.icon.setFitHeight(defaultIconSize * scaleFactor);
-        this.icon.setSmooth(false); // Boken :(
+        this.icon.setSmooth(false); // Broken: https://bugs.openjdk.org/browse/JDK-8211861
         this.icon.setPreserveRatio(false);
         BorderPane.setMargin(icon, new Insets(0, 5, 0, 0));
 
         setCenter(buildCentre());
         setLeft(icon);
 
+        Platform.runLater(this::updateIconSize);
         pingTask.submit(() -> Pinger.ping(server, this));
+    }
+
+    private void updateIconSize() {
+        double scaledIconSize = defaultIconSize * getScaleFactor();
+        icon.setFitWidth(scaledIconSize);
+        icon.setFitHeight(scaledIconSize);
     }
 
     private VBox buildCentre() {
@@ -247,5 +254,16 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     public StyleableProperty<Number> getScaleFactorProperty() {
         return scaleFactorProperty.property();
     }
-}
 
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        List<CssMetaData<? extends Styleable, ?>> styleables =
+                new ArrayList<>(BorderPane.getClassCssMetaData());
+        styleables.add(ScaleFactorCssProperty.getCssMetaData());
+        return Collections.unmodifiableList(styleables);
+    }
+
+    private double getScaleFactor() {
+        return scaleFactorProperty.get();
+    }
+}

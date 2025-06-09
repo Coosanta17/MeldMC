@@ -3,7 +3,6 @@
     src: url('../fonts/merged_minecraft_seven+unifont.otf');
 }
 
-/* FIXME: Loading as Sans Serif */
 @font-face {
     font-family: 'Minecraft Seven v2 Bold';
     src: url('../fonts/merged_minecraft_seven+unifont-bold.otf');
@@ -33,7 +32,7 @@
 }
 
 .server-icon {
-    -scale-factor: 3;
+    -scale-factor: 1.33;
 }
 
 .mc-button-text {
