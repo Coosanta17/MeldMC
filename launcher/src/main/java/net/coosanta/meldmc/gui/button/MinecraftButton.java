@@ -57,10 +57,10 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
         setMaxHeight(Double.MAX_VALUE);
 
         try {
-            buttonImage.set(new Image("/icons/button/button.png"));
-            hoverButtonImage.set(new Image("/icons/button/button_highlighted.png"));
-            disabledButtonImage.set(new Image("/icons/button/button_disabled.png"));
-            clickSound = new AudioClip(ResourceUtil.loadResource("/sounds/click.wav").toExternalForm());
+            buttonImage.set(ResourceUtil.getImage("/icons/button/button.png"));
+            hoverButtonImage.set(ResourceUtil.getImage("/icons/button/button_highlighted.png"));
+            disabledButtonImage.set(ResourceUtil.getImage("/icons/button/button_disabled.png"));
+            clickSound = ResourceUtil.getAudio("/sounds/click.wav");
         } catch (Exception e) {
             throw new RuntimeException("Failed to load button resources", e);
         }
@@ -132,10 +132,8 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
     @Override
     public void fire() {
         if (!isDisabled()) {
-            log.debug("Button fired"); // TODO: remove debug
             clickSound.play();
-            arm();
-            fireEvent(new ActionEvent(this, null));
+            fireEvent(new ActionEvent());
             Platform.runLater(this::disarm);
         }
     }

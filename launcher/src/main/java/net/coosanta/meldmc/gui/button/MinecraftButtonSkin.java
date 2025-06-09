@@ -41,6 +41,13 @@ public class MinecraftButtonSkin extends SkinBase<MinecraftButton> {
             redraw();
         });
 
+        button.setOnMousePressed(e -> {
+            if (!button.isDisabled()) {
+                button.fire();
+                redraw();
+            }
+        });
+
         button.armedProperty().addListener((obs, wasArmed, isArmed) -> redraw());
 
         button.disabledProperty().addListener((obs, wasDisabled, isDisabled) -> redraw());

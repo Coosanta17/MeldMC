@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 
@@ -96,11 +95,7 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
         if (favicon != null) {
             rawIcon = ResourceUtil.imageFromByteArray(favicon);
         } else {
-            try {
-                rawIcon = new Image(ResourceUtil.loadResource("/icons/unknown_server.png").toExternalForm());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            rawIcon = ResourceUtil.getImage("/icons/unknown_server.png");
         }
         this.icon = new ImageView(rawIcon);
         this.icon.setSmooth(false); // Broken: https://bugs.openjdk.org/browse/JDK-8211861

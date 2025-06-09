@@ -4,10 +4,8 @@ import javafx.css.*;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import net.coosanta.meldmc.utility.ResourceUtil;
 import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,11 +16,7 @@ public class Background extends Canvas implements ScaleFactorCssProperty.ScaleFa
     private static final int BASE_TEXTURE_SIZE = 16;
 
     static {
-        try {
-            backgroundImage = new Image(ResourceUtil.loadResource("/icons/background.png").toExternalForm());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        backgroundImage = new Image("/icons/background.png");
     }
 
     public Background(double width, double height) {
