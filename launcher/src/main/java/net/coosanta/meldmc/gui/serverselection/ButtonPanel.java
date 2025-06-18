@@ -74,6 +74,11 @@ public class ButtonPanel extends GridPane {
         }
     }
 
+    public void serverSelected(ServerEntry server) {
+        List.of(joinServerButton, serverInfoButton, editButton, deleteButton)
+                .forEach(button -> button.setDisable(false));
+    }
+
     private void handleJoinServer() {
         log.debug("Join server clicked");
     }

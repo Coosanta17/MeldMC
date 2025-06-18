@@ -24,10 +24,12 @@ public class CentrePanel extends VBox {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ExecutorService pingTask = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()));
     private final Path gameDir = Main.getGameDir();
+    private final SelectionPanel selectionPanel;
 
     private CompoundTag serversDat;
 
-    public CentrePanel() {
+    public CentrePanel(SelectionPanel selectionPanel) {
+        this.selectionPanel = selectionPanel;
         setPrefSize(DESIGN_WIDTH, DESIGN_HEIGHT);
         setMaxSize(DESIGN_WIDTH, DESIGN_HEIGHT);
 
@@ -54,7 +56,11 @@ public class CentrePanel extends VBox {
         ListTag<CompoundTag> serversDatList = extractServersList();
 
         ArrayList<ServerEntry> serverList = new ArrayList<>();
-        serversDatList.forEach((server) -> serverList.add(new ServerEntry(new ServerInfo(server), pingTask)));
+        serversDatList.forEach((server) -> {
+            ServerEntry entry = new ServerEntry(new ServerInfo(server), pingTask);
+            entry.setOnMouseClicked(event -> selectionPanel.selectEntry(entry));
+            serverList.add(entry);
+        });
 
         return serverList;
     }
