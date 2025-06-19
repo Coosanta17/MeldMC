@@ -25,7 +25,7 @@ buildscript {
 apply(plugin = "org.openjfx.javafxplugin")
 
 javafx {
-    modules("javafx.controls", "javafx.graphics", "javafx.base", "javafx.media")
+    modules("javafx.controls", "javafx.graphics", "javafx.base", "javafx.media", "javafx.fxml")
 }
 
 repositories {
