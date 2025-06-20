@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static net.coosanta.meldmc.Main.DESIGN_HEIGHT;
+import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
+
 public class Background extends Canvas implements ScaleFactorCssProperty.ScaleFactorContainer {
     private final ScaleFactorCssProperty scaleFactorProperty;
     private static final Image backgroundImage;
@@ -17,6 +20,10 @@ public class Background extends Canvas implements ScaleFactorCssProperty.ScaleFa
 
     static {
         backgroundImage = new Image("/icons/background.png");
+    }
+
+    public Background() {
+        this(DESIGN_WIDTH, DESIGN_HEIGHT);
     }
 
     public Background(double width, double height) {

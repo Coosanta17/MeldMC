@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import net.coosanta.meldmc.gui.Background?>
+<?import net.coosanta.meldmc.gui.serverselection.SelectionPanel?>
+
+<StackPane fx:id="root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="net.coosanta.meldmc.gui.MainWindowController">
+    <Background fx:id="background"/>
+    <SelectionPanel fx:id="contentPanel"/>
+</StackPane>
