@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.gui.button;
+package net.coosanta.meldmc.gui.nodes.button;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;

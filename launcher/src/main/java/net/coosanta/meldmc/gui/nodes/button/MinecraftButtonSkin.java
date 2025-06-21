@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.gui.button;
+package net.coosanta.meldmc.gui.nodes.button;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;

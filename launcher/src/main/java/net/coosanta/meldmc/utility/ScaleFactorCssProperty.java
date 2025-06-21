@@ -7,7 +7,8 @@ import javafx.css.StyleableDoubleProperty;
 import javafx.css.StyleableProperty;
 import javafx.css.converter.SizeConverter;
 import javafx.scene.Node;
-import net.coosanta.meldmc.gui.Background;
+import net.coosanta.meldmc.gui.views.Background;
+import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
 
 /**
  * ScaleFactorCssProperty provides a reusable mechanism for JavaFX components
@@ -74,7 +75,7 @@ import net.coosanta.meldmc.gui.Background;
  *
  * @see ScaleFactorContainer
  * @see Background For an example implementation
- * @see net.coosanta.meldmc.gui.button.MinecraftButton For another example implementation
+ * @see MinecraftButton For another example implementation
  */
 public class ScaleFactorCssProperty {
     private final Styleable owner;

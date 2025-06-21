@@ -1,6 +1,6 @@
 package net.coosanta.meldmc;
 
-import net.coosanta.meldmc.gui.MainWindow;
+import net.coosanta.meldmc.gui.views.MainWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

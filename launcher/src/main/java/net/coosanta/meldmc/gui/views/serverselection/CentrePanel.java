@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.gui.serverselection;
+package net.coosanta.meldmc.gui.views.serverselection;
 
 import javafx.scene.layout.VBox;
 import net.coosanta.meldmc.Main;

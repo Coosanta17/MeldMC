@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.gui.serverselection;
+package net.coosanta.meldmc.gui.views.serverselection;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

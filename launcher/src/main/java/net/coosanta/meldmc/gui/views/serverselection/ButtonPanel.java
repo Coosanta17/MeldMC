@@ -1,11 +1,11 @@
-package net.coosanta.meldmc.gui.serverselection;
+package net.coosanta.meldmc.gui.views.serverselection;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import net.coosanta.meldmc.gui.button.MinecraftButton;
+import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

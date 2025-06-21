@@ -1,11 +1,12 @@
-package net.coosanta.meldmc.gui;
+package net.coosanta.meldmc.gui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import net.coosanta.meldmc.Main;
-import net.coosanta.meldmc.gui.serverselection.SelectionPanel;
+import net.coosanta.meldmc.gui.views.Background;
+import net.coosanta.meldmc.gui.views.serverselection.SelectionPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.gui;
+package net.coosanta.meldmc.gui.views;
 
 import javafx.css.*;
 import javafx.scene.canvas.Canvas;

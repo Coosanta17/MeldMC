@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.gui.serverselection;
+package net.coosanta.meldmc.gui.views.serverselection;
 
 import javafx.application.Platform;
 import javafx.css.CssMetaData;
@@ -11,7 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextFlow;
-import net.coosanta.meldmc.gui.text.FormattedTextParser;
+import net.coosanta.meldmc.gui.nodes.text.FormattedTextParser;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import net.coosanta.meldmc.network.Pinger;
 import net.coosanta.meldmc.utility.ResourceUtil;
