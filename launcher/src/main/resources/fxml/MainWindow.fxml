@@ -2,7 +2,7 @@
 
 <?import javafx.scene.layout.StackPane?>
 <?import net.coosanta.meldmc.gui.views.Background?>
-<?import net.coosanta.meldmc.gui.views.serverselection.SelectionPanel?>
+<?import net.coosanta.meldmc.gui.controllers.serverselection.SelectionPanel?>
 
 <StackPane fx:id="root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="net.coosanta.meldmc.gui.controllers.MainWindowController">

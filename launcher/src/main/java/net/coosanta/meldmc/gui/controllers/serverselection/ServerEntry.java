@@ -1,11 +1,11 @@
-package net.coosanta.meldmc.gui.views.serverselection;
+package net.coosanta.meldmc.gui.controllers.serverselection;
 
 import javafx.application.Platform;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 
@@ -32,91 +33,72 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
 
     private final ServerInfo server;
 
-    private final ImageView icon;
+    @FXML
+    private ImageView icon;
     private final int defaultIconSize = 64;
-    private final Label name;
-    private final Label ping;
-    private final HBox playercount;
-    private final GridPane header;
-
-    private final TextFlow motdFlow;
+    @FXML
+    private Label name;
+    @FXML
+    private Label ping;
+    @FXML
+    private HBox playercount;
+    @FXML
+    private GridPane header;
+    @FXML
+    private TextFlow motdFlow;
 
     public ServerEntry(ServerInfo server, ExecutorService pingTask) {
-        scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
-        this.getStyleClass().add("server-icon");
+        this.server = server;
+        this.scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
+
+        loadFXML();
+
         scaleFactorProperty.property().addListener((obs, oldVal, newVal) ->
                 updateIconSize());
 
-        setPadding(new Insets(5, 10, 5, 10));
+        setupUI();
 
-        this.server = server;
+        Platform.runLater(this::updateIconSize);
+        pingTask.submit(() -> Pinger.ping(server, this));
+    }
 
-        this.name = new Label(server.getName());
-        this.ping = new Label("Pinging...");
-        this.playercount = new HBox(unknownLabel);
+    private void loadFXML() {
+        FXMLLoader fxmlLoader = new FXMLLoader(ResourceUtil.loadResource("/fxml/serverselection/ServerEntry.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
 
-        this.motdFlow = new TextFlow();
-        this.motdFlow.getStyleClass().add("server-motd");
+        try {
+            fxmlLoader.load();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load FXML for ServerEntry", e);
+        }
+    }
 
-        updateMotd();
+    private void setupUI() {
+        name.setText(server.getName());
 
-        name.getStyleClass().add("server-name");
-        ping.getStyleClass().add("server-ping");
+        ping.setText("Pinging...");
+
+        playercount.getChildren().add(unknownLabel);
         unknownLabel.getStyleClass().add("player-separator");
 
-        this.header = buildHeader();
+        motdFlow.getStyleClass().add("server-motd");
+        updateMotd();
 
         Image rawIcon;
         @Nullable byte[] favicon = server.getFavicon();
-        if (favicon != null) {
+        if (favicon != null) { // TODO: Favicon from server ping.
             rawIcon = ResourceUtil.imageFromByteArray(favicon);
         } else {
             rawIcon = ResourceUtil.getImage("/icons/unknown_server.png");
         }
-        this.icon = new ImageView(rawIcon);
-        this.icon.setSmooth(false); // Broken: https://bugs.openjdk.org/browse/JDK-8211861
-        this.icon.setPreserveRatio(false);
-        BorderPane.setMargin(icon, new Insets(0, 5, 0, 0));
-
-        setCenter(buildCentre());
-        setLeft(icon);
-
-        Platform.runLater(this::updateIconSize);
-        pingTask.submit(() -> Pinger.ping(server, this));
+        icon.setImage(rawIcon);
     }
 
     private void updateIconSize() {
         double scaledIconSize = defaultIconSize * getScaleFactor();
         icon.setFitWidth(scaledIconSize);
         icon.setFitHeight(scaledIconSize);
-    }
-
-    private VBox buildCentre() {
-        VBox centre = new VBox(5);
-        centre.getChildren().addAll(header, motdFlow);
-        return centre;
-    }
-
-    private GridPane buildHeader() {
-        GridPane header = new GridPane();
-
-        header.setHgap(10);
-
-        ColumnConstraints column1 = new ColumnConstraints();
-        column1.setHgrow(Priority.ALWAYS);
-        column1.setFillWidth(true);
-
-        ColumnConstraints column2 = new ColumnConstraints();
-        ColumnConstraints column3 = new ColumnConstraints();
-
-        header.getColumnConstraints().addAll(column1, column2, column3);
-
-        name.setAlignment(Pos.CENTER);
-        header.add(name, 0, 0);
-        header.add(playercount, 1, 0);
-        header.add(ping, 2, 0);
-
-        return header;
     }
 
     private void updatePlayerCount() {

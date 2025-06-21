@@ -1,7 +1,7 @@
 package net.coosanta.meldmc.network;
 
 import javafx.application.Platform;
-import net.coosanta.meldmc.gui.views.serverselection.ServerEntry;
+import net.coosanta.meldmc.gui.controllers.serverselection.ServerEntry;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.network.factory.ClientNetworkSessionFactory;

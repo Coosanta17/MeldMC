@@ -1,8 +1,10 @@
-package net.coosanta.meldmc.gui.views.serverselection;
+package net.coosanta.meldmc.gui.controllers.serverselection;
 
+import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.VBox;
 import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.minecraft.ServerInfo;
+import net.coosanta.meldmc.utility.ResourceUtil;
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.tag.CompoundTag;
 import net.querz.nbt.tag.ListTag;
@@ -29,6 +31,23 @@ public class CentrePanel extends VBox {
     private CompoundTag serversDat;
 
     public CentrePanel() {
+        loadFXML();
+        loadServers();
+    }
+
+    private void loadFXML() {
+        FXMLLoader fxmlLoader = new FXMLLoader(ResourceUtil.loadResource("/fxml/serverselection/CentrePanel.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
+
+        try {
+            fxmlLoader.load();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load FXML for CentrePanel", e);
+        }
+    }
+
+    private void loadServers() {
         setPrefSize(DESIGN_WIDTH, DESIGN_HEIGHT);
         setMaxSize(DESIGN_WIDTH, DESIGN_HEIGHT);
 

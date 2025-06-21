@@ -5,8 +5,8 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
-<?import net.coosanta.meldmc.gui.views.serverselection.CentrePanel?>
-<?import net.coosanta.meldmc.gui.views.serverselection.ButtonPanel?>
+<?import net.coosanta.meldmc.gui.controllers.serverselection.CentrePanel?>
+<?import net.coosanta.meldmc.gui.controllers.serverselection.ButtonPanel?>
 
 <fx:root type="BorderPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <top>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.TextFlow?>
+
+<fx:root type="BorderPane" styleClass="server-icon" xmlns="http://javafx.com/javafx/17"
+         xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets top="5" right="10" bottom="5" left="10"/>
+    </padding>
+
+    <left>
+        <ImageView fx:id="icon" smooth="false">
+            <BorderPane.margin>
+                <Insets right="5"/>
+            </BorderPane.margin>
+        </ImageView>
+    </left>
+
+    <center>
+        <VBox spacing="5">
+            <GridPane fx:id="header" hgap="10">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints/>
+                    <ColumnConstraints/>
+                </columnConstraints>
+
+                <Label fx:id="name" styleClass="server-name" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <HBox fx:id="playercount" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label fx:id="ping" styleClass="server-ping" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            </GridPane>
+
+            <TextFlow fx:id="motdFlow" styleClass="server-motd"/>
+        </VBox>
+    </center>
+</fx:root>

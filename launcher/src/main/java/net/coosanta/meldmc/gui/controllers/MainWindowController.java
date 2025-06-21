@@ -6,7 +6,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.gui.views.Background;
-import net.coosanta.meldmc.gui.views.serverselection.SelectionPanel;
+import net.coosanta.meldmc.gui.controllers.serverselection.SelectionPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

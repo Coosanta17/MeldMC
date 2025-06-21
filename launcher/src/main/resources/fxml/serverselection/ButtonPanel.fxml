@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.GridPane?>
+<?import net.coosanta.meldmc.gui.nodes.button.MinecraftButton?>
+
+<?import javafx.scene.layout.ColumnConstraints?>
+<fx:root type="GridPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+         hgap="10" vgap="10" alignment="CENTER">
+    <padding>
+        <Insets top="15" right="15" bottom="15" left="15"/>
+    </padding>
+
+    <columnConstraints>
+        <ColumnConstraints percentWidth="8.33" /> <!-- 100/12 -->
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33" />
+    </columnConstraints>
+
+    <!-- First row -->
+    <MinecraftButton fx:id="joinServerButton" text="Join Server"
+                     prefHeight="50" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                     GridPane.columnSpan="4" GridPane.fillWidth="true" styleClass="mc-button"/>
+
+    <MinecraftButton fx:id="serverInfoButton" text="Server Info"
+                     prefHeight="50" GridPane.columnIndex="4" GridPane.rowIndex="0"
+                     GridPane.columnSpan="4" GridPane.fillWidth="true" styleClass="mc-button"/>
+
+    <MinecraftButton fx:id="addServerButton" text="Add Server"
+                     prefHeight="50" GridPane.columnIndex="8" GridPane.rowIndex="0"
+                     GridPane.columnSpan="4" GridPane.fillWidth="true" styleClass="mc-button"/>
+
+    <!-- Second row -->
+    <MinecraftButton fx:id="editButton" text="Edit"
+                     prefHeight="50" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                     GridPane.columnSpan="3" GridPane.fillWidth="true" styleClass="mc-button"/>
+
+    <MinecraftButton fx:id="deleteButton" text="Delete"
+                     prefHeight="50" GridPane.columnIndex="3" GridPane.rowIndex="1"
+                     GridPane.columnSpan="3" GridPane.fillWidth="true" styleClass="mc-button"/>
+
+    <MinecraftButton fx:id="refreshButton" text="Refresh"
+                     prefHeight="50" GridPane.columnIndex="6" GridPane.rowIndex="1"
+                     GridPane.columnSpan="3" GridPane.fillWidth="true" styleClass="mc-button"/>
+
+    <MinecraftButton fx:id="settingsButton" text="Settings"
+                     prefHeight="50" GridPane.columnIndex="9" GridPane.rowIndex="1"
+                     GridPane.columnSpan="3" GridPane.fillWidth="true" styleClass="mc-button"/>
+</fx:root>

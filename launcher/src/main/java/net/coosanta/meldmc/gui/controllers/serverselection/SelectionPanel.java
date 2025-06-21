@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.gui.views.serverselection;
+package net.coosanta.meldmc.gui.controllers.serverselection;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
