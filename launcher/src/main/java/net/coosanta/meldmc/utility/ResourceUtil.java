@@ -1,7 +1,5 @@
 package net.coosanta.meldmc.utility;
 
-import java.io.IOException;
-
 import javafx.scene.image.Image;
 import javafx.scene.media.AudioClip;
 import org.slf4j.Logger;
@@ -38,10 +36,10 @@ public class ResourceUtil {
         });
     }
 
-    public static URL loadResource(String path) throws IOException {
+    public static URL loadResource(String path) {
         URL resource = ResourceUtil.class.getResource(path);
         if (resource == null) {
-            throw new IOException("Failed to load resource '" + path + "'");
+            throw new RuntimeException("Failed to load resource '" + path + "'");
         }
         return resource;
     }

@@ -106,7 +106,10 @@ public class FormattedTextParser {
                 } else if (FORMATTING_CODES.containsKey(formatCode)) {
                     String cssClass = FORMATTING_CODES.get(formatCode);
                     activeClasses.put(cssClass, true);
-                } // TODO: explore default minecraft behaviour with invalid formatting codes
+                } else {
+                    currentText.append(c); // TODO: explore default minecraft behaviour with invalid formatting codes
+                }
+                // TODO: Fix some formatting combinations not working - including bold and colour
             } else {
                 currentText.append(c);
             }

@@ -24,12 +24,11 @@ public class CentrePanel extends VBox {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ExecutorService pingTask = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()));
     private final Path gameDir = Main.getGameDir();
-    private final SelectionPanel selectionPanel;
+    private SelectionPanel selectionPanel;
 
     private CompoundTag serversDat;
 
-    public CentrePanel(SelectionPanel selectionPanel) {
-        this.selectionPanel = selectionPanel;
+    public CentrePanel() {
         setPrefSize(DESIGN_WIDTH, DESIGN_HEIGHT);
         setMaxSize(DESIGN_WIDTH, DESIGN_HEIGHT);
 
@@ -100,5 +99,13 @@ public class CentrePanel extends VBox {
         @SuppressWarnings("unchecked")
         ListTag<CompoundTag> serversList = (ListTag<CompoundTag>) serversListUnchecked;
         return serversList;
+    }
+
+    void setSelectionPanel(SelectionPanel selectionPanel) {
+        if (this.selectionPanel == null) {
+            this.selectionPanel = selectionPanel;
+        } else {
+            log.warn("Tried to set selectionPanel when it was already set.");
+        }
     }
 }

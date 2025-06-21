@@ -1,50 +1,40 @@
 package net.coosanta.meldmc.gui.views.serverselection;
 
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import net.coosanta.meldmc.utility.ResourceUtil;
+
+import java.io.IOException;
 
 public class SelectionPanel extends BorderPane {
-    private final CentrePanel centrePanel;
-    private final ButtonPanel buttonPane;
+    @FXML
+    private CentrePanel centrePanel;
+    @FXML
+    private ButtonPanel buttonPane;
+    @FXML
+    private StackPane centreContainer;
+
     private ServerEntry selectedServer;
 
     public SelectionPanel() {
-        setTop(createHeader());
-
-        centrePanel = new CentrePanel(this);
-
-        StackPane centreContainer = new StackPane(centrePanel);
-        centreContainer.setAlignment(Pos.TOP_CENTER);
-        centreContainer.setPrefSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        ScrollPane centreScrollPane = new ScrollPane(centreContainer);
-
-        centreScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        centreScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-
-        centreScrollPane.setFitToWidth(true);
-        centreScrollPane.setFitToHeight(true);
-
-        setCenter(centreScrollPane);
-
-        buttonPane = new ButtonPanel();
-        setBottom(buttonPane);
+        loadFXML();
     }
 
-    private Node createHeader() {
-        Label headerText = new Label("Select Server");
-        headerText.getStyleClass().add("header");
+    private void loadFXML() {
+        FXMLLoader fxmlLoader = new FXMLLoader(ResourceUtil.loadResource("/fxml/serverselection/SelectionPanel.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
 
-        StackPane headerPane = new StackPane(headerText);
-        headerPane.setAlignment(Pos.CENTER);
-        headerPane.setPadding(new Insets(5));
-
-        return headerPane;
+        try {
+            fxmlLoader.load();
+            if (centrePanel != null) {
+                centrePanel.setSelectionPanel(this);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load FXML for SelectionPanel", e);
+        }
     }
 
     public void selectEntry(ServerEntry newSelection) {
