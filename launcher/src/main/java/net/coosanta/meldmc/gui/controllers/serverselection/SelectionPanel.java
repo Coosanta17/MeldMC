@@ -31,6 +31,9 @@ public class SelectionPanel extends BorderPane {
             fxmlLoader.load();
             if (centrePanel != null) {
                 centrePanel.setSelectionPanel(this);
+                if (buttonPane != null) {
+                    buttonPane.setCentrePanel(centrePanel);
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load FXML for SelectionPanel", e);

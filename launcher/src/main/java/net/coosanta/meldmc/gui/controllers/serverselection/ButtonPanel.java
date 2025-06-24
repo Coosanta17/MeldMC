@@ -12,6 +12,7 @@ import java.io.IOException;
 
 public class ButtonPanel extends GridPane {
     private static final Logger log = LoggerFactory.getLogger(ButtonPanel.class);
+    private CentrePanel centrePanel;
 
     @FXML
     private MinecraftButton joinServerButton;
@@ -94,9 +95,18 @@ public class ButtonPanel extends GridPane {
 
     private void handleRefresh() {
         log.debug("Refresh clicked");
+        if (centrePanel != null) {
+            centrePanel.reload();
+        } else {
+            log.warn("Cannot refresh - CentrePanel reference null");
+        }
     }
 
     private void handleSettings() {
         log.debug("Settings clicked");
+    }
+
+    void setCentrePanel(CentrePanel centrePanel) {
+        this.centrePanel = centrePanel;
     }
 }

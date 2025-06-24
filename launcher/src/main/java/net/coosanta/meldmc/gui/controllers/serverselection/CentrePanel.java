@@ -32,6 +32,11 @@ public class CentrePanel extends VBox {
 
     public CentrePanel() {
         loadFXML();
+        setPrefSize(DESIGN_WIDTH, DESIGN_HEIGHT);
+        setMaxSize(DESIGN_WIDTH, DESIGN_HEIGHT);
+
+        setManaged(true);
+
         loadServers();
     }
 
@@ -48,11 +53,6 @@ public class CentrePanel extends VBox {
     }
 
     private void loadServers() {
-        setPrefSize(DESIGN_WIDTH, DESIGN_HEIGHT);
-        setMaxSize(DESIGN_WIDTH, DESIGN_HEIGHT);
-
-        setManaged(true);
-
         try {
             List<ServerEntry> serverList = getServersFromFile();
             getChildren().addAll(serverList);
@@ -126,5 +126,10 @@ public class CentrePanel extends VBox {
         } else {
             log.warn("Tried to set selectionPanel when it was already set.");
         }
+    }
+
+    void reload() {
+        getChildren().clear();
+        loadServers();
     }
 }
