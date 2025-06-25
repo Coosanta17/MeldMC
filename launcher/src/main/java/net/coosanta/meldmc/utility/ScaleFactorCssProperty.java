@@ -74,8 +74,8 @@ import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
  * </pre>
  *
  * @see ScaleFactorContainer
- * @see Background For an example implementation
- * @see MinecraftButton For another example implementation
+ * @see Background An example implementation
+ * @see MinecraftButton Another example implementation
  */
 public class ScaleFactorCssProperty {
     private final Styleable owner;

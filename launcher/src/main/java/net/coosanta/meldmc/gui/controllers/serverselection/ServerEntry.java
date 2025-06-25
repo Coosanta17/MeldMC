@@ -5,7 +5,6 @@ import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -63,12 +62,8 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     }
 
     private void loadFXML() {
-        FXMLLoader fxmlLoader = new FXMLLoader(ResourceUtil.loadResource("/fxml/serverselection/ServerEntry.fxml"));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-
         try {
-            fxmlLoader.load();
+            ResourceUtil.loadFXML("/fxml/serverselection/ServerEntry.fxml", this).load();
         } catch (IOException e) {
             throw new RuntimeException("Failed to load FXML for ServerEntry", e);
         }
@@ -161,8 +156,7 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
 
     @Override
     public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
-        List<CssMetaData<? extends Styleable, ?>> styleables =
-                new ArrayList<>(BorderPane.getClassCssMetaData());
+        List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(BorderPane.getClassCssMetaData());
         styleables.add(ScaleFactorCssProperty.getCssMetaData());
         return Collections.unmodifiableList(styleables);
     }

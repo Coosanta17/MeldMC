@@ -1,7 +1,6 @@
 package net.coosanta.meldmc.gui.controllers.serverselection;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.GridPane;
 import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
 import net.coosanta.meldmc.utility.ResourceUtil;
@@ -30,21 +29,16 @@ public class ButtonPanel extends GridPane {
     private MinecraftButton settingsButton;
 
     public ButtonPanel() {
-        loadFXML();
+        try {
+            ResourceUtil.loadFXML("/fxml/serverselection/ButtonPanel.fxml", this).load();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load FXML for ButtonPanel", e);
+        }
         setupEventHandlers();
         disableServerButtons();
     }
 
     private void loadFXML() {
-        FXMLLoader fxmlLoader = new FXMLLoader(ResourceUtil.loadResource("/fxml/serverselection/ButtonPanel.fxml"));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-
-        try {
-            fxmlLoader.load();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load FXML for ButtonPanel", e);
-        }
     }
 
     private void setupEventHandlers() {

@@ -1,5 +1,6 @@
 package net.coosanta.meldmc.utility;
 
+import javafx.fxml.FXMLLoader;
 import javafx.scene.image.Image;
 import javafx.scene.media.AudioClip;
 import org.slf4j.Logger;
@@ -47,5 +48,13 @@ public class ResourceUtil {
     public static Image imageFromByteArray(byte[] imageData) {
         ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
         return new Image(bis);
+    }
+
+    public static FXMLLoader loadFXML(String path, Object rootController) {
+        FXMLLoader fxmlLoader = new FXMLLoader(ResourceUtil.loadResource(path));
+        fxmlLoader.setRoot(rootController);
+        fxmlLoader.setController(rootController);
+
+        return fxmlLoader;
     }
 }
