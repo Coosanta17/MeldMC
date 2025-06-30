@@ -6,7 +6,7 @@
 
 <?import javafx.scene.layout.ColumnConstraints?>
 <fx:root type="GridPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-         hgap="10" vgap="10" alignment="CENTER">
+         hgap="10" vgap="10" alignment="BOTTOM_CENTER">
     <padding>
         <Insets top="15" right="15" bottom="15" left="15"/>
     </padding>

@@ -25,7 +25,7 @@ public class MainWindowController {
     private Background background;
 
     @FXML
-    private SelectionPanel contentPanel;
+    private SelectionPanel selectionPanel;
 
     private Stage stage;
 
@@ -51,5 +51,31 @@ public class MainWindowController {
                 background.resize(scene.getWidth(), newHeight.doubleValue()));
 
         stage.setOnCloseRequest(event -> System.exit(0));
+    }
+
+    public void showEditServerPanel() {
+        showEditServerPanel(null);
+    }
+
+    public void showEditServerPanel(Integer index) {
+        log.debug("Showing Edit Server panel");
+        EditServer editServerPanel = new EditServer(index);
+
+        root.getChildren().removeIf(node -> !(node instanceof Background));
+        root.getChildren().add(editServerPanel);
+    }
+
+    public void showSelectionPanel() {
+        log.debug("Setting Selection panel");
+
+        root.getChildren().removeIf(node -> !(node instanceof Background));
+
+        if (!root.getChildren().contains(selectionPanel)) {
+            root.getChildren().add(selectionPanel);
+        }
+    }
+
+    public SelectionPanel getSelectionPanel() {
+        return selectionPanel;
     }
 }

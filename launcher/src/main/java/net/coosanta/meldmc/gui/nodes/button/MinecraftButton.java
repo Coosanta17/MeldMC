@@ -46,8 +46,7 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
     }
 
     public MinecraftButton(String text, boolean disabled) {
-        super();
-        setText(text);
+        super(text);
         setDisable(disabled);
 
         scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
@@ -109,14 +108,12 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
 
     @Override
     protected double computeMinWidth(double height) {
-        double scaleFactor = getScaleFactor();
-        return (LEFT_BORDER + RIGHT_BORDER) * scaleFactor + 20;
+        return (LEFT_BORDER + RIGHT_BORDER) * getScaleFactor() + 20;
     }
 
     @Override
     protected double computeMinHeight(double width) {
-        double scaleFactor = getScaleFactor();
-        return (TOP_BORDER + BOTTOM_BORDER) * scaleFactor + 10;
+        return (TOP_BORDER + BOTTOM_BORDER) * getScaleFactor() + 10;
     }
 
     @Override

@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.SkinBase;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
+import net.coosanta.meldmc.utility.TextureScalingUtil;
 
 public class MinecraftButtonSkin extends SkinBase<MinecraftButton> {
     private final Canvas canvas;
@@ -83,136 +84,19 @@ public class MinecraftButtonSkin extends SkinBase<MinecraftButton> {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.setImageSmoothing(false);
 
-        double scaleFactor = button.getScaleFactor();
-
-        double scaledLeft = MinecraftButton.LEFT_BORDER * scaleFactor;
-        double scaledRight = MinecraftButton.RIGHT_BORDER * scaleFactor;
-        double scaledTop = MinecraftButton.TOP_BORDER * scaleFactor;
-        double scaledBottom = MinecraftButton.BOTTOM_BORDER * scaleFactor;
-
-        double centerWidth = canvas.getWidth() - scaledLeft - scaledRight;
-        double centerHeight = canvas.getHeight() - scaledTop - scaledBottom;
-
-        drawButton(gc, image, scaledLeft, scaledTop, centerWidth, centerHeight);
+        drawButton(gc, image);
     }
 
-    private void drawButton(GraphicsContext gc, Image image,
-                            double scaledLeft, double scaledTop,
-                            double centerWidth, double centerHeight) {
+    private void drawButton(GraphicsContext gc, Image image) {
         double scaleFactor = getSkinnable().getScaleFactor();
 
-        // Top-left corner
-        drawTextureTiles(gc, image,
-                0, 0,
-                MinecraftButton.LEFT_BORDER, MinecraftButton.TOP_BORDER,
-                0, 0,
-                MinecraftButton.LEFT_BORDER * scaleFactor, MinecraftButton.TOP_BORDER * scaleFactor,
-                scaleFactor);
-
-        // Top edge
-        drawTextureTiles(gc, image,
-                MinecraftButton.LEFT_BORDER, 0,
-                MinecraftButton.ORIGINAL_WIDTH - MinecraftButton.LEFT_BORDER - MinecraftButton.RIGHT_BORDER,
-                MinecraftButton.TOP_BORDER,
-                scaledLeft, 0,
-                centerWidth,
-                MinecraftButton.TOP_BORDER * scaleFactor,
-                scaleFactor);
-
-        // Top-right corner
-        drawTextureTiles(gc, image,
-                MinecraftButton.ORIGINAL_WIDTH - MinecraftButton.RIGHT_BORDER, 0,
-                MinecraftButton.RIGHT_BORDER, MinecraftButton.TOP_BORDER,
-                scaledLeft + centerWidth, 0,
-                MinecraftButton.RIGHT_BORDER * scaleFactor,
-                MinecraftButton.TOP_BORDER * scaleFactor,
-                scaleFactor);
-
-        // Left edge
-        drawTextureTiles(gc, image,
-                0, MinecraftButton.TOP_BORDER,
-                MinecraftButton.LEFT_BORDER,
-                MinecraftButton.ORIGINAL_HEIGHT - MinecraftButton.TOP_BORDER - MinecraftButton.BOTTOM_BORDER,
-                0, scaledTop,
-                MinecraftButton.LEFT_BORDER * scaleFactor,
-                centerHeight,
-                scaleFactor);
-
-        // Centre
-        drawTextureTiles(gc, image,
-                MinecraftButton.LEFT_BORDER, MinecraftButton.TOP_BORDER,
-                MinecraftButton.ORIGINAL_WIDTH - MinecraftButton.LEFT_BORDER - MinecraftButton.RIGHT_BORDER,
-                MinecraftButton.ORIGINAL_HEIGHT - MinecraftButton.TOP_BORDER - MinecraftButton.BOTTOM_BORDER,
-                scaledLeft, scaledTop, centerWidth, centerHeight, scaleFactor);
-
-        // Right edge
-        drawTextureTiles(gc, image,
-                MinecraftButton.ORIGINAL_WIDTH - MinecraftButton.RIGHT_BORDER, MinecraftButton.TOP_BORDER,
-                MinecraftButton.RIGHT_BORDER,
-                MinecraftButton.ORIGINAL_HEIGHT - MinecraftButton.TOP_BORDER - MinecraftButton.BOTTOM_BORDER,
-                scaledLeft + centerWidth, scaledTop,
-                MinecraftButton.RIGHT_BORDER * scaleFactor,
-                centerHeight,
-                scaleFactor);
-
-        // Bottom-left corner
-        drawTextureTiles(gc, image,
-                0, MinecraftButton.ORIGINAL_HEIGHT - MinecraftButton.BOTTOM_BORDER,
-                MinecraftButton.LEFT_BORDER, MinecraftButton.BOTTOM_BORDER,
-                0, scaledTop + centerHeight,
-                MinecraftButton.LEFT_BORDER * scaleFactor,
-                MinecraftButton.BOTTOM_BORDER * scaleFactor,
-                scaleFactor);
-
-        // Bottom edge
-        drawTextureTiles(gc, image,
-                MinecraftButton.LEFT_BORDER, MinecraftButton.ORIGINAL_HEIGHT - MinecraftButton.BOTTOM_BORDER,
-                MinecraftButton.ORIGINAL_WIDTH - MinecraftButton.LEFT_BORDER - MinecraftButton.RIGHT_BORDER,
-                MinecraftButton.BOTTOM_BORDER,
-                scaledLeft, scaledTop + centerHeight,
-                centerWidth,
-                MinecraftButton.BOTTOM_BORDER * scaleFactor,
-                scaleFactor);
-
-        // Bottom-right corner
-        drawTextureTiles(gc, image,
-                MinecraftButton.ORIGINAL_WIDTH - MinecraftButton.RIGHT_BORDER,
-                MinecraftButton.ORIGINAL_HEIGHT - MinecraftButton.BOTTOM_BORDER,
-                MinecraftButton.RIGHT_BORDER, MinecraftButton.BOTTOM_BORDER,
-                scaledLeft + centerWidth, scaledTop + centerHeight,
-                MinecraftButton.RIGHT_BORDER * scaleFactor,
-                MinecraftButton.BOTTOM_BORDER * scaleFactor,
-                scaleFactor);
-    }
-
-    private void drawTextureTiles(GraphicsContext gc, Image image,
-                                  double sx, double sy, double sw, double sh,
-                                  double dx, double dy, double dw, double dh,
-                                  double scaleFactor) {
-        int tilesX = (int) Math.ceil(dw / (sw * scaleFactor));
-        int tilesY = (int) Math.ceil(dh / (sh * scaleFactor));
-
-        double tileWidth = sw * scaleFactor;
-        double tileHeight = sh * scaleFactor;
-
-        for (int y = 0; y < tilesY; y++) {
-            for (int x = 0; x < tilesX; x++) {
-                double currentTileWidth = Math.min(tileWidth, dw - x * tileWidth);
-                double currentTileHeight = Math.min(tileHeight, dh - y * tileHeight);
-
-                if (currentTileWidth <= 0 || currentTileHeight <= 0) continue;
-
-                double currentSrcWidth = currentTileWidth / scaleFactor;
-                double currentSrcHeight = currentTileHeight / scaleFactor;
-
-                gc.drawImage(
-                        image,
-                        sx, sy, currentSrcWidth, currentSrcHeight,
-                        dx + x * tileWidth, dy + y * tileHeight,
-                        currentTileWidth, currentTileHeight
-                );
-            }
-        }
+        TextureScalingUtil.drawNineSliceTexture(
+            gc, image,
+            MinecraftButton.LEFT_BORDER, MinecraftButton.RIGHT_BORDER,
+            MinecraftButton.TOP_BORDER, MinecraftButton.BOTTOM_BORDER,
+            0, 0, canvas.getWidth(), canvas.getHeight(),
+            scaleFactor
+        );
     }
 
     @Override

@@ -106,9 +106,9 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
             Label separator = new Label("/");
             Label maxPlayers = new Label(String.valueOf(serverPlayers.getMaxPlayers()));
 
-            online.getStyleClass().add("player-number");
+            online.getStyleClass().add("body");
             separator.getStyleClass().add("player-separator");
-            maxPlayers.getStyleClass().add("player-number");
+            maxPlayers.getStyleClass().add("body");
 
             playercount.getChildren().addAll(
                     online,

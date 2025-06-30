@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import net.coosanta.meldmc.gui.nodes.button.MinecraftButton?>
+
+<fx:root type="BorderPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+         BorderPane.alignment="CENTER"
+         StackPane.alignment="TOP_CENTER"
+         AnchorPane.topAnchor="0.0"
+         AnchorPane.leftAnchor="0.0"
+         AnchorPane.rightAnchor="0.0">
+    <top>
+        <StackPane>
+            <padding>
+                <Insets top="20" right="5" bottom="5" left="5"/>
+            </padding>
+            <Label styleClass="header" text="Edit Server Info"/>
+        </StackPane>
+    </top>
+
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label fx:id="serverNameLabel" text="Server Name" styleClass="body" alignment="BOTTOM_LEFT"/>
+            <TextField fx:id="serverNameInput" prefHeight="50" styleClass="mc-text-field" text="A Minecraft Server"/>
+
+            <Label fx:id="serverAddressLabel" text="Server Address" styleClass="body" alignment="BOTTOM_LEFT"/>
+            <TextField fx:id="serverAddressInput" prefHeight="50" styleClass="mc-text-field"/>
+
+            <Region prefHeight="50"/>
+
+            <MinecraftButton fx:id="cancel" text="Cancel"/>
+            <MinecraftButton fx:id="done" text="Done"/>
+        </VBox>
+    </center>
+</fx:root>

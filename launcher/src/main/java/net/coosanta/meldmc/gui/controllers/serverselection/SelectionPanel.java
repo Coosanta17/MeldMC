@@ -6,6 +6,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import net.coosanta.meldmc.utility.ResourceUtil;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 public class SelectionPanel extends BorderPane {
@@ -17,6 +18,7 @@ public class SelectionPanel extends BorderPane {
     private StackPane centreContainer;
 
     private ServerEntry selectedServer;
+    private @Nullable Integer selectedServerIndex;
 
     public SelectionPanel() {
         loadFXML();
@@ -40,23 +42,31 @@ public class SelectionPanel extends BorderPane {
         }
     }
 
-    public void selectEntry(ServerEntry newSelection) {
+    public void selectEntry(ServerEntry newSelection, Integer index) {
         if (selectedServer != null) {
             selectedServer.setBorder(null);
         }
 
         selectedServer = newSelection;
+        selectedServerIndex = index;
 
-        selectedServer.setBorder(new Border(new BorderStroke(
-                Color.WHITE,
-                BorderStrokeStyle.SOLID,
-                new CornerRadii(0),
-                new BorderWidths(2)
-        )));
+        if (newSelection != null) {
+            selectedServer.setBorder(new Border(new BorderStroke(
+                    Color.WHITE,
+                    BorderStrokeStyle.SOLID,
+                    new CornerRadii(0),
+                    new BorderWidths(2)
+            )));
+        }
+
         buttonPane.serverSelected(selectedServer);
     }
 
-    public ServerEntry getSelectedServer() {
-        return selectedServer;
+    public @Nullable Integer getSelectedServerIndex() {
+        return selectedServerIndex;
+    }
+
+    public CentrePanel getCentrePanel() {
+        return centrePanel;
     }
 }

@@ -40,8 +40,37 @@
     -fx-text-fill: #FFFFFF;
 }
 
+.mc-text-field {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #000000;
+
+    -fx-border-width: 3px;
+    -fx-border-color: #A0A0A0;
+
+    -fx-caret-color: white;
+    -fx-caret-width: 609239px;
+
+    -fx-highlight-fill: #555555;
+    -fx-highlight-text-fill: white;
+
+    -fx-padding: 4px;
+
+    -fx-min-height: 50px;
+    -fx-pref-height: 50px;
+
+    -fx-alignment: center-left;
+}
+
+.mc-text-field:focused {
+    -fx-border-color: white;
+}
+
+.body {
+    -fx-text-fill: #9e9e9e;
+}
+
 .header {
-    -fx-font-size: 30px;
+    -fx-font-size: 24px;
     -fx-text-fill: #FFFFFF;
 }
 
@@ -51,10 +80,6 @@
 
 .server-ping {
     -fx-text-fill: #F0F0F0;
-}
-
-.player-number {
-    -fx-text-fill: #a5a5a5;
 }
 
 .player-separator {

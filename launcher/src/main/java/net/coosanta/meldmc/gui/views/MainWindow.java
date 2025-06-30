@@ -11,21 +11,45 @@ import net.coosanta.meldmc.utility.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Dimension;
 import java.io.IOException;
 
 public class MainWindow extends Application {
     private static final Logger log = LoggerFactory.getLogger(MainWindow.class);
+    private static final Dimension windowDimension = Main.getWindowsSize();
 
-    private static final java.awt.Dimension windowDimension = Main.getWindowsSize();
+    private static MainWindow instance;
+
+    private Stage stage;
+    private MainWindowController controller;
+
+    public MainWindow() {
+        // Constructor required by JavaFX
+    }
+
+    /**
+     * Gets the singleton instance of MainWindow
+     *
+     * @return The MainWindow instance
+     */
+    public static MainWindow getInstance() {
+        return instance;
+    }
+
+    public MainWindowController getController() {
+        return controller;
+    }
 
     @Override
     public void start(Stage stage) throws IOException {
         log.info("Starting application main window");
 
+        this.stage = stage;
+
         FXMLLoader loader = new FXMLLoader(ResourceUtil.loadResource("/fxml/MainWindow.fxml"));
         StackPane root = loader.load();
 
-        MainWindowController controller = loader.getController();
+        controller = loader.getController();
 
         Scene scene = new Scene(root, windowDimension.width, windowDimension.height);
         scene.getStylesheets().add(ResourceUtil.loadResource("/styles/base-style.css").toExternalForm());
@@ -33,6 +57,8 @@ public class MainWindow extends Application {
         stage.setScene(scene);
 
         controller.setStage(stage);
+
+        instance = this;
 
         stage.show();
     }

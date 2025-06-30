@@ -12,7 +12,7 @@
     <top>
         <StackPane>
             <padding>
-                <Insets top="5" right="5" bottom="5" left="5"/>
+                <Insets top="20" right="5" bottom="5" left="5"/>
             </padding>
             <Label styleClass="header" text="Select Server"/>
         </StackPane>
@@ -27,6 +27,8 @@
     </center>
 
     <bottom>
-        <ButtonPanel fx:id="buttonPane"/>
+        <StackPane>
+            <ButtonPanel fx:id="buttonPane"/>
+        </StackPane>
     </bottom>
 </fx:root>
