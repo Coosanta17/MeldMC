@@ -62,8 +62,9 @@ public class CentrePanel extends VBox {
         ArrayList<ServerEntry> serverList = new ArrayList<>();
         ServerListManager manager = ServerListManager.getInstance();
 
-        for (ServerInfo serverInfo : manager.getServers()) {
-            ServerEntry entry = new ServerEntry(new ServerInfo(serverInfo), pingTask);
+        List<ServerInfo> servers = manager.getServers();
+        for (int i = 0; i < servers.size(); i++) {
+            ServerEntry entry = new ServerEntry(i, pingTask);
             int index = serverList.size();
             entry.setOnMouseClicked(event -> selectionPanel.selectEntry(entry, index));
             serverList.add(entry);

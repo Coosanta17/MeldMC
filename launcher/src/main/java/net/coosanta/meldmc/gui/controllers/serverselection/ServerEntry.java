@@ -12,6 +12,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.TextFlow;
 import net.coosanta.meldmc.gui.nodes.text.FormattedTextParser;
 import net.coosanta.meldmc.minecraft.ServerInfo;
+import net.coosanta.meldmc.minecraft.ServerListManager;
 import net.coosanta.meldmc.network.Pinger;
 import net.coosanta.meldmc.utility.ResourceUtil;
 import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
@@ -30,11 +31,13 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ScaleFactorCssProperty scaleFactorProperty;
 
+    private final int index;
     private final ServerInfo server;
 
     @FXML
     private ImageView icon;
     private final int defaultIconSize = 64;
+    private String lastFaviconHash;
     @FXML
     private Label name;
     @FXML
@@ -46,8 +49,9 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     @FXML
     private TextFlow motdFlow;
 
-    public ServerEntry(ServerInfo server, ExecutorService pingTask) {
-        this.server = server;
+    public ServerEntry(int serverIndex, ExecutorService pingTask) {
+        this.index = serverIndex;
+        this.server = ServerListManager.getInstance().getServers().get(index);
         this.scaleFactorProperty = new ScaleFactorCssProperty(this, "factor");
 
         loadFXML();
@@ -70,6 +74,7 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     }
 
     private void setupUI() {
+        // TODO: Name length limit, Description length limit, component text formatting.
         name.setText(server.getName());
 
         ping.setText("Pinging...");
@@ -128,7 +133,6 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
                 FormattedTextParser.updateTextFlowWithStatus(motdFlow, "Cannot connect to server", "pinger-motd-ping-error");
             }
         } else {
-            // TODO: Modern minecraft styling.
             FormattedTextParser.updateTextFlow(motdFlow, descriptionComp, "server-motd");
         }
     }
@@ -143,7 +147,12 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
         }
 
         if (server.getFavicon() != null) {
-            icon.setImage(ResourceUtil.imageFromByteArray(server.getFavicon()));
+            String newFaviconHash = Arrays.toString(server.getFavicon());
+            if (!newFaviconHash.equals(lastFaviconHash)) {
+                icon.setImage(ResourceUtil.imageFromByteArray(server.getFavicon()));
+                lastFaviconHash = newFaviconHash;
+                ServerListManager.getInstance().updateServer(index, server);
+            }
         }
 
         updateMotd();
