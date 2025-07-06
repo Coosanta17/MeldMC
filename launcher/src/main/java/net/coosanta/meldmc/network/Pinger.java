@@ -23,7 +23,7 @@ public class Pinger {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         InetSocketAddress address = getAddress(serverInfo.getAddress());
-        MinecraftProtocol protocol = new MinecraftProtocol();
+        MinecraftProtocol protocol = new MinecraftProtocol(MeldCodec.CODEC);
 
         ClientSession client = ClientNetworkSessionFactory.factory()
                 .setRemoteSocketAddress(address)

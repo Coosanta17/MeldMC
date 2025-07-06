@@ -1,5 +1,6 @@
 package net.coosanta.meldmc.minecraft;
 
+import net.coosanta.meldmc.network.MeldServerStatusInfo;
 import net.kyori.adventure.text.Component;
 import net.querz.nbt.tag.CompoundTag;
 import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;
@@ -18,31 +19,53 @@ import java.util.Base64;
  * and provides functionality for serialization to NBT.
  */
 public class ServerInfo {
-    /** Logger for this class */
+    /**
+     * Logger for this class
+     */
     private static final Logger log = LoggerFactory.getLogger(ServerInfo.class);
 
-    /** The display name of the server */
+    /**
+     * The display name of the server
+     */
     private String name;
-    /** The server address (hostname or IP) */
+    /**
+     * The server address (hostname or IP)
+     */
     private String address;
 
-    /** The server description/MOTD */
+    /**
+     * The server description/MOTD
+     */
     private Component description;
-    /** The server favicon as a byte array (may be null) */
+    /**
+     * The server favicon as a byte array (may be null)
+     */
     private @Nullable byte[] favicon;
-    /** The ping time in milliseconds */
+    /**
+     * The ping time in milliseconds
+     */
     private long ping;
-    /** Information about players on the server (may be null) */
+    /**
+     * Information about players on the server (may be null)
+     */
     private @Nullable PlayerInfo players;
-    /** Information about the server version */
+    /**
+     * Information about the server version
+     */
     private VersionInfo versionInfo;
-    /** The current status of the server connection */
+    /**
+     * The current status of the server connection
+     */
     private ServerInfo.Status status = Status.INITIAL;
+    /**
+     * Indicates if the server supports Meld functionality
+     */
+    private boolean meldSupported;
 
     /**
      * Creates a new server info instance with the given name and address.
      *
-     * @param name The display name of the server
+     * @param name    The display name of the server
      * @param address The address of the server (hostname or IP)
      */
     public ServerInfo(String name, String address) {
@@ -105,6 +128,9 @@ public class ServerInfo {
         this.favicon = statusInfo.getIconPng();
         this.players = statusInfo.getPlayerInfo();
         this.versionInfo = statusInfo.getVersionInfo();
+        if (statusInfo instanceof MeldServerStatusInfo) {
+            this.meldSupported = ((MeldServerStatusInfo) statusInfo).isMeldSupported();
+        }
     }
 
     /**
@@ -243,15 +269,25 @@ public class ServerInfo {
      * Enum representing the different connection states of a server.
      */
     public enum Status {
-        /** Initial state before any connection attempts */
+        /**
+         * Initial state before any connection attempts
+         */
         INITIAL,
-        /** Currently attempting to ping the server */
+        /**
+         * Currently attempting to ping the server
+         */
         PINGING,
-        /** Server could not be reached */
+        /**
+         * Server could not be reached
+         */
         UNREACHABLE,
-        /** Server was reached but is incompatible */
+        /**
+         * Server was reached but is incompatible
+         */
         INCOMPATIBLE,
-        /** Successfully connected to the server */
+        /**
+         * Successfully connected to the server
+         */
         SUCCESSFUL
     }
 }
