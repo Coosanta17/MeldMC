@@ -102,6 +102,7 @@ public class ServerInfo {
         this.versionInfo = serverInfo.versionInfo;
         this.status = serverInfo.status;
         this.description = serverInfo.description;
+        this.meldSupported = serverInfo.meldSupported;
     }
 
     /**
@@ -249,6 +250,15 @@ public class ServerInfo {
      */
     public long getPing() {
         return ping;
+    }
+
+    /**
+     * Gets the supportedness of meld for this server.
+     *
+     * @return Meld support.
+     */
+    public boolean isMeldSupported() {
+        return meldSupported;
     }
 
     @Override
