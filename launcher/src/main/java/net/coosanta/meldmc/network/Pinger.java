@@ -87,15 +87,6 @@ public class Pinger {
 
         String host = parts[0];
 
-        return new InetSocketAddress(host, port);
+        return InetSocketAddress.createUnresolved(host, port);
     }
-
-//    public static void main(String[] args) {
-//        log.info("pinging...");
-//        ServerInfo info = new ServerInfo("Test", "mc.hypixel.net");
-//        ping(info).thenAccept((unused -> {
-//            log.info("Successfully pinged!");
-//            log.info(info.toString());
-//        })).join();
-//    }
 }

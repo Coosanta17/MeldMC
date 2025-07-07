@@ -81,7 +81,7 @@ public class DebugPinger {
 
         String host = parts[0];
 
-        return new InetSocketAddress(host, port);
+        return InetSocketAddress.createUnresolved(host, port);
     }
 
 
