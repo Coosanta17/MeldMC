@@ -21,7 +21,7 @@ public class MeldCodec {
                     .registerServerboundPacket(ClientIntentionPacket.class, ClientIntentionPacket::new)
             )
             .state(ProtocolState.STATUS, MinecraftPacketRegistry.builder()
-                    .registerClientboundPacket(MeldStatusResponsePacket.class, MeldStatusResponsePacket::new)
+                    .registerClientboundPacket(MeldClientboundStatusResponsePacket.class, MeldClientboundStatusResponsePacket::new)
                     .registerClientboundPacket(ClientboundPongResponsePacket.class, ClientboundPongResponsePacket::new)
                     .registerServerboundPacket(ServerboundStatusRequestPacket.class, ServerboundStatusRequestPacket::new)
                     .registerServerboundPacket(ServerboundPingRequestPacket.class, ServerboundPingRequestPacket::new)

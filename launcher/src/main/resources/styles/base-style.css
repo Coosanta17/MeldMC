@@ -61,6 +61,24 @@
     -fx-alignment: center-left;
 }
 
+.mc-tooltip {
+    -fx-background-color: #000000;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 3px;
+    -fx-font-size: 20px;
+    -fx-font-family: 'Minecraft Seven v2';
+    -fx-padding: 5px;
+}
+
+.mc-tooltip .tooltip-arrow {
+    -fx-background-color: transparent;
+}
+
+.support-indicator {
+    -fx-cursor: hand;
+}
+
 .mc-text-field:focused {
     -fx-border-color: white;
 }

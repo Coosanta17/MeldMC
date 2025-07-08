@@ -6,6 +6,7 @@ import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -22,8 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.ScaleFactorContainer {
@@ -48,6 +51,9 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     private GridPane header;
     @FXML
     private TextFlow motdFlow;
+    @FXML
+    private ImageView supportIndicator;
+    private final Dimension defaultSupportIndicatorSize = new Dimension(9, 8);
 
     public ServerEntry(int serverIndex, ExecutorService pingTask) {
         this.index = serverIndex;
@@ -93,12 +99,35 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
             rawIcon = ResourceUtil.getImage("/icons/unknown_server.png");
         }
         icon.setImage(rawIcon);
+
+        setupSupportIndicator();
+    }
+
+    private void setupSupportIndicator() {
+        if (server.isMeldSupported()) {
+            supportIndicator.setImage(ResourceUtil.getImage("/icons/checkmark.png"));
+        }
+
+        Tooltip tooltip = new Tooltip("This server is compatible with Meld.");
+        tooltip.getStyleClass().add("mc-tooltip");
+
+        supportIndicator.setVisible(false);
+
+        Tooltip.install(supportIndicator, tooltip);
     }
 
     private void updateIconSize() {
-        double scaledIconSize = defaultIconSize * getScaleFactor();
+        final double scaledIconSize = defaultIconSize * getScaleFactor();
         icon.setFitWidth(scaledIconSize);
         icon.setFitHeight(scaledIconSize);
+
+        updateSupportIconSize();
+    }
+
+    private void updateSupportIconSize() {
+        final double scaleFactor = getScaleFactor();
+        supportIndicator.setFitWidth(defaultSupportIndicatorSize.width * scaleFactor);
+        supportIndicator.setFitHeight(defaultSupportIndicatorSize.height * scaleFactor);
     }
 
     private void updatePlayerCount() {
@@ -153,6 +182,14 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
                 lastFaviconHash = newFaviconHash;
                 ServerListManager.getInstance().updateServer(index, server);
             }
+        }
+
+        if (server.isMeldSupported()) {
+            supportIndicator.setImage(ResourceUtil.getImage("/icons/checkmark.png"));
+            updateSupportIconSize();
+            supportIndicator.setVisible(true);
+        } else {
+            supportIndicator.setVisible(false);
         }
 
         updateMotd();

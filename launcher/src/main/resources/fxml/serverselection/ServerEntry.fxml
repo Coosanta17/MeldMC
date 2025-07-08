@@ -31,11 +31,13 @@
                     <ColumnConstraints hgrow="ALWAYS"/>
                     <ColumnConstraints/>
                     <ColumnConstraints/>
+                    <ColumnConstraints/>
                 </columnConstraints>
 
                 <Label fx:id="name" styleClass="server-name" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
                 <HBox fx:id="playercount" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
                 <Label fx:id="ping" styleClass="server-ping" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                <ImageView fx:id="supportIndicator" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
             </GridPane>
 
             <TextFlow fx:id="motdFlow" styleClass="server-motd"/>

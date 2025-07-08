@@ -18,14 +18,14 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MeldStatusResponsePacket extends ClientboundStatusResponsePacket {
+public class MeldClientboundStatusResponsePacket extends ClientboundStatusResponsePacket {
     // vanilla behavior falls back to false if the field was not sent
     private static final boolean ENFORCES_SECURE_CHAT_DEFAULT = false;
     private static final boolean MELD_SUPPORT_DEFAULT = false;
-    private static final Logger log = LoggerFactory.getLogger(MeldStatusResponsePacket.class);
+    private static final Logger log = LoggerFactory.getLogger(MeldClientboundStatusResponsePacket.class);
     private final @NonNull JsonObject jsonData;
 
-    public MeldStatusResponsePacket(ByteBuf in) {
+    public MeldClientboundStatusResponsePacket(ByteBuf in) {
         super(in);
         this.jsonData = super.getData();
     }
@@ -69,8 +69,8 @@ public class MeldStatusResponsePacket extends ClientboundStatusResponsePacket {
         }
 
         boolean meldSupported = MELD_SUPPORT_DEFAULT;
-        if (jsonData.has("meld-support")) {
-            meldSupported = jsonData.get("meld-support").getAsBoolean();
+        if (jsonData.has("meldSupport")) {
+            meldSupported = jsonData.get("meldSupport").getAsBoolean();
         }
 
         return new MeldServerStatusInfo(description, players, version, icon, enforcesSecureChat, meldSupported);
