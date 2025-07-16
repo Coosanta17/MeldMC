@@ -1,9 +1,10 @@
-package net.coosanta.meldmc.network;
+package net.coosanta.meldmc.network.packets;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBuf;
+import net.coosanta.meldmc.network.data.MeldServerStatusInfo;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.mcprotocollib.auth.GameProfile;

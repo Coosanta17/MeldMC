@@ -1,6 +1,6 @@
 package net.coosanta.meldmc.minecraft;
 
-import net.coosanta.meldmc.network.MeldServerStatusInfo;
+import net.coosanta.meldmc.network.data.MeldServerStatusInfo;
 import net.kyori.adventure.text.Component;
 import net.querz.nbt.tag.CompoundTag;
 import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;

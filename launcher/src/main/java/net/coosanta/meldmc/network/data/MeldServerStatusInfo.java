@@ -1,4 +1,4 @@
-package net.coosanta.meldmc.network;
+package net.coosanta.meldmc.network.data;
 
 import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;

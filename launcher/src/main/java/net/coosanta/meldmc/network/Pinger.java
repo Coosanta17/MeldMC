@@ -1,12 +1,19 @@
 package net.coosanta.meldmc.network;
 
+import io.netty.buffer.ByteBuf;
 import javafx.application.Platform;
 import net.coosanta.meldmc.gui.controllers.serverselection.ServerEntry;
 import net.coosanta.meldmc.minecraft.ServerInfo;
+import net.coosanta.meldmc.network.data.MeldCodec;
+import net.coosanta.meldmc.network.packets.ClientboundModlistResponsePacket;
+import net.coosanta.meldmc.network.packets.ServerboundModlistRequestPacket;
 import org.geysermc.mcprotocollib.network.ClientSession;
+import org.geysermc.mcprotocollib.network.codec.PacketDefinition;
+import org.geysermc.mcprotocollib.network.codec.PacketSerializer;
 import org.geysermc.mcprotocollib.network.factory.ClientNetworkSessionFactory;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.geysermc.mcprotocollib.protocol.data.handshake.HandshakeIntent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,16 +37,27 @@ public class Pinger {
                 .setProtocol(protocol)
                 .create();
 
+//        client.addListener(new MeldClientListener(HandshakeIntent.STATUS));
+
         client.setFlag(MinecraftConstants.SERVER_INFO_HANDLER_KEY, (session, info) ->
                 serverInfo.addStatusInfo(info));
 
         client.setFlag(MinecraftConstants.SERVER_PING_TIME_HANDLER_KEY, (session, pingTime) -> {
             serverInfo.setPing(pingTime);
             // FIXME: If you have such fast internet that takes less than 0.5ms to ping the server then it will think the server is offline due to rounding (Math.ceil exists?????).
-            if (serverInfo.getPing() > 0) {
+            if (pingTime > 0) {
                 serverInfo.setStatus(ServerInfo.Status.SUCCESSFUL);
             } else {
                 serverInfo.setStatus(ServerInfo.Status.UNREACHABLE);
+            }
+
+            if (serverInfo.isMeldSupported()) {
+                ServerboundModlistRequestPacket.sendInMeldChannel(client);
+                try { // FIXME
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
             future.complete(null);
         });
