@@ -23,6 +23,7 @@ public class MeldClientboundStatusResponsePacket extends ClientboundStatusRespon
     // vanilla behavior falls back to false if the field was not sent
     private static final boolean ENFORCES_SECURE_CHAT_DEFAULT = false;
     private static final boolean MELD_SUPPORT_DEFAULT = false;
+    private static final int DEFAULT_PORT = 8080;
     private static final Logger log = LoggerFactory.getLogger(MeldClientboundStatusResponsePacket.class);
     private final @NonNull JsonObject jsonData;
 
@@ -74,6 +75,11 @@ public class MeldClientboundStatusResponsePacket extends ClientboundStatusRespon
             meldSupported = jsonData.get("meldSupport").getAsBoolean();
         }
 
-        return new MeldServerStatusInfo(description, players, version, icon, enforcesSecureChat, meldSupported);
+        int port = DEFAULT_PORT;
+        if (jsonData.has("meldPort")) {
+            port = jsonData.get("meldPort").getAsInt();
+        }
+
+        return new MeldServerStatusInfo(description, players, version, icon, enforcesSecureChat, meldSupported, port);
     }
 }

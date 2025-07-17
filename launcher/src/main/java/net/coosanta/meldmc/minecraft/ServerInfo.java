@@ -61,6 +61,7 @@ public class ServerInfo {
      * Indicates if the server supports Meld functionality
      */
     private boolean meldSupported;
+    private int port;
 
     /**
      * Creates a new server info instance with the given name and address.
@@ -103,6 +104,7 @@ public class ServerInfo {
         this.status = serverInfo.status;
         this.description = serverInfo.description;
         this.meldSupported = serverInfo.meldSupported;
+        this.port = serverInfo.port;
     }
 
     /**
@@ -131,6 +133,7 @@ public class ServerInfo {
         this.versionInfo = statusInfo.getVersionInfo();
         if (statusInfo instanceof MeldServerStatusInfo) {
             this.meldSupported = ((MeldServerStatusInfo) statusInfo).isMeldSupported();
+            this.port = ((MeldServerStatusInfo) statusInfo).getPort();
         }
     }
 
@@ -259,6 +262,10 @@ public class ServerInfo {
      */
     public boolean isMeldSupported() {
         return meldSupported;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     @Override
