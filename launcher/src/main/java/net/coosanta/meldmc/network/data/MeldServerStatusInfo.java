@@ -7,35 +7,36 @@ import org.geysermc.mcprotocollib.protocol.data.status.VersionInfo;
 import org.jetbrains.annotations.Nullable;
 
 public class MeldServerStatusInfo extends ServerStatusInfo {
-    private final boolean meldSupported;
+    private final String address;
     private final int port;
+    private final boolean isHttps;
+    private final boolean selfSigned;
 
     public MeldServerStatusInfo(Component description, @Nullable PlayerInfo playerInfo,
                                 @Nullable VersionInfo versionInfo, byte[] iconPng,
-                                boolean enforcesSecureChat, boolean meldSupported, int port) {
-        super(description, playerInfo, versionInfo, iconPng, enforcesSecureChat);
-        this.meldSupported = meldSupported;
-        this.port = port;
-    }
+                                boolean enforcesSecureChat, String address, int port,
+                                boolean isHttps, boolean selfSigned) {
 
-    public boolean isMeldSupported() {
-        return meldSupported;
+        super(description, playerInfo, versionInfo, iconPng, enforcesSecureChat);
+        this.address = address;
+        this.port = port;
+        this.isHttps = isHttps;
+        this.selfSigned = selfSigned;
     }
 
     public int getPort() {
         return port;
     }
 
-    // Potentially unnecessary
-    public static MeldServerStatusInfo from(ServerStatusInfo original, boolean meldSupported, int port) {
-        return new MeldServerStatusInfo(
-                original.getDescription(),
-                original.getPlayerInfo(),
-                original.getVersionInfo(),
-                original.getIconPng(),
-                original.isEnforcesSecureChat(),
-                meldSupported,
-                port
-        );
+    public String getAddress() {
+        return address;
+    }
+
+    public boolean isHttps() {
+        return isHttps;
+    }
+
+    public boolean isSelfSigned() {
+        return selfSigned;
     }
 }

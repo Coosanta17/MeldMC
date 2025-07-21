@@ -210,4 +210,8 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     private double getScaleFactor() {
         return scaleFactorProperty.get();
     }
+
+    public ServerInfo getServer() {
+        return server;
+    }
 }

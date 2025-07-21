@@ -23,7 +23,6 @@ public class MeldClientboundStatusResponsePacket extends ClientboundStatusRespon
     // vanilla behavior falls back to false if the field was not sent
     private static final boolean ENFORCES_SECURE_CHAT_DEFAULT = false;
     private static final boolean MELD_SUPPORT_DEFAULT = false;
-    private static final int DEFAULT_PORT = 8080;
     private static final Logger log = LoggerFactory.getLogger(MeldClientboundStatusResponsePacket.class);
     private final @NonNull JsonObject jsonData;
 
@@ -73,13 +72,22 @@ public class MeldClientboundStatusResponsePacket extends ClientboundStatusRespon
         boolean meldSupported = MELD_SUPPORT_DEFAULT;
         if (jsonData.has("meldSupport")) {
             meldSupported = jsonData.get("meldSupport").getAsBoolean();
+            log.debug("Found server that supports meld!");
         }
 
-        int port = DEFAULT_PORT;
-        if (jsonData.has("meldPort")) {
-            port = jsonData.get("meldPort").getAsInt();
-        }
+        if (meldSupported) {
+            if (!jsonData.has("meldAddress") || !jsonData.has("meldPort") ||
+                    !jsonData.has("meldIsHttps") || !jsonData.has("meldSelfSigned")) {
+                throw new IllegalArgumentException("Missing fields in meldSupported response");
+            }
 
-        return new MeldServerStatusInfo(description, players, version, icon, enforcesSecureChat, meldSupported, port);
+            var address = jsonData.get("meldAddress").getAsString();
+            var port = jsonData.get("meldPort").getAsInt();
+            var isHttps = jsonData.get("meldIsHttps").getAsBoolean();
+            var selfSigned = jsonData.get("meldSelfSigned").getAsBoolean();
+
+            return new MeldServerStatusInfo(description, players, version, icon, enforcesSecureChat, address, port, isHttps, selfSigned);
+        }
+        return new ServerStatusInfo(description, players, version, icon, enforcesSecureChat);
     }
 }

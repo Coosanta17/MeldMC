@@ -19,49 +19,61 @@ import java.util.Base64;
  * and provides functionality for serialization to NBT.
  */
 public class ServerInfo {
-    /**
-     * Logger for this class
-     */
     private static final Logger log = LoggerFactory.getLogger(ServerInfo.class);
 
     /**
-     * The display name of the server
+     * The display name of the server.
      */
     private String name;
     /**
-     * The server address (hostname or IP)
+     * The server address (hostname or IP).
      */
     private String address;
 
     /**
-     * The server description/MOTD
+     * The server description/MOTD.
      */
     private Component description;
     /**
-     * The server favicon as a byte array (may be null)
+     * The server favicon as a byte array (may be null).
      */
     private @Nullable byte[] favicon;
     /**
-     * The ping time in milliseconds
+     * The ping time in milliseconds.
      */
     private long ping;
     /**
-     * Information about players on the server (may be null)
+     * Information about players on the server (may be null).
      */
     private @Nullable PlayerInfo players;
     /**
-     * Information about the server version
+     * Information about the server version.
      */
     private VersionInfo versionInfo;
     /**
-     * The current status of the server connection
+     * The current status of the server connection.
      */
     private ServerInfo.Status status = Status.INITIAL;
     /**
-     * Indicates if the server supports Meld functionality
+     * Indicates if the server supports Meld functionality.
      */
     private boolean meldSupported;
-    private int port;
+    /**
+     * Address the Meld HTTP server is located.
+     */
+    private String meldAddress;
+    /**
+     * Port the Meld HTTP server is located.
+     */
+    private int meldPort;
+    /**
+     * Indicates if the Meld HTTP server is secure.
+     */
+    private boolean isHttps;
+    /**
+     * Indicates if the Meld HTTPS server uses self-signed certificates.
+     */
+    private boolean selfSigned;
 
     /**
      * Creates a new server info instance with the given name and address.
@@ -104,7 +116,7 @@ public class ServerInfo {
         this.status = serverInfo.status;
         this.description = serverInfo.description;
         this.meldSupported = serverInfo.meldSupported;
-        this.port = serverInfo.port;
+        this.meldPort = serverInfo.meldPort;
     }
 
     /**
@@ -131,9 +143,12 @@ public class ServerInfo {
         this.favicon = statusInfo.getIconPng();
         this.players = statusInfo.getPlayerInfo();
         this.versionInfo = statusInfo.getVersionInfo();
-        if (statusInfo instanceof MeldServerStatusInfo) {
-            this.meldSupported = ((MeldServerStatusInfo) statusInfo).isMeldSupported();
-            this.port = ((MeldServerStatusInfo) statusInfo).getPort();
+        if (statusInfo instanceof MeldServerStatusInfo meldStatus) {
+            this.meldSupported = true; // Meld support checked in MeldClientboundStatusResponsePacket
+            this.meldAddress = meldStatus.getAddress();
+            this.meldPort = meldStatus.getPort();
+            this.isHttps = meldStatus.isHttps();
+            this.selfSigned = meldStatus.isSelfSigned();
         }
     }
 
@@ -264,8 +279,20 @@ public class ServerInfo {
         return meldSupported;
     }
 
-    public int getPort() {
-        return port;
+    public int getMeldPort() {
+        return meldPort;
+    }
+
+    public String getMeldAddress() {
+        return meldAddress;
+    }
+
+    public boolean isSelfSigned() {
+        return selfSigned;
+    }
+
+    public boolean isHttps() {
+        return isHttps;
     }
 
     @Override

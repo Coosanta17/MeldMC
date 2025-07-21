@@ -3,6 +3,8 @@ package net.coosanta.meldmc.network;
 import javafx.application.Platform;
 import net.coosanta.meldmc.gui.controllers.serverselection.ServerEntry;
 import net.coosanta.meldmc.minecraft.ServerInfo;
+import net.coosanta.meldmc.network.client.MeldClient;
+import net.coosanta.meldmc.network.client.MeldClientImpl;
 import net.coosanta.meldmc.network.data.MeldCodec;
 import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.network.factory.ClientNetworkSessionFactory;
@@ -33,8 +35,18 @@ public class Pinger {
 
 //        client.addListener(new MeldClientListener(HandshakeIntent.STATUS));
 
-        client.setFlag(MinecraftConstants.SERVER_INFO_HANDLER_KEY, (session, info) ->
-                serverInfo.addStatusInfo(info));
+        client.setFlag(MinecraftConstants.SERVER_INFO_HANDLER_KEY, (session, info) -> {
+            serverInfo.addStatusInfo(info);
+            if (serverInfo.isMeldSupported()) { // TODO: REMOVE DEBUG
+                MeldClient meldClient = new MeldClientImpl((serverInfo.getMeldAddress().equals("0.0.0.0")) ? address.getHostName() : serverInfo.getMeldAddress(), serverInfo.getMeldPort(), serverInfo.isHttps(), serverInfo.isSelfSigned());
+                meldClient.fetchModInfo()
+                        .thenAccept(msg -> log.info("{}", msg))
+                        .exceptionally(e -> {
+                            log.error("Failed to fetch mod info", e);
+                            return null;
+                        });
+            }
+        });
 
         client.setFlag(MinecraftConstants.SERVER_PING_TIME_HANDLER_KEY, (session, pingTime) -> {
             serverInfo.setPing(pingTime);
@@ -43,11 +55,6 @@ public class Pinger {
                 serverInfo.setStatus(ServerInfo.Status.SUCCESSFUL);
             } else {
                 serverInfo.setStatus(ServerInfo.Status.UNREACHABLE);
-            }
-
-            if (serverInfo.isMeldSupported()) {
-                // Do something TODO
-                log.debug("Meld Port: {}", serverInfo.getPort());
             }
             future.complete(null);
         });
