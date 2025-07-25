@@ -65,7 +65,7 @@ public class ServerListManager {
                 loadServersDatFromFile(serversDatFile);
             }
 
-            refreshServerCache();
+            setServerCacheFromNBT();
         } finally {
             lock.writeLock().unlock();
         }
@@ -136,13 +136,11 @@ public class ServerListManager {
     /**
      * Updates the in-memory cache of servers from the NBT data
      */
-    private void refreshServerCache() {
+    private void setServerCacheFromNBT() {
         lock.writeLock().lock();
         try {
-            ListTag<CompoundTag> serversList = extractServersList();
             serverCache.clear();
-
-            serversList.forEach(server -> serverCache.add(new ServerInfo(server)));
+            extractServersList().forEach(server -> serverCache.add(new ServerInfo(server)));
         } finally {
             lock.writeLock().unlock();
         }
@@ -170,10 +168,10 @@ public class ServerListManager {
     public void addServer(ServerInfo server) {
         lock.writeLock().lock();
         try {
-            ListTag<CompoundTag> serversList = extractServersList();
-            serversList.add(server.toNbt());
+            serverCache.add(server);
+            extractServersList().add(server.toNbt());
+
             saveServersDat();
-            refreshServerCache();
         } finally {
             lock.writeLock().unlock();
         }
@@ -182,21 +180,23 @@ public class ServerListManager {
     /**
      * Updates an existing server in the list
      *
-     * @param index The index of the server to update
+     * @param index         The index of the server to update
      * @param updatedServer The updated ServerInfo
      * @throws IndexOutOfBoundsException If the index is out of range
      */
     public void updateServer(int index, ServerInfo updatedServer) {
         lock.writeLock().lock();
         try {
+
             ListTag<CompoundTag> serversList = extractServersList();
             if (index < 0 || index >= serversList.size()) {
                 throw new IndexOutOfBoundsException("Server index out of range: " + index);
             }
 
+            serverCache.set(index, updatedServer);
             serversList.set(index, updatedServer.toNbt());
+
             saveServersDat();
-            refreshServerCache();
         } finally {
             lock.writeLock().unlock();
         }
@@ -216,9 +216,10 @@ public class ServerListManager {
                 throw new IndexOutOfBoundsException("Server index out of range: " + index);
             }
 
+            serverCache.remove(index);
             serversList.remove(index);
+
             saveServersDat();
-            refreshServerCache();
         } finally {
             lock.writeLock().unlock();
         }
@@ -228,7 +229,7 @@ public class ServerListManager {
      * Moves a server to a new position in the list
      *
      * @param fromIndex The current index of the server
-     * @param toIndex The desired index for the server
+     * @param toIndex   The desired index for the server
      * @throws IndexOutOfBoundsException If either index is out of range
      */
     public void moveServer(int fromIndex, int toIndex) {
@@ -236,14 +237,14 @@ public class ServerListManager {
         try {
             ListTag<CompoundTag> serversList = extractServersList();
             if (fromIndex < 0 || fromIndex >= serversList.size() ||
-                toIndex < 0 || toIndex >= serversList.size()) {
+                    toIndex < 0 || toIndex >= serversList.size()) {
                 throw new IndexOutOfBoundsException("Server index out of range");
             }
 
-            CompoundTag serverTag = serversList.remove(fromIndex);
-            serversList.add(toIndex, serverTag);
+            serverCache.add(toIndex, serverCache.remove(fromIndex));
+            serversList.add(toIndex, serversList.remove(fromIndex));
+
             saveServersDat();
-            refreshServerCache();
         } finally {
             lock.writeLock().unlock();
         }

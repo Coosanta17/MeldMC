@@ -63,12 +63,16 @@
 
 .mc-tooltip {
     -fx-background-color: #000000;
-    -fx-text-fill: #FFFFFF;
     -fx-border-color: #FFFFFF;
     -fx-border-width: 3px;
     -fx-font-size: 20px;
     -fx-font-family: 'Minecraft Seven v2';
     -fx-padding: 5px;
+    -fx-text-fill: #FFFFFF;
+}
+
+.mc-tooltip.error {
+    -fx-text-fill: #dd0000;
 }
 
 .mc-tooltip .tooltip-arrow {
@@ -115,6 +119,22 @@
 
 .server-motd-pinging {
     -fx-fill: #7a7a7a;
+}
+
+.mod-name {
+    -fx-fill: #FFFFFF;
+}
+
+.mod-version {
+    -fx-fill: #7a7a7a;
+}
+
+.mod-info-field-label {
+    -fx-fill: #9a9a9a;
+}
+
+.mod-info-field-value {
+    -fx-fill: #ffffff;
 }
 
 .pinger-motd-ping-error {

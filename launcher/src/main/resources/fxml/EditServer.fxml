@@ -32,7 +32,7 @@
             <Label fx:id="serverAddressLabel" text="Server Address" styleClass="body" alignment="BOTTOM_LEFT"/>
             <TextField fx:id="serverAddressInput" prefHeight="50" styleClass="mc-text-field"/>
 
-            <Region prefHeight="50"/>
+            <Region prefHeight="50"/> <!-- TODO: CSS sizes -->
 
             <MinecraftButton fx:id="cancel" text="Cancel"/>
             <MinecraftButton fx:id="done" text="Done"/>

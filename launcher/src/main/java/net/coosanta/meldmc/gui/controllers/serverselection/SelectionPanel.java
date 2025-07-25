@@ -55,7 +55,7 @@ public class SelectionPanel extends BorderPane {
                     Color.WHITE,
                     BorderStrokeStyle.SOLID,
                     new CornerRadii(0),
-                    new BorderWidths(2)
+                    new BorderWidths(3)
             )));
         }
 

@@ -1,9 +1,11 @@
 package net.coosanta.meldmc.gui.controllers.serverselection;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
 import net.coosanta.meldmc.gui.views.MainWindow;
+import net.coosanta.meldmc.minecraft.ServerInfo;
 import net.coosanta.meldmc.minecraft.ServerListManager;
 import net.coosanta.meldmc.utility.ResourceUtil;
 import org.slf4j.Logger;
@@ -70,7 +72,23 @@ public class ButtonPanel extends GridPane {
             return;
         }
         joinServerButton.setDisable(false);
-        serverInfoButton.setDisable(false);
+        if (server.getServer().getMeldData() == null) {
+            serverInfoButton.setDisable(true);
+
+            var tooltip = new Tooltip("Failed to get mod data!");
+            tooltip.getStyleClass().add("mc-tooltip-error");
+
+            Tooltip.install(serverInfoButton, tooltip);
+        } else if (!server.getServer().isMeldSupported()) {
+            serverInfoButton.setDisable(true);
+
+            var tooltip = new Tooltip("Server does not support meld.");
+            tooltip.getStyleClass().add("mc-tooltip");
+
+            Tooltip.install(serverInfoButton, tooltip);
+        } else {
+            serverInfoButton.setDisable(false);
+        }
         editButton.setDisable(false);
         deleteButton.setDisable(false);
     }
@@ -82,6 +100,8 @@ public class ButtonPanel extends GridPane {
 
     private void handleServerInfo() {
         log.debug("Server info clicked");
+        ServerInfo server = getSelectedServerInfo();
+        MainWindow.getInstance().getController().showMeldInfoPanel(server);
     }
 
     private void handleAddServer() {
@@ -89,38 +109,18 @@ public class ButtonPanel extends GridPane {
         MainWindow.getInstance().getController().showEditServerPanel();
     }
 
-    private Integer getSelectedServerIndex() {
-        Integer selectedIndex = MainWindow.getInstance().getController().getSelectionPanel().getSelectedServerIndex();
-        if (selectedIndex == null) {
-            log.error("No server selected");
-        }
-        return selectedIndex;
-    }
-
     private void handleEditServer() {
         log.debug("Edit clicked");
-        Integer selectedIndex = getSelectedServerIndex();
-        if (selectedIndex != null) {
-            MainWindow.getInstance().getController().showEditServerPanel(selectedIndex);
-        }
+        int selectedIndex = getSelectedServerIndex();
+        MainWindow.getInstance().getController().showEditServerPanel(selectedIndex);
     }
 
     private void handleDeleteServer() {
         log.debug("Delete clicked");
-        Integer selectedIndex = getSelectedServerIndex();
-        if (selectedIndex != null) {
-            ServerListManager.getInstance().removeServer(selectedIndex);
-            refreshCentrePanel();
-        }
+        int selectedIndex = getSelectedServerIndex();
+        ServerListManager.getInstance().removeServer(selectedIndex);
+        refreshCentrePanel();
         MainWindow.getInstance().getController().getSelectionPanel().selectEntry(null, null);
-    }
-
-    private void refreshCentrePanel() {
-        if (centrePanel != null) {
-            centrePanel.reload();
-        } else {
-            log.warn("Cannot refresh - CentrePanel reference null");
-        }
     }
 
     private void handleRefresh() {
@@ -130,6 +130,27 @@ public class ButtonPanel extends GridPane {
 
     private void handleSettings() {
         log.debug("Settings clicked");
+    }
+
+    private ServerInfo getSelectedServerInfo() {
+        int selectedIndex = getSelectedServerIndex();
+        return ServerListManager.getInstance().getServers().get(selectedIndex);
+    }
+
+    private int getSelectedServerIndex() {
+        Integer selectedIndex = MainWindow.getInstance().getController().getSelectionPanel().getSelectedServerIndex();
+        if (selectedIndex == null) {
+            throw new IllegalStateException("No server selected");
+        }
+        return selectedIndex;
+    }
+
+    private void refreshCentrePanel() {
+        if (centrePanel != null) {
+            centrePanel.reload();
+        } else {
+            log.warn("Cannot refresh - CentrePanel reference null");
+        }
     }
 
     void setCentrePanel(CentrePanel centrePanel) {

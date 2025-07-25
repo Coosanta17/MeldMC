@@ -1,5 +1,6 @@
 package net.coosanta.meldmc.minecraft;
 
+import net.coosanta.meldmc.network.client.MeldData;
 import net.coosanta.meldmc.network.data.MeldServerStatusInfo;
 import net.kyori.adventure.text.Component;
 import net.querz.nbt.tag.CompoundTag;
@@ -21,59 +22,20 @@ import java.util.Base64;
 public class ServerInfo {
     private static final Logger log = LoggerFactory.getLogger(ServerInfo.class);
 
-    /**
-     * The display name of the server.
-     */
     private String name;
-    /**
-     * The server address (hostname or IP).
-     */
     private String address;
-
-    /**
-     * The server description/MOTD.
-     */
     private Component description;
-    /**
-     * The server favicon as a byte array (may be null).
-     */
     private @Nullable byte[] favicon;
-    /**
-     * The ping time in milliseconds.
-     */
     private long ping;
-    /**
-     * Information about players on the server (may be null).
-     */
     private @Nullable PlayerInfo players;
-    /**
-     * Information about the server version.
-     */
     private VersionInfo versionInfo;
-    /**
-     * The current status of the server connection.
-     */
     private ServerInfo.Status status = Status.INITIAL;
-    /**
-     * Indicates if the server supports Meld functionality.
-     */
     private boolean meldSupported;
-    /**
-     * Address the Meld HTTP server is located.
-     */
     private String meldAddress;
-    /**
-     * Port the Meld HTTP server is located.
-     */
     private int meldPort;
-    /**
-     * Indicates if the Meld HTTP server is secure.
-     */
     private boolean isHttps;
-    /**
-     * Indicates if the Meld HTTPS server uses self-signed certificates.
-     */
     private boolean selfSigned;
+    private MeldData meldData;
 
     /**
      * Creates a new server info instance with the given name and address.
@@ -138,7 +100,7 @@ public class ServerInfo {
      *
      * @param statusInfo The server status information to add
      */
-    public void addStatusInfo(ServerStatusInfo statusInfo) {
+    public synchronized void addStatusInfo(ServerStatusInfo statusInfo) {
         this.description = statusInfo.getDescription();
         this.favicon = statusInfo.getIconPng();
         this.players = statusInfo.getPlayerInfo();
@@ -152,129 +114,64 @@ public class ServerInfo {
         }
     }
 
-    /**
-     * Sets the server favicon.
-     *
-     * @param favicon The favicon byte array, or null if none
-     */
+    public synchronized void setMeldData(MeldData meldData) {
+        this.meldData = meldData;
+    }
+
     public void setFavicon(@Nullable byte[] favicon) {
         this.favicon = favicon;
     }
 
-    /**
-     * Updates the status of this server.
-     *
-     * @param status The new server status
-     */
     public void setStatus(Status status) {
         this.status = status;
     }
 
-    /**
-     * Sets the display name of the server.
-     *
-     * @param name The new server name
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * Sets the server address.
-     *
-     * @param address The new server address
-     */
     public void setAddress(String address) {
         this.address = address;
     }
 
-    /**
-     * Sets the ping time for this server.
-     *
-     * @param ping The ping time in milliseconds
-     */
     public void setPing(long ping) {
         this.ping = ping;
     }
 
-    /**
-     * Gets the display name of this server.
-     *
-     * @return The server name
-     */
+
     public String getName() {
         return name;
     }
 
-    /**
-     * Gets the address of this server.
-     *
-     * @return The server address
-     */
     public String getAddress() {
         return address;
     }
 
-    /**
-     * Gets the server favicon.
-     *
-     * @return The favicon as a byte array, or null if none exists
-     */
     @Nullable
     public byte[] getFavicon() {
         return favicon;
     }
 
-    /**
-     * Gets information about the server version.
-     *
-     * @return The server version info
-     */
     public VersionInfo getVersionInfo() {
         return versionInfo;
     }
 
-    /**
-     * Gets information about players on the server.
-     *
-     * @return The player information, or null if not available
-     */
     public @Nullable PlayerInfo getPlayers() {
         return players;
     }
 
-    /**
-     * Gets the current connection status of this server.
-     *
-     * @return The server status
-     */
     public Status getStatus() {
         return status;
     }
 
-    /**
-     * Gets the server description/MOTD.
-     *
-     * @return The server description component
-     */
     public Component getDescription() {
         return description;
     }
 
-    /**
-     * Gets the ping time for this server.
-     *
-     * @return The ping time in milliseconds
-     */
     public long getPing() {
         return ping;
     }
 
-    /**
-     * Gets the supportedness of meld for this server.
-     *
-     * @return Meld support.
-     */
     public boolean isMeldSupported() {
         return meldSupported;
     }
@@ -295,6 +192,10 @@ public class ServerInfo {
         return isHttps;
     }
 
+    public synchronized MeldData getMeldData() {
+        return meldData;
+    }
+
     @Override
     public String toString() {
         return "ServerInfo{" +
@@ -313,25 +214,10 @@ public class ServerInfo {
      * Enum representing the different connection states of a server.
      */
     public enum Status {
-        /**
-         * Initial state before any connection attempts
-         */
         INITIAL,
-        /**
-         * Currently attempting to ping the server
-         */
         PINGING,
-        /**
-         * Server could not be reached
-         */
         UNREACHABLE,
-        /**
-         * Server was reached but is incompatible
-         */
         INCOMPATIBLE,
-        /**
-         * Successfully connected to the server
-         */
         SUCCESSFUL
     }
 }

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
+<?import net.coosanta.meldmc.gui.controllers.meldserverinfo.ModEntryInfo?>
+<?import net.coosanta.meldmc.gui.nodes.button.MinecraftButton?>
+<?import javafx.scene.text.Text?>
+<fx:root type="BorderPane" styleClass="server-icon" xmlns="http://javafx.com/javafx/17"
+         xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets top="5" right="10" bottom="5" left="10"/>
+    </padding>
+
+    <top>
+        <StackPane>
+            <padding>
+                <Insets top="20" right="5" bottom="5" left="5"/>
+            </padding>
+            <Label fx:id="header" styleClass="header"/>
+        </StackPane>
+    </top>
+
+    <left>
+        <ScrollPane fx:id="leftScrollpane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER"
+                    style="-fx-background-color: #000000">
+            <padding>
+                <Insets right="10"/>
+            </padding>
+
+            <StackPane fx:id="leftContainer" alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity">
+                <VBox fx:id="leftPanel" spacing="10">
+                    <TextFlow>
+                        <Text text="Minecraft Version: " styleClass="mod-info-field-label"/>
+                        <Text fx:id="mcVersion" styleClass="mod-info-field-value"/>
+                    </TextFlow>
+
+                    <TextFlow>
+                        <Text text="Mod Loader: " styleClass="mod-info-field-label"/>
+                        <Text fx:id="modLoader" styleClass="mod-info-field-value"/>
+                    </TextFlow>
+
+                    <TextFlow>
+                        <Text fx:id="modLoaderVersionLabel" styleClass="mod-info-field-label"/>
+                        <Text fx:id="modLoaderVersion" styleClass="mod-info-field-value"/>
+                    </TextFlow>
+
+                    <Region prefHeight="20"/> <!-- TODO: CSS sizes -->
+
+                    <VBox fx:id="modsPanel" spacing="10"/> <!-- Mods will be added programmatically -->
+                </VBox>
+            </StackPane>
+        </ScrollPane>
+    </left>
+
+    <center>
+        <ScrollPane fx:id="centreScrollPane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER"
+                    style="-fx-background-color: #000000">
+            <padding>
+                <Insets left="10"/>
+            </padding>
+            <ModEntryInfo fx:id="modInfo"/>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <GridPane hgap="10">
+            <padding>
+                <Insets top="10"/>
+            </padding>
+            <columnConstraints>
+                <ColumnConstraints percentWidth="33.33"/>
+                <ColumnConstraints percentWidth="33.33"/>
+                <ColumnConstraints percentWidth="33.33"/>
+            </columnConstraints>
+            <VBox GridPane.columnIndex="0">
+                <Label text="Search" styleClass="body"/>
+                <TextField fx:id="modSearch" styleClass="mc-text-field"/>
+            </VBox>
+            <MinecraftButton GridPane.columnIndex="1" fx:id="openModsFolder" text="Open Mods Folder"
+                             GridPane.fillHeight="false" GridPane.fillWidth="true" styleClass="mc-button"/>
+            <MinecraftButton GridPane.columnIndex="2" fx:id="done" text="Done"
+                             GridPane.fillHeight="false" GridPane.fillWidth="true" styleClass="mc-button"/>
+        </GridPane>
+    </bottom>
+</fx:root>

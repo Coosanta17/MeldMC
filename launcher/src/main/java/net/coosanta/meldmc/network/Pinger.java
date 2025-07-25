@@ -40,7 +40,7 @@ public class Pinger {
             if (serverInfo.isMeldSupported()) { // TODO: REMOVE DEBUG
                 MeldClient meldClient = new MeldClientImpl((serverInfo.getMeldAddress().equals("0.0.0.0")) ? address.getHostName() : serverInfo.getMeldAddress(), serverInfo.getMeldPort(), serverInfo.isHttps(), serverInfo.isSelfSigned());
                 meldClient.fetchModInfo()
-                        .thenAccept(msg -> log.info("{}", msg))
+                        .thenAccept(serverInfo::setMeldData)
                         .exceptionally(e -> {
                             log.error("Failed to fetch mod info", e);
                             return null;

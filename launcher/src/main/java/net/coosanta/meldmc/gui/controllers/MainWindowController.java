@@ -1,12 +1,16 @@
 package net.coosanta.meldmc.gui.controllers;
 
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import net.coosanta.meldmc.Main;
+import net.coosanta.meldmc.gui.controllers.meldserverinfo.MeldInfoPanel;
 import net.coosanta.meldmc.gui.views.Background;
 import net.coosanta.meldmc.gui.controllers.serverselection.SelectionPanel;
+import net.coosanta.meldmc.gui.views.LoadingScreen;
+import net.coosanta.meldmc.minecraft.ServerInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,20 +63,46 @@ public class MainWindowController {
 
     public void showEditServerPanel(Integer index) {
         log.debug("Showing Edit Server panel");
-        EditServer editServerPanel = new EditServer(index);
+        var editServerPanel = new EditServer(index);
 
-        root.getChildren().removeIf(node -> !(node instanceof Background));
-        root.getChildren().add(editServerPanel);
+        showScreen(editServerPanel);
+    }
+
+    public void showMeldInfoPanel(ServerInfo server) {
+        log.debug("Showing Meld Info Panel");
+        var meldInfoPanel = new MeldInfoPanel(server);
+
+        showScreen(meldInfoPanel);
+    }
+
+    public void showLoadingScreen(Node contents) {
+        log.debug("Showing loading screen");
+        var loadingScreen = new LoadingScreen(contents);
+
+        showScreen(loadingScreen);
     }
 
     public void showSelectionPanel() {
         log.debug("Setting Selection panel");
 
-        root.getChildren().removeIf(node -> !(node instanceof Background));
-
+        clearTheBoardMike();
         if (!root.getChildren().contains(selectionPanel)) {
             root.getChildren().add(selectionPanel);
         }
+    }
+
+    private void showScreen(Node screen) {
+        clearTheBoardMike();
+        root.getChildren().add(screen);
+
+//        if (screen instanceof Region region) {
+//            region.prefWidthProperty().bind(root.widthProperty());
+//            region.prefHeightProperty().bind(root.heightProperty());
+//        }
+    }
+
+    private void clearTheBoardMike() {
+        root.getChildren().removeIf(node -> !(node instanceof Background));
     }
 
     public SelectionPanel getSelectionPanel() {
