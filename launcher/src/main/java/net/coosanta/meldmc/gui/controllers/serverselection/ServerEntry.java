@@ -54,6 +54,8 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     @FXML
     private ImageView supportIndicator;
     private final Dimension defaultSupportIndicatorSize = new Dimension(9, 8);
+    @FXML
+    private StackPane supportIndicatorContainer;
 
     public ServerEntry(int serverIndex, ExecutorService pingTask) {
         this.index = serverIndex;
@@ -104,16 +106,14 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
     }
 
     private void setupSupportIndicator() {
-        if (server.isMeldSupported()) {
-            supportIndicator.setImage(ResourceUtil.getImage("/icons/checkmark.png"));
-        }
+        supportIndicator.setImage(ResourceUtil.getImage("/icons/checkmark.png"));
+
+        updateSupportIconSize();
 
         Tooltip tooltip = new Tooltip("This server is compatible with Meld.");
         tooltip.getStyleClass().add("mc-tooltip");
 
-        supportIndicator.setVisible(false);
-
-        Tooltip.install(supportIndicator, tooltip);
+        Tooltip.install(supportIndicatorContainer, tooltip);
     }
 
     private void updateIconSize() {
@@ -184,13 +184,7 @@ public class ServerEntry extends BorderPane implements ScaleFactorCssProperty.Sc
             }
         }
 
-        if (server.isMeldSupported()) {
-            supportIndicator.setImage(ResourceUtil.getImage("/icons/checkmark.png"));
-            updateSupportIconSize();
-            supportIndicator.setVisible(true);
-        } else {
-            supportIndicator.setVisible(false);
-        }
+        supportIndicatorContainer.setVisible(server.isMeldSupported());
 
         updateMotd();
     }

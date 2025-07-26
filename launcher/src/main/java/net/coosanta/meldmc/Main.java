@@ -30,8 +30,8 @@ public class Main {
 
         try {
             if (widthArgIndex != -1 && heightArgIndex != -1) {
-                width = Integer.parseInt(gameArgs.get(widthArgIndex + 1));
-                height = Integer.parseInt(gameArgs.get(heightArgIndex + 1));
+                width = Math.max(Integer.parseInt(gameArgs.get(widthArgIndex + 1)), DESIGN_WIDTH);
+                height = Math.max(Integer.parseInt(gameArgs.get(heightArgIndex + 1)), DESIGN_HEIGHT);
             }
         } catch (NumberFormatException e) {
             log.error("Invalid window size arguments", e);

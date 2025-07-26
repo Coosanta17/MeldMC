@@ -1,6 +1,5 @@
 package net.coosanta.meldmc.gui.controllers.serverselection;
 
-import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.VBox;
 import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.minecraft.ServerInfo;
@@ -16,7 +15,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static net.coosanta.meldmc.Main.*;
+import static net.coosanta.meldmc.Main.DESIGN_HEIGHT;
+import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
 
 public class CentrePanel extends VBox {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -26,8 +26,9 @@ public class CentrePanel extends VBox {
     private List<ServerEntry> serverList;
 
     public CentrePanel() {
-        setPrefSize(DESIGN_WIDTH, DESIGN_HEIGHT);
-        setMaxSize(DESIGN_WIDTH, DESIGN_HEIGHT);
+        // FIXME: non-hardcoded value. (50 is subtracted to account for borderwidth when server is selected)
+        setPrefSize(DESIGN_WIDTH - 50, DESIGN_HEIGHT);
+        setMaxSize(DESIGN_WIDTH - 50, DESIGN_HEIGHT);
 
         setManaged(true);
 
@@ -42,12 +43,8 @@ public class CentrePanel extends VBox {
     }
 
     private void loadFXML() {
-        FXMLLoader fxmlLoader = new FXMLLoader(ResourceUtil.loadResource("/fxml/serverselection/CentrePanel.fxml"));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-
         try {
-            fxmlLoader.load();
+            ResourceUtil.loadFXML("/fxml/serverselection/CentrePanel.fxml", this).load();
         } catch (IOException e) {
             throw new RuntimeException("Failed to load FXML for CentrePanel", e);
         }

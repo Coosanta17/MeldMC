@@ -12,7 +12,7 @@
     <top>
         <StackPane>
             <padding>
-                <Insets top="20" right="5" bottom="5" left="5"/>
+                <Insets top="20" right="5" left="5"/>
             </padding>
             <Label styleClass="header" text="Select Server"/>
         </StackPane>
@@ -21,7 +21,11 @@
     <center>
         <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER">
             <StackPane fx:id="centreContainer" alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity">
-                <CentrePanel fx:id="centrePanel"/>
+                <CentrePanel fx:id="centrePanel">
+                    <padding>
+                        <Insets top="5"/>
+                    </padding>
+                </CentrePanel>
             </StackPane>
         </ScrollPane>
     </center>

@@ -3,7 +3,6 @@ package net.coosanta.meldmc.gui.controllers.serverselection;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import net.coosanta.meldmc.utility.ResourceUtil;
 
 import javax.annotation.Nullable;
@@ -44,19 +43,14 @@ public class SelectionPanel extends BorderPane {
 
     public void selectEntry(ServerEntry newSelection, Integer index) {
         if (selectedServer != null) {
-            selectedServer.setBorder(null);
+            selectedServer.getStyleClass().remove("entry-selected");
         }
 
         selectedServer = newSelection;
         selectedServerIndex = index;
 
         if (newSelection != null) {
-            selectedServer.setBorder(new Border(new BorderStroke(
-                    Color.WHITE,
-                    BorderStrokeStyle.SOLID,
-                    new CornerRadii(0),
-                    new BorderWidths(3)
-            )));
+            selectedServer.getStyleClass().add("entry-selected");
         }
 
         buttonPane.serverSelected(selectedServer);

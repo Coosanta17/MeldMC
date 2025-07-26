@@ -33,6 +33,10 @@
 
             <StackPane fx:id="leftContainer" alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity">
                 <VBox fx:id="leftPanel" spacing="10">
+                    <padding>
+                        <Insets right="3" left="3"/>
+                    </padding>
+
                     <TextFlow>
                         <Text text="Minecraft Version: " styleClass="mod-info-field-label"/>
                         <Text fx:id="mcVersion" styleClass="mod-info-field-value"/>

@@ -8,7 +8,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
@@ -128,17 +127,12 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
 
     private void selectMod(ModEntry newSelection) {
         if (selectedMod != null) {
-            selectedMod.setBorder(null);
+            selectedMod.getStyleClass().remove("entry-selected");
         }
 
         if (newSelection != null) {
             modInfo.updateServer(newSelection.getModData());
-            newSelection.setBorder(new Border(new BorderStroke(
-                    Color.WHITE,
-                    BorderStrokeStyle.SOLID,
-                    new CornerRadii(0),
-                    new BorderWidths(3)
-            )));
+            newSelection.getStyleClass().add("entry-selected");
         }
 
         selectedMod = newSelection;

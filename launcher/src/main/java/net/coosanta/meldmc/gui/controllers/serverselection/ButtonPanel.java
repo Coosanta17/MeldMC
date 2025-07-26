@@ -66,7 +66,7 @@ public class ButtonPanel extends GridPane {
         deleteButton.setDisable(true);
     }
 
-    public void serverSelected(ServerEntry server) {
+    public void serverSelected(ServerEntry server) { // FIXME: Incorrect placement and styling of error tooltips.
         if (server == null) {
             disableServerButtons();
             return;

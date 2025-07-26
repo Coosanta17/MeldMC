@@ -3,13 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
-
 <fx:root type="BorderPane" styleClass="server-icon" xmlns="http://javafx.com/javafx/17"
          xmlns:fx="http://javafx.com/fxml/1">
     <padding>
@@ -37,7 +32,14 @@
                 <Label fx:id="name" styleClass="server-name" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
                 <HBox fx:id="playercount" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
                 <Label fx:id="ping" styleClass="server-ping" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                <ImageView fx:id="supportIndicator" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                <StackPane fx:id="supportIndicatorContainer" styleClass="stack-pane-rounded"
+                           GridPane.columnIndex="3" GridPane.rowIndex="0" visible="false">
+                    <padding>
+                        <Insets top="5" right="5" bottom="5" left="5"/>
+                    </padding>
+
+                    <ImageView fx:id="supportIndicator" smooth="false"/>
+                </StackPane>
             </GridPane>
 
             <TextFlow fx:id="motdFlow" styleClass="server-motd"/>
