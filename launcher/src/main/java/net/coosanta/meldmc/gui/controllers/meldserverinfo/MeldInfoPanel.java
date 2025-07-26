@@ -59,7 +59,7 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
     @FXML
     MinecraftButton done;
 
-    List<ModEntry> serverMods = new ArrayList<ModEntry>();
+    List<ModEntry> serverMods = new ArrayList<>();
     @FXML
     private ModEntryInfo modInfo;
 
@@ -101,14 +101,14 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
                 return;
             }
 
-            var modEntry = new ModEntry(value);
+            ModEntry modEntry = new ModEntry(value);
 
             modEntry.setOnMouseClicked(event -> selectMod(modEntry));
 
             serverMods.add(modEntry);
-
-            modsPanel.getChildren().add(modEntry);
         });
+
+        modsPanel.getChildren().addAll(serverMods);
 
         done.setOnAction(e -> MainWindow.getInstance().getController().showSelectionPanel());
         modSearch.textProperty().addListener((observable, oldValue, newValue) -> searchMod(newValue));

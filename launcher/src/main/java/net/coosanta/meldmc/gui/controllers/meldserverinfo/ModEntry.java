@@ -1,27 +1,41 @@
 package net.coosanta.meldmc.gui.controllers.meldserverinfo;
 
+import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import net.coosanta.meldmc.network.client.MeldData;
 import net.coosanta.meldmc.utility.ResourceUtil;
 
-public class ModEntry extends BorderPane {
+import java.io.IOException;
+
+public class ModEntry extends HBox {
     private final MeldData.ClientMod modData;
 
-    private final Label name;
-    private final Label version;
+    @FXML
+    private Label name;
+    @FXML
+    private Label version;
+    @FXML
+    private ImageView sourceIcon;
 
     public ModEntry(MeldData.ClientMod data) {
-        this.name = new Label(data.modname());
-        this.version = new Label(data.modVersion());
+        try {
+            ResourceUtil.loadFXML("/fxml/meldserverinfo/ModEntry.fxml", this).load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        getStylesheets().add(ResourceUtil.loadResource("/styles/base-style.css").toExternalForm());
+        this.name.setText(data.modname());
+        this.version.setText(data.modVersion());
 
-        name.getStyleClass().add("mod-name");
-        version.getStyleClass().add("mod-version");
-
-        setTop(name);
-        setBottom(version);
+        if (data.modSource() == MeldData.ClientMod.ModSource.SERVER) {
+            this.sourceIcon.setImage(ResourceUtil.getImage("/icons/mod_distributors/server.png"));
+        } else if (data.modSource() == MeldData.ClientMod.ModSource.MODRINTH) {
+            this.sourceIcon.setImage(ResourceUtil.getImage("/icons/mod_distributors/modrinth.png"));
+        } else {
+            this.sourceIcon.setImage(ResourceUtil.getImage("/icons/mod_distributors/warn.png"));
+        }
 
         this.modData = data;
     }

@@ -122,11 +122,11 @@
 }
 
 .mod-name {
-    -fx-fill: #FFFFFF;
+    -fx-text-fill: #FFFFFF;
 }
 
 .mod-version {
-    -fx-fill: #7a7a7a;
+    -fx-text-fill: #7a7a7a;
 }
 
 .mod-info-field-label {
