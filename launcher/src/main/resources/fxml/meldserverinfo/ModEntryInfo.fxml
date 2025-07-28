@@ -30,6 +30,11 @@
         <Text fx:id="filename" styleClass="mod-info-field-value"/>
     </TextFlow>
 
+    <TextFlow>
+        <Text fx:id="fileSizeLabel" text="File size: " styleClass="mod-info-field-label" visible="false"/>
+        <Text fx:id="fileSize" styleClass="mod-info-field-value"/>
+    </TextFlow>
+
     <TextFlow fx:id="urlFlow" visible="false">
         <Text fx:id="urlLabel" text="File url: " styleClass="mod-info-field-label"/>
         <Text fx:id="url" styleClass="mod-info-field-value"/>

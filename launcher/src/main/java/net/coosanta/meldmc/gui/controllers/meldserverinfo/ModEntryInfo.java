@@ -25,6 +25,10 @@ public class ModEntryInfo extends VBox {
     @FXML
     private Text filenameLabel;
     @FXML
+    private Text fileSize;
+    @FXML
+    private Text fileSizeLabel;
+    @FXML
     private TextFlow urlFlow;
     @FXML
     private Text url;
@@ -56,6 +60,7 @@ public class ModEntryInfo extends VBox {
     public void updateServer(MeldData.ClientMod clientMod) {
         authorsLabel.setVisible(true);
         filenameLabel.setVisible(true);
+        fileSizeLabel.setVisible(true);
         modIdLabel.setVisible(true);
         hashLabel.setVisible(true);
         versionLabel.setVisible(true);
@@ -64,6 +69,11 @@ public class ModEntryInfo extends VBox {
         version.setText(clientMod.modVersion());
         hash.setText(clientMod.hash());
         filename.setText(clientMod.filename());
+        if (clientMod.fileSize() >= 1e+6) {
+            fileSize.setText(String.format("%.2f MB", clientMod.fileSize() / 1e+6));
+        } else {
+            fileSize.setText(String.format("%.2f KB", clientMod.fileSize() / 1000.0));
+        }
         if (clientMod.url() == null) {
             urlFlow.setVisible(false);
         } else {
