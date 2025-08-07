@@ -1,5 +1,7 @@
 package net.coosanta.meldmc.network.client;
 
+import net.coosanta.meldmc.network.ProgressCallback;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -36,18 +38,4 @@ public interface MeldClient {
      * Closes the client and releases resources.
      */
     void close();
-
-    /**
-     * Interface for progress updates.
-     */
-    interface ProgressCallback {
-        /**
-         * Called with progress updates.
-         *
-         * @param bytesTransferred Number of bytes transferred so far
-         * @param totalBytes Total number of bytes to transfer, or -1 if unknown
-         * @param fileName Name of the current file, or null if not applicable
-         */
-        void onProgress(long bytesTransferred, long totalBytes, String fileName);
-    }
 }

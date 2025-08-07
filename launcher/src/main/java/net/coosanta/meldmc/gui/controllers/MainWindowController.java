@@ -7,8 +7,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.gui.controllers.meldserverinfo.MeldInfoPanel;
-import net.coosanta.meldmc.gui.views.Background;
 import net.coosanta.meldmc.gui.controllers.serverselection.SelectionPanel;
+import net.coosanta.meldmc.gui.views.Background;
 import net.coosanta.meldmc.gui.views.LoadingScreen;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import org.slf4j.Logger;
@@ -63,26 +63,20 @@ public class MainWindowController {
 
     public void showEditServerPanel(Integer index) {
         log.debug("Showing Edit Server panel");
-        var editServerPanel = new EditServer(index);
-
-        showScreen(editServerPanel);
+        showScreen(new EditServer(index));
     }
 
     public void showMeldInfoPanel(ServerInfo server) {
         log.debug("Showing Meld Info Panel");
-        var meldInfoPanel = new MeldInfoPanel(server);
-
-        showScreen(meldInfoPanel);
+        showScreen(new MeldInfoPanel(server));
     }
 
     public void showLoadingScreen(Node contents) {
         log.debug("Showing loading screen");
-        var loadingScreen = new LoadingScreen(contents);
-
-        showScreen(loadingScreen);
+        showScreen(new LoadingScreen(contents));
     }
 
-    public void showSelectionPanel() {
+    public void showSelectionPanel() { // FIXME: Pinging thing shown when ping already done after showing selection panel
         log.debug("Setting Selection panel");
 
         clearTheBoardMike();
@@ -91,14 +85,9 @@ public class MainWindowController {
         }
     }
 
-    private void showScreen(Node screen) {
+    public void showScreen(Node screen) {
         clearTheBoardMike();
         root.getChildren().add(screen);
-
-//        if (screen instanceof Region region) {
-//            region.prefWidthProperty().bind(root.widthProperty());
-//            region.prefHeightProperty().bind(root.heightProperty());
-//        }
     }
 
     private void clearTheBoardMike() {

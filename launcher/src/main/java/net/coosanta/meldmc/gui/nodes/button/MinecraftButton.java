@@ -7,6 +7,7 @@ import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Skin;
 import javafx.scene.image.Image;
@@ -133,6 +134,20 @@ public class MinecraftButton extends ButtonBase implements ScaleFactorCssPropert
             fireEvent(new ActionEvent());
             Platform.runLater(this::disarm);
         }
+    }
+
+    /**
+     * Creates a new MinecraftButton with the specified text and action handler.
+     * Simplifies creation of buttons with action handlers.
+     *
+     * @param text   The text to display on the button.
+     * @param action The action handler to execute when the button is clicked.
+     * @return A new MinecraftButton instance with the specified text and action handler.
+     */
+    public static MinecraftButton createButton(String text, EventHandler<ActionEvent> action) {
+        MinecraftButton button = new MinecraftButton(text);
+        button.setOnAction(action);
+        return button;
     }
 
     // CSS integration

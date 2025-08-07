@@ -206,9 +206,10 @@ public class ServerListManager {
      * Removes a server from the list
      *
      * @param index The index of the server to remove
+     * @param createBackup If there should be a server instance backup created.
      * @throws IndexOutOfBoundsException If the index is out of range
      */
-    public void removeServer(int index) {
+    public void removeServer(int index, boolean createBackup) {
         lock.writeLock().lock();
         try {
             ListTag<CompoundTag> serversList = extractServersList();
@@ -216,7 +217,17 @@ public class ServerListManager {
                 throw new IndexOutOfBoundsException("Server index out of range: " + index);
             }
 
-            serverCache.remove(index);
+            ServerInfo removed = serverCache.remove(index);
+
+            GameInstance instance = InstanceManager.getInstance(removed.getAddress());
+            if (instance != null) {
+                if (serverCache.contains(removed)) { // Double-checking for safety
+                    instance.backupInstanceDirectory(null);
+                } else {
+                    instance.deleteInstance(createBackup, null); // TODO
+                }
+            }
+
             serversList.remove(index);
 
             saveServersDat();

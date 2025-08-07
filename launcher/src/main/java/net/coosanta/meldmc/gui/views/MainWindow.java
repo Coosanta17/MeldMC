@@ -60,6 +60,8 @@ public class MainWindow extends Application {
 
         instance = this;
 
+        controller.getSelectionPanel().getButtonPane().setMainController(controller);
+
         stage.show();
     }
 }

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 
 /**
  * Represents information about a Minecraft server.
@@ -78,7 +79,11 @@ public class ServerInfo {
         this.status = serverInfo.status;
         this.description = serverInfo.description;
         this.meldSupported = serverInfo.meldSupported;
+        this.meldAddress = serverInfo.meldAddress;
         this.meldPort = serverInfo.meldPort;
+        this.isHttps = serverInfo.isHttps;
+        this.selfSigned = serverInfo.selfSigned;
+        this.meldData = serverInfo.meldData;
     }
 
     /**
@@ -116,6 +121,7 @@ public class ServerInfo {
 
     public synchronized void setMeldData(MeldData meldData) {
         this.meldData = meldData;
+        InstanceManager.getInstance(address).setMeldData(meldData);
     }
 
     public void setFavicon(@Nullable byte[] favicon) {
@@ -208,6 +214,16 @@ public class ServerInfo {
                 ", versionInfo=" + versionInfo +
                 ", status=" + status +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof ServerInfo that && Objects.equals(address, that.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(address);
     }
 
     /**

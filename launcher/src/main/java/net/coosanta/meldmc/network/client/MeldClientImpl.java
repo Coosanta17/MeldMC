@@ -1,6 +1,7 @@
 package net.coosanta.meldmc.network.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.coosanta.meldmc.network.ProgressCallback;
 import net.coosanta.meldmc.utility.SSLUtils;
 import org.jetbrains.annotations.NotNull;
 

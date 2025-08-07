@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.layout.*?>
+<fx:root type="StackPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox alignment="CENTER" spacing="10">
+
+        <StackPane fx:id="confirmation"/>
+
+        <HBox fx:id="buttonsBox" spacing="10" alignment="CENTER"/>
+    </VBox>
+</fx:root>

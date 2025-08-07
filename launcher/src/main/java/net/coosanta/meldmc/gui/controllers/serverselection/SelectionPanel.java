@@ -2,7 +2,8 @@ package net.coosanta.meldmc.gui.controllers.serverselection;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import net.coosanta.meldmc.utility.ResourceUtil;
 
 import javax.annotation.Nullable;
@@ -41,6 +42,15 @@ public class SelectionPanel extends BorderPane {
         }
     }
 
+    public void deselectEntries() {
+        if (selectedServer != null) {
+            selectedServer.getStyleClass().remove("entry-selected");
+        }
+        selectedServer = null;
+        selectedServerIndex = null;
+        buttonPane.disableServerButtons();
+    }
+
     public void selectEntry(ServerEntry newSelection, Integer index) {
         if (selectedServer != null) {
             selectedServer.getStyleClass().remove("entry-selected");
@@ -62,5 +72,9 @@ public class SelectionPanel extends BorderPane {
 
     public CentrePanel getCentrePanel() {
         return centrePanel;
+    }
+
+    public ButtonPanel getButtonPane() {
+        return buttonPane;
     }
 }

@@ -7,11 +7,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
 import net.coosanta.meldmc.gui.views.MainWindow;
+import net.coosanta.meldmc.minecraft.InstanceManager;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import net.coosanta.meldmc.network.client.MeldData;
 import net.coosanta.meldmc.utility.ResourceUtil;
@@ -19,6 +22,7 @@ import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,7 +58,9 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
     @FXML
     TextField modSearch;
     @FXML
-    MinecraftButton openModsFolder; // TODO: Implement, if needed
+    MinecraftButton joinServer;
+    @FXML
+    MinecraftButton openInstanceFolder;
     @FXML
     MinecraftButton done;
 
@@ -109,6 +115,19 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
 
         modsPanel.getChildren().addAll(serverMods);
 
+        openInstanceFolder.setOnAction(event -> {
+            try {
+                if (!Desktop.isDesktopSupported()) throw new IOException("Java desktop API is not supported on this machine.");
+                Desktop.getDesktop().open(InstanceManager.getInstance(server.getAddress()).getInstanceDir().toFile());
+            } catch (IOException e) {
+                log.error("Failed to open instance folder for server address: {}", server.getAddress(), e);
+            }
+        });
+
+        joinServer.setOnAction(e -> {
+            log.info("akdjfhsdkfjchhkewjfhkdsajhdkasdjhksdfjhaksdfjdhskf (Join server pressed)");
+            // TODO JOIN THE FUCKING SERVER
+        });
         done.setOnAction(e -> MainWindow.getInstance().getController().showSelectionPanel());
         modSearch.textProperty().addListener((observable, oldValue, newValue) -> searchMod(newValue));
 

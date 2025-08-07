@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.*?>
 <?import net.coosanta.meldmc.gui.controllers.meldserverinfo.ModEntryInfo?>
 <?import net.coosanta.meldmc.gui.nodes.button.MinecraftButton?>
-<?import javafx.scene.text.Text?>
 <fx:root type="BorderPane" styleClass="server-icon" xmlns="http://javafx.com/javafx/17"
          xmlns:fx="http://javafx.com/fxml/1">
     <padding>
@@ -75,18 +72,27 @@
             <padding>
                 <Insets top="10"/>
             </padding>
+
             <columnConstraints>
-                <ColumnConstraints percentWidth="33.33"/>
-                <ColumnConstraints percentWidth="33.33"/>
-                <ColumnConstraints percentWidth="33.33"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
             </columnConstraints>
+
+
             <VBox GridPane.columnIndex="0">
                 <Label text="Search" styleClass="body"/>
                 <TextField fx:id="modSearch" styleClass="mc-text-field"/>
             </VBox>
-            <MinecraftButton GridPane.columnIndex="1" fx:id="openModsFolder" text="Open Mods Folder"
+
+            <MinecraftButton GridPane.columnIndex="1" fx:id="joinServer" text="Join Server"
                              GridPane.fillHeight="false" GridPane.fillWidth="true" styleClass="mc-button"/>
-            <MinecraftButton GridPane.columnIndex="2" fx:id="done" text="Done"
+
+            <MinecraftButton GridPane.columnIndex="2" fx:id="openInstanceFolder" text="Open Instance Folder"
+                             GridPane.fillHeight="false" GridPane.fillWidth="true" styleClass="mc-button"/>
+
+            <MinecraftButton GridPane.columnIndex="3" fx:id="done" text="Done"
                              GridPane.fillHeight="false" GridPane.fillWidth="true" styleClass="mc-button"/>
         </GridPane>
     </bottom>

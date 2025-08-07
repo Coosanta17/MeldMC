@@ -2,6 +2,7 @@ package net.coosanta.meldmc.network;
 
 import javafx.application.Platform;
 import net.coosanta.meldmc.gui.controllers.serverselection.ServerEntry;
+import net.coosanta.meldmc.minecraft.InstanceManager;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import net.coosanta.meldmc.network.client.MeldClient;
 import net.coosanta.meldmc.network.client.MeldClientImpl;
@@ -33,10 +34,9 @@ public class Pinger {
                 .setProtocol(protocol)
                 .create();
 
-//        client.addListener(new MeldClientListener(HandshakeIntent.STATUS));
-
         client.setFlag(MinecraftConstants.SERVER_INFO_HANDLER_KEY, (session, info) -> {
             serverInfo.addStatusInfo(info);
+            InstanceManager.newInstance(serverInfo.getAddress());
             if (serverInfo.isMeldSupported()) { // TODO: REMOVE DEBUG
                 MeldClient meldClient = new MeldClientImpl((serverInfo.getMeldAddress().equals("0.0.0.0")) ? address.getHostName() : serverInfo.getMeldAddress(), serverInfo.getMeldPort(), serverInfo.isHttps(), serverInfo.isSelfSigned());
                 meldClient.fetchModInfo()

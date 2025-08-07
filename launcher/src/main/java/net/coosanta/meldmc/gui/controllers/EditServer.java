@@ -96,7 +96,7 @@ public class EditServer extends BorderPane implements ScaleFactorCssProperty.Sca
         MainWindowController mainWindowController = MainWindow.getInstance().getController();
 
         mainWindowController.getSelectionPanel().getCentrePanel().reload();
-        mainWindowController.getSelectionPanel().selectEntry(null, null);
+        mainWindowController.getSelectionPanel().deselectEntries();
 
         mainWindowController.showSelectionPanel();
     }

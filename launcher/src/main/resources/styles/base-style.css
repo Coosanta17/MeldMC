@@ -27,6 +27,11 @@
     -scale-factor: 5;
 }
 
+.white {
+    -fx-fill: white;
+    -fx-text-fill: white;
+}
+
 .mc-button {
     -scale-factor: 3;
 }
@@ -98,6 +103,7 @@
 
 .body {
     -fx-text-fill: #9e9e9e;
+    -fx-fill: #9e9e9e;
 }
 
 .header {
