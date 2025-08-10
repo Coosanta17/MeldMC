@@ -22,7 +22,7 @@ import net.coosanta.meldmc.utility.ScaleFactorCssProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -117,7 +117,8 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
 
         openInstanceFolder.setOnAction(event -> {
             try {
-                if (!Desktop.isDesktopSupported()) throw new IOException("Java desktop API is not supported on this machine.");
+                if (!Desktop.isDesktopSupported())
+                    throw new IOException("Java desktop API is not supported on this machine.");
                 Desktop.getDesktop().open(InstanceManager.getInstance(server.getAddress()).getInstanceDir().toFile());
             } catch (IOException e) {
                 log.error("Failed to open instance folder for server address: {}", server.getAddress(), e);

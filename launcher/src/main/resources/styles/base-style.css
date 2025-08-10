@@ -158,6 +158,13 @@
     -fx-fill: #ffffff;
 }
 
+.selectable-textfield-white {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+    -fx-padding: 0;
+}
+
 .stack-pane-rounded {
     -fx-background-color: rgba(0, 0, 0, 0.75);
     -fx-background-radius: 2;

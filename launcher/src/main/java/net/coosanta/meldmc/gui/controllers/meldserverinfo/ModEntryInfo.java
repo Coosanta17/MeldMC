@@ -1,6 +1,8 @@
 package net.coosanta.meldmc.gui.controllers.meldserverinfo;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -9,7 +11,7 @@ import net.coosanta.meldmc.utility.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 
@@ -22,7 +24,7 @@ public class ModEntryInfo extends VBox {
     @FXML
     private Text versionLabel;
     @FXML
-    private Text hash;
+    private TextField hash;
     @FXML
     private Text hashLabel;
     @FXML
@@ -46,9 +48,9 @@ public class ModEntryInfo extends VBox {
     @FXML
     private Text description;
     @FXML
-    private TextFlow urlFlow;
+    private HBox urlFlow;
     @FXML
-    private Text url;
+    private TextField url;
     @FXML
     private TextFlow viewProjectFlow;
     @FXML

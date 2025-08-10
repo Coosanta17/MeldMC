@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.HBox?>
 <fx:root type="VBox" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
@@ -18,10 +21,10 @@
         <Text fx:id="version" styleClass="mod-info-field-value"/>
     </TextFlow>
 
-    <TextFlow>
+    <HBox>
         <Text fx:id="hashLabel" text="Hash (SHA-512): " styleClass="mod-info-field-label" visible="false"/>
-        <Text fx:id="hash" styleClass="mod-info-field-value"/>
-    </TextFlow>
+        <TextField fx:id="hash" editable="false" HBox.hgrow="ALWAYS" styleClass="selectable-textfield-white"/>
+    </HBox>
 
     <TextFlow>
         <Text fx:id="filenameLabel" text="Filename: " styleClass="mod-info-field-label" visible="false"/>
@@ -47,10 +50,12 @@
         <Text fx:id="description" styleClass="mod-info-field-value"/>
     </TextFlow>
 
-    <TextFlow fx:id="urlFlow" visible="false">
+    <Region prefHeight="20"/>
+
+    <HBox fx:id="urlFlow" visible="false" >
         <Text fx:id="urlLabel" text="File url: " styleClass="mod-info-field-label"/>
-        <Text fx:id="url" styleClass="mod-info-field-value"/>
-    </TextFlow>
+        <TextField fx:id="url" editable="false" HBox.hgrow="ALWAYS" styleClass="selectable-textfield-white"/>
+    </HBox>
 
     <TextFlow fx:id="viewProjectFlow" visible="false">
         <Text fx:id="viewProject" styleClass="url-hyperlink"/>
