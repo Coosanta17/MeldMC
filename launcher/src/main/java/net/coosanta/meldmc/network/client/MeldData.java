@@ -17,8 +17,9 @@ public record MeldData(String mcVersion, ModLoader modLoader, String modLoaderVe
         QUILT
     }
 
-    public record ClientMod(String modVersion, String hash, @Nullable String url, String filename,
-                            String modname, String modId, String authors, String description, long fileSize) {
+    public record ClientMod(String modVersion, String hash, @Nullable String url, @Nullable String projectUrl,
+                            @Nullable String projectId, String filename, String modname, String modId, String authors,
+                            String description, long fileSize) {
 
         public ModSource modSource() {
             if (url == null) return ModSource.SERVER;

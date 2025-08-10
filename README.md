@@ -19,5 +19,8 @@ Launches mods the easy way
 - [ ] Deleting Instance With callback
 - [ ] Hash verifying (done?????) `MeldData`
 - [ ] Remove Debug + Do something about the <0.5 ping time display bug assuming timeout even when there is ping `Pinger`
+- [ ] Resource + Shader packs
+- [ ] Modrinth custom `User-Agent` header.
+- [ ] Translations
 - [ ] Everything else that I haven't though of.
 - [ ] Bugs Bugs Bugs!!!

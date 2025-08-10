@@ -49,6 +49,12 @@
     -fx-background-color: #000000;
 }
 
+.url-hyperlink {
+    -fx-fill: blue;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
 .mc-button-text {
     -fx-font-size: 1em;
     -fx-text-fill: #FFFFFF;

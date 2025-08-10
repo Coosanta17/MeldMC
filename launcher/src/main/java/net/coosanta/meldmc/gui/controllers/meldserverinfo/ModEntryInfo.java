@@ -6,10 +6,15 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import net.coosanta.meldmc.network.client.MeldData;
 import net.coosanta.meldmc.utility.ResourceUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
+import java.net.URI;
 
 public class ModEntryInfo extends VBox {
+    private static final Logger log = LoggerFactory.getLogger(ModEntryInfo.class);
     @FXML
     private Text modname;
     @FXML
@@ -29,10 +34,6 @@ public class ModEntryInfo extends VBox {
     @FXML
     private Text fileSizeLabel;
     @FXML
-    private TextFlow urlFlow;
-    @FXML
-    private Text url;
-    @FXML
     private Text urlLabel;
     @FXML
     private Text modId;
@@ -44,6 +45,14 @@ public class ModEntryInfo extends VBox {
     private Text authorsLabel;
     @FXML
     private Text description;
+    @FXML
+    private TextFlow urlFlow;
+    @FXML
+    private Text url;
+    @FXML
+    private TextFlow viewProjectFlow;
+    @FXML
+    private Text viewProject;
 
     public ModEntryInfo() {
         loadFXML();
@@ -77,8 +86,27 @@ public class ModEntryInfo extends VBox {
         if (clientMod.url() == null) {
             urlFlow.setVisible(false);
         } else {
-            urlFlow.setVisible(true);
             url.setText(clientMod.url());
+            urlFlow.setVisible(true);
+        }
+        if (clientMod.projectUrl() == null) {
+            viewProjectFlow.setVisible(false);
+        } else {
+            String modSource = switch (clientMod.modSource()) {
+                case MODRINTH -> "Modrinth";
+                case CURSEFORGE -> "CurseForge";
+                case UNTRUSTED -> "Untrusted source: " + clientMod.projectUrl();
+                case SERVER -> throw new IllegalStateException("Mod with a project URL should not be from the server");
+            };
+            viewProject.setText("View project on " + modSource);
+            viewProject.setOnMouseClicked(event -> {
+                try {
+                    Desktop.getDesktop().browse(new URI(clientMod.projectUrl()));
+                } catch (Exception ex) {
+                    log.error("Failed to open hyperlink.", ex);
+                }
+            });
+            viewProjectFlow.setVisible(true);
         }
         modId.setText(clientMod.modId());
         authors.setText(clientMod.authors());
