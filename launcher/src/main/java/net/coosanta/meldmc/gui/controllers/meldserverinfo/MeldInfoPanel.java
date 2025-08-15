@@ -32,6 +32,8 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
     private static final Logger log = LoggerFactory.getLogger(MeldInfoPanel.class);
     private final ScaleFactorCssProperty scaleFactorProperty;
 
+    private final ServerInfo server;
+
     @FXML
     private Label header;
 
@@ -127,6 +129,7 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
 
         joinServer.setOnAction(e -> {
             log.info("akdjfhsdkfjchhkewjfhkdsajhdkasdjhksdfjhaksdfjdhskf (Join server pressed)");
+            MainWindow.getInstance().getController().showModDownloadConfirmation(server.getAddress());
             // TODO JOIN THE FUCKING SERVER
         });
         done.setOnAction(e -> MainWindow.getInstance().getController().showSelectionPanel());
@@ -143,6 +146,8 @@ public class MeldInfoPanel extends BorderPane implements ScaleFactorCssProperty.
                 });
             }
         });
+
+        this.server = server;
     }
 
     private void selectMod(ModEntry newSelection) {

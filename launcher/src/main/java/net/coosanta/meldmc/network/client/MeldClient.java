@@ -3,7 +3,8 @@ package net.coosanta.meldmc.network.client;
 import net.coosanta.meldmc.network.ProgressCallback;
 
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -21,11 +22,11 @@ public interface MeldClient {
     /**
      * Downloads files with the specified hashes.
      *
-     * @param hashes List of file hashes to download
+     * @param hashes      Collection of file hashes to download
      * @param destination Directory to save the downloaded files
      * @return A CompletableFuture that resolves to a list of downloaded file paths
      */
-    CompletableFuture<List<Path>> downloadFiles(List<String> hashes, Path destination);
+    CompletableFuture<Set<Path>> downloadFiles(Collection<String> hashes, Path destination);
 
     /**
      * Sets a callback for progress updates during downloads.

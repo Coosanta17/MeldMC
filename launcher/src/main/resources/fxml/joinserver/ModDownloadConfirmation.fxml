@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import net.coosanta.meldmc.gui.nodes.button.MinecraftButton?>
+<fx:root type="BorderPane" styleClass="server-icon" xmlns="http://javafx.com/javafx/17"
+         xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets top="5" right="10" bottom="5" left="10"/>
+    </padding>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <StackPane>
+                <VBox spacing="10">
+                    <Label fx:id="warning" styleClass="white" wrapText="true"/>
+
+                    <TitledPane fx:id="modrinthTitle" text="Modrinth" expanded="false"
+                                style="-fx-background-color: white">
+                        <VBox fx:id="newModrinthMods" spacing="10"/>
+                    </TitledPane>
+
+                    <TitledPane fx:id="serverSentTitle" text="Server Sent" expanded="false"
+                                style="-fx-background-color: white">
+                        <VBox fx:id="newServerMods" spacing="10"/>
+                    </TitledPane>
+
+                    <TitledPane fx:id="untrustedTitle" text="Untrusted" expanded="false"
+                                style="-fx-background-color: white">
+                        <VBox fx:id="newUntrustedMods" spacing="10"/>
+                    </TitledPane>
+                </VBox>
+            </StackPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <MinecraftButton fx:id="join" text="Join Server"/>
+            <MinecraftButton fx:id="cancel" text="Cancel"/>
+        </HBox>
+    </bottom>
+</fx:root>

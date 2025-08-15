@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import net.coosanta.meldmc.Main;
+import net.coosanta.meldmc.gui.controllers.joinserver.ModDownloadConfirmation;
 import net.coosanta.meldmc.gui.controllers.meldserverinfo.MeldInfoPanel;
 import net.coosanta.meldmc.gui.controllers.serverselection.SelectionPanel;
 import net.coosanta.meldmc.gui.views.Background;
@@ -14,7 +15,7 @@ import net.coosanta.meldmc.minecraft.ServerInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Dimension;
 
 import static net.coosanta.meldmc.Main.DESIGN_HEIGHT;
 import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
@@ -74,6 +75,11 @@ public class MainWindowController {
     public void showLoadingScreen(Node contents) {
         log.debug("Showing loading screen");
         showScreen(new LoadingScreen(contents));
+    }
+
+    public void showModDownloadConfirmation(String address) {
+        log.debug("Showing mod download confirmation for address {}", address);
+        showScreen(new ModDownloadConfirmation(address));
     }
 
     public void showSelectionPanel() { // FIXME: Pinging thing shown when ping already done after showing selection panel

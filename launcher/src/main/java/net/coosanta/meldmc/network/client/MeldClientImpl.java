@@ -5,8 +5,11 @@ import net.coosanta.meldmc.network.ProgressCallback;
 import net.coosanta.meldmc.utility.SSLUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.net.ssl.*;
-import java.io.*;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -15,8 +18,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,7 +80,7 @@ public class MeldClientImpl implements MeldClient {
     }
 
     @Override
-    public CompletableFuture<List<Path>> downloadFiles(List<String> hashes, Path destination) {
+    public CompletableFuture<Set<Path>> downloadFiles(Collection<String> hashes, Path destination) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Files.createDirectories(destination);
@@ -103,8 +107,8 @@ public class MeldClientImpl implements MeldClient {
         }, executorService);
     }
 
-    private @NotNull List<Path> processZipResponse(Path destination, HttpURLConnection connection, long contentLength) throws IOException {
-        List<Path> extractedFiles = new ArrayList<>();
+    private @NotNull Set<Path> processZipResponse(Path destination, HttpURLConnection connection, long contentLength) throws IOException {
+        Set<Path> extractedFiles = new HashSet<>();
 
         try (ProgressTrackingInputStream progressStream = new ProgressTrackingInputStream(connection.getInputStream(), contentLength);
              ZipInputStream zipIn = new ZipInputStream(progressStream)) {

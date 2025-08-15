@@ -32,6 +32,11 @@
     -fx-text-fill: white;
 }
 
+.black {
+    -fx-fill: black;
+    -fx-text-fill: black;
+}
+
 .mc-button {
     -scale-factor: 3;
 }
@@ -158,11 +163,22 @@
     -fx-fill: #ffffff;
 }
 
-.selectable-textfield-white {
+.file-size {
+    -fx-text-fill: #7a7a7a;
+    -fx-fill: #7a7a7a;
+}
+
+.selectable-textfield-white,
+.selectable-textfield-black {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-text-fill: white;
     -fx-padding: 0;
+}
+.selectable-textfield-white {
+    -fx-text-fill: white;
+}
+.selectable-textfield-black {
+    -fx-text-fill: black;
 }
 
 .stack-pane-rounded {

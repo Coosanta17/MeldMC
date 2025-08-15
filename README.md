@@ -5,6 +5,11 @@ Launches mods the easy way
 - [ ] Region CSS sizes (fxml)
 - [ ] Join server `MeldInfoPanel`
   - [ ] Offline server info viewer / instance
+  - [ ] Update warnings
+    - [x] New Mods 
+    - [ ] Unacknowledged warnings
+    - [ ] Delete warnings
+  - [ ] Version changing
   - [ ] Downloading mods
   - [ ] Download warning screen
   - [ ] akdfjsdkfjhweiudjsakdjcskdjfhkjdsjvkdf
@@ -22,5 +27,6 @@ Launches mods the easy way
 - [ ] Resource + Shader packs
 - [ ] Modrinth custom `User-Agent` header.
 - [ ] Translations
+- [ ] Extra client mods that aren't specified by the server.
 - [ ] Everything else that I haven't though of.
 - [ ] Bugs Bugs Bugs!!!

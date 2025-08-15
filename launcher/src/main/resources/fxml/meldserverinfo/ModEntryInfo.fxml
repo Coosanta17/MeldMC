@@ -2,10 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.HBox?>
 <fx:root type="VBox" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
@@ -52,7 +50,7 @@
 
     <Region prefHeight="20"/>
 
-    <HBox fx:id="urlFlow" visible="false" >
+    <HBox fx:id="urlFlow" visible="false">
         <Text fx:id="urlLabel" text="File url: " styleClass="mod-info-field-label"/>
         <TextField fx:id="url" editable="false" HBox.hgrow="ALWAYS" styleClass="selectable-textfield-white"/>
     </HBox>

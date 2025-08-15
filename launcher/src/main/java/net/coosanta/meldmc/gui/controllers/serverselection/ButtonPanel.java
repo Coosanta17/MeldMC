@@ -42,7 +42,6 @@ public class ButtonPanel extends GridPane {
     @FXML
     private MinecraftButton settingsButton;
 
-
     public ButtonPanel() {
         try {
             ResourceUtil.loadFXML("/fxml/serverselection/ButtonPanel.fxml", this).load();
@@ -134,7 +133,7 @@ public class ButtonPanel extends GridPane {
         ServerInfo selectedServerInfo = getSelectedServerInfo();
         String warning;
         if (ServerListManager.getInstance().getServers().stream()
-                .filter(server -> server.equals(selectedServerInfo)).count() > 1) {
+                    .filter(server -> server.equals(selectedServerInfo)).count() > 1) {
             warning = """
                     You are about to delete the server "%s" at '%s'.
                     Instance files will not be deleted because duplicate server(s) were detected (same address).

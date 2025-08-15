@@ -3,7 +3,10 @@ package net.coosanta.meldmc.minecraft;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.network.ProgressCallback;
+import net.coosanta.meldmc.network.client.MeldClient;
+import net.coosanta.meldmc.network.client.MeldClientRegistry;
 import net.coosanta.meldmc.network.client.MeldData;
+import net.coosanta.meldmc.utility.ResourceUtil;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,26 +14,32 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class GameInstance {
     private static final Logger log = LoggerFactory.getLogger(GameInstance.class);
-    private final String ip;
+
+    private final String address;
     private @Nullable MeldData cachedMeldData;
     private @Nullable MeldData meldData;
     private final Path instanceDir;
     private final Path meldJson;
 
-    public GameInstance(String ip) {
-        this.ip = ip;
+    private final Map<String, MeldData.ClientMod> changedMods = new HashMap<>();
+    boolean modLoaderChanged;
+    boolean modLoaderVersionChanged;
+    boolean mcVersionChanged;
+
+    public GameInstance(String address) {
+        this.address = address;
 
         // Handle illegal characters
-        String dirName = ip.replaceAll("[:\\\\/*?\"<>|]", "_");
-        Path gameDir = Main.getGameDir();
-        this.instanceDir = gameDir.resolve(dirName);
+        String dirName = "meldinstances/" + address.replaceAll("[:\\\\/*?\"<>|]", "_");
+        this.instanceDir = Main.getGameDir().resolve(dirName);
 
         this.meldJson = instanceDir.resolve("meld.json");
 
@@ -42,10 +51,21 @@ public class GameInstance {
     public void setMeldData(MeldData meldData) {
         this.meldData = meldData;
         createInstanceDirectory();
-        if (cachedMeldData == null) {
+        if (!Objects.equals(cachedMeldData, meldData)) {
+            boolean noCachedData = cachedMeldData == null;
+            modLoaderChanged = noCachedData || cachedMeldData.modLoader() != meldData.modLoader();
+            modLoaderVersionChanged = noCachedData || !cachedMeldData.modLoaderVersion().equals(meldData.modLoaderVersion());
+            mcVersionChanged = noCachedData || !cachedMeldData.mcVersion().equals(meldData.mcVersion());
+
+            changedMods.clear();
+
+            var oldMods = noCachedData ? Collections.<String, MeldData.ClientMod>emptyMap() : cachedMeldData.modMap();
+            meldData.modMap().forEach((key, value) -> {
+                if (!value.equals(oldMods.get(key))) {
+                    changedMods.put(key, value);
+                }
+            });
             saveInstanceData();
-        } else if (!cachedMeldData.equals(meldData)) {
-            log.info("To be implemented...");
         }
     }
 
@@ -53,7 +73,7 @@ public class GameInstance {
         try {
             Files.createDirectories(instanceDir);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create instance directory for server: " + ip, e);
+            throw new RuntimeException("Failed to create instance directory for server: " + address, e);
         }
     }
 
@@ -65,7 +85,7 @@ public class GameInstance {
         try {
             mapper.writeValue(meldJson.toFile(), meldData);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save MeldData for server: " + ip, e);
+            throw new RuntimeException("Failed to save MeldData for server: " + address, e);
         }
     }
 
@@ -76,7 +96,7 @@ public class GameInstance {
         try {
             return mapper.readValue(meldJson.toFile(), MeldData.class);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read MeldData for server: " + ip, e);
+            throw new RuntimeException("Failed to read MeldData for server: " + address, e);
         }
     }
 
@@ -173,6 +193,26 @@ public class GameInstance {
         }
     }
 
+    public void downloadMods(ProgressCallback progressCallback) {
+        if (meldData == null) throw new NullPointerException("MeldData cannot be null");
+
+        Map<String, MeldData.ClientMod> serverMods = new HashMap<>();
+        Map<String, MeldData.ClientMod> webMods = new HashMap<>();
+
+        MeldClient meldClient = MeldClientRegistry.getClient(address);
+        meldClient.setProgressCallback(progressCallback);
+        var serverModsDownloadFuture = meldClient.downloadFiles(serverMods.keySet(), instanceDir.resolve("mods"));
+        serverModsDownloadFuture.thenAccept(paths -> paths.forEach(path -> {
+            try {
+                if (!changedMods.containsKey(ResourceUtil.calculateSHA512(path.toFile()))) {
+                    // TODO Unequal Hashes - !IMPORTANT! handling of manipulated data
+                }
+            } catch (IOException | NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+        }));
+    }
+
     public @Nullable MeldData getMeldData() {
         return meldData;
     }
@@ -181,8 +221,8 @@ public class GameInstance {
         return cachedMeldData;
     }
 
-    public String getIp() {
-        return ip;
+    public String getAddress() {
+        return address;
     }
 
     public boolean isMeldCached() {
@@ -191,5 +231,9 @@ public class GameInstance {
 
     public Path getInstanceDir() {
         return instanceDir;
+    }
+
+    public Map<String, MeldData.ClientMod> getChangedMods() {
+        return changedMods;
     }
 }

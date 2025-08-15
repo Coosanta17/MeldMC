@@ -6,8 +6,7 @@
 <?import javafx.scene.text.*?>
 <?import net.coosanta.meldmc.gui.controllers.meldserverinfo.ModEntryInfo?>
 <?import net.coosanta.meldmc.gui.nodes.button.MinecraftButton?>
-<fx:root type="BorderPane" styleClass="server-icon" xmlns="http://javafx.com/javafx/17"
-         xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="BorderPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <padding>
         <Insets top="5" right="10" bottom="5" left="10"/>
     </padding>
