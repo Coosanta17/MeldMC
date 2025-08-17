@@ -1,12 +1,15 @@
 package net.coosanta.meldmc.minecraft;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.application.Platform;
 import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.network.ProgressCallback;
-import net.coosanta.meldmc.network.client.MeldClient;
+import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import net.coosanta.meldmc.network.client.MeldClientRegistry;
 import net.coosanta.meldmc.network.client.MeldData;
+import net.coosanta.meldmc.network.client.WebDownloader;
 import net.coosanta.meldmc.utility.ResourceUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,8 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -28,8 +33,10 @@ public class GameInstance {
     private @Nullable MeldData meldData;
     private final Path instanceDir;
     private final Path meldJson;
+    private final Path modsDir;
 
     private final Map<String, MeldData.ClientMod> changedMods = new HashMap<>();
+    private final Map<String, Path> deletedMods = new HashMap<>();
     boolean modLoaderChanged;
     boolean modLoaderVersionChanged;
     boolean mcVersionChanged;
@@ -42,6 +49,8 @@ public class GameInstance {
         this.instanceDir = Main.getGameDir().resolve(dirName);
 
         this.meldJson = instanceDir.resolve("meld.json");
+
+        this.modsDir = getInstanceDir().resolve("mods");
 
         if (Files.exists(meldJson)) {
             this.cachedMeldData = readInstanceData();
@@ -56,16 +65,63 @@ public class GameInstance {
             modLoaderChanged = noCachedData || cachedMeldData.modLoader() != meldData.modLoader();
             modLoaderVersionChanged = noCachedData || !cachedMeldData.modLoaderVersion().equals(meldData.modLoaderVersion());
             mcVersionChanged = noCachedData || !cachedMeldData.mcVersion().equals(meldData.mcVersion());
+        }
 
-            changedMods.clear();
+        changedMods.clear();
+        deletedMods.clear();
 
-            var oldMods = noCachedData ? Collections.<String, MeldData.ClientMod>emptyMap() : cachedMeldData.modMap();
-            meldData.modMap().forEach((key, value) -> {
-                if (!value.equals(oldMods.get(key))) {
-                    changedMods.put(key, value);
+        var newModsByName = meldData.modMap().values().stream()
+                .collect(Collectors.toMap(MeldData.ClientMod::filename, m -> m));
+
+        // scan files for tampering or extras TODO: Non-blocking, with slow disk handling
+        if (Files.exists(modsDir)) {
+            try (var stream = Files.list(modsDir).filter(Files::isRegularFile)) {
+                stream.forEach(path -> checkChanges(path, newModsByName));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to scan mods directory", e);
+            }
+        }
+
+        // Add any remaining entries that are missing on disk - all other mods have been removed when checking for changes
+        newModsByName.values()
+                .forEach(mod -> changedMods.put(mod.hash(), mod));
+
+        log.debug("Detected {} new or changed mods", changedMods.size());
+
+        saveInstanceData();
+
+    }
+
+    private void checkChanges(Path path, Map<String, MeldData.@NotNull ClientMod> newModsByName) {
+        String name = path.getFileName().toString();
+        var expected = newModsByName.remove(name);
+        if (expected != null) {
+            // Check for change in data and add to changedMods accordingly.
+            try {
+                String currentHash = ResourceUtil.calculateSHA512(path.toFile());
+                if (!currentHash.equals(expected.hash())) {
+                    changedMods.put(expected.hash(), expected);
                 }
-            });
-            saveInstanceData();
+            } catch (IOException | NoSuchAlgorithmException e) {
+                throw new RuntimeException("Failed to hash mod file: " + name, e);
+            }
+        } else {
+            // rename file if hash matches, else delete.
+            try {
+                String currentHash = ResourceUtil.calculateSHA512(path.toFile());
+                var matchEntry = newModsByName.entrySet().stream()
+                        .filter(e -> e.getValue().hash().equals(currentHash))
+                        .findFirst();
+                if (matchEntry.isPresent()) {
+                    String correctName = matchEntry.get().getValue().filename();
+                    Files.move(path, modsDir.resolve(correctName));
+                    newModsByName.remove(matchEntry.get().getKey());
+                } else {
+                    deletedMods.put(name, path);
+                }
+            } catch (IOException | NoSuchAlgorithmException e) {
+                throw new RuntimeException("Failed to process mod file: " + name, e);
+            }
         }
     }
 
@@ -193,24 +249,101 @@ public class GameInstance {
         }
     }
 
-    public void downloadMods(ProgressCallback progressCallback) {
-        if (meldData == null) throw new NullPointerException("MeldData cannot be null");
+    public void downloadMods(UnifiedProgressTracker progressTracker) {
+        var webMods = getChangedMods().values().stream()
+                .filter(mod -> mod.modSource() != MeldData.ClientMod.ModSource.SERVER)
+                .collect(Collectors.toSet());
 
-        Map<String, MeldData.ClientMod> serverMods = new HashMap<>();
-        Map<String, MeldData.ClientMod> webMods = new HashMap<>();
+        var serverMods = getChangedMods().values().stream()
+                .filter(mod -> mod.modSource() == MeldData.ClientMod.ModSource.SERVER)
+                .collect(Collectors.toSet());
 
-        MeldClient meldClient = MeldClientRegistry.getClient(address);
-        meldClient.setProgressCallback(progressCallback);
-        var serverModsDownloadFuture = meldClient.downloadFiles(serverMods.keySet(), instanceDir.resolve("mods"));
-        serverModsDownloadFuture.thenAccept(paths -> paths.forEach(path -> {
-            try {
-                if (!changedMods.containsKey(ResourceUtil.calculateSHA512(path.toFile()))) {
-                    // TODO Unequal Hashes - !IMPORTANT! handling of manipulated data
-                }
-            } catch (IOException | NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
+        long totalBytes = webMods.stream().mapToLong(MeldData.ClientMod::fileSize).sum() +
+                          serverMods.stream().mapToLong(MeldData.ClientMod::fileSize).sum();
+        long totalFiles = webMods.size() + serverMods.size();
+
+        progressTracker.setTotalExpected(totalBytes, totalFiles);
+
+        removeDeletedMods();
+
+        @SuppressWarnings("resource") // closed in whenComplete at end of method.
+        var webDownloader = new WebDownloader();
+
+        webDownloader.setTotalProgressCallback((deltaBytes, total, unused) ->
+                progressTracker.addBytesProgress(deltaBytes));
+
+        webDownloader.setFileProgressCallback((deltaDownloadedFiles, total, unused) ->
+                progressTracker.addFileProgress(deltaDownloadedFiles));
+
+        // Web downloads
+        CompletableFuture<Set<Path>> webDownloadFuture = webMods.isEmpty()
+                ? CompletableFuture.completedFuture(Set.of())
+                : webDownloader.downloadMods(webMods, modsDir);
+
+        // Server downloads
+        CompletableFuture<Set<Path>> serverDownloadFuture = CompletableFuture.completedFuture(Set.of());
+        if (!serverMods.isEmpty()) {
+            var meldClient = MeldClientRegistry.getClient(getAddress());
+            if (meldClient != null) {
+                meldClient.setProgressCallback((newBytes, total, filename) ->
+                        progressTracker.addBytesProgress(newBytes));
+
+                var serverHashes = serverMods.stream()
+                        .map(MeldData.ClientMod::hash)
+                        .collect(Collectors.toSet());
+
+                serverDownloadFuture = meldClient.downloadFiles(serverHashes, modsDir)
+                        .whenComplete((paths, ex) -> {
+                            if (paths != null) progressTracker.addFileProgress(serverMods.size());
+                        });
             }
-        }));
+        }
+
+        // Wait for both downloads to complete
+        CompletableFuture<Set<Path>> finalServerDownloadFuture = serverDownloadFuture; // Effectively final for lambda
+        CompletableFuture.allOf(webDownloadFuture, serverDownloadFuture)
+                .thenAccept(v -> {
+                    try {
+                        Set<Path> webPaths = webDownloadFuture.join();
+                        Set<Path> serverPaths = finalServerDownloadFuture.join();
+
+                        log.debug("Downloaded {} web mods.", webPaths.size());
+                        log.debug("Downloaded {} server mods.", serverPaths.size());
+
+                        progressTracker.completeAllProgress();
+
+                        Set<Path> allDownloaded = Stream
+                                .concat(webPaths.stream(), serverPaths.stream())
+                                .collect(Collectors.toSet());
+
+                        for (Path path : allDownloaded) {
+                            try {
+                                String sha = ResourceUtil.calculateSHA512(path.toFile());
+                                if (!changedMods.containsKey(sha)) {
+                                    log.error("Downloaded hashes do not match expected value!");
+                                    // TODO Unequal Hashes - handling of manipulated data
+                                }
+                            } catch (IOException | NoSuchAlgorithmException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+
+                        Platform.runLater(() -> {
+                            // TODO: Complete download handling
+                        });
+                    } catch (Exception e) {
+                        log.error("Error retrieving download results", e);
+                    }
+                })
+                .exceptionally(ex -> {
+                    log.error("Mod download failed", ex);
+                    Platform.runLater(() -> {
+                        // TODO: Error handling
+                    });
+                    return null;
+                })
+                .whenComplete((v, ex) -> webDownloader.close());
+
     }
 
     public @Nullable MeldData getMeldData() {
@@ -235,5 +368,20 @@ public class GameInstance {
 
     public Map<String, MeldData.ClientMod> getChangedMods() {
         return changedMods;
+    }
+
+    public Map<String, Path> getDeletedMods() {
+        return deletedMods;
+    }
+
+    public void removeDeletedMods() {
+        for (Path file : deletedMods.values()) {
+            try {
+                Files.deleteIfExists(file);
+            } catch (IOException e) {
+                log.warn("Failed to delete mod file: {}", file, e);
+            }
+        }
+        deletedMods.clear();
     }
 }

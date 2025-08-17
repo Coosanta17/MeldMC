@@ -65,6 +65,20 @@
     -fx-text-fill: #FFFFFF;
 }
 
+.mc-progress-bar {
+    -fx-border-color: white;
+    -fx-border-width: 3px;
+    -fx-border-radius: 0;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+}
+
+.mc-progress-bar > .bar {
+    -fx-background-color: #00dd00;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+
 .mc-text-field {
     -fx-text-fill: #ffffff;
     -fx-background-color: #000000;

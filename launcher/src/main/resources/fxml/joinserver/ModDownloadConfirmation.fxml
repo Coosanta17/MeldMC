@@ -37,7 +37,7 @@
 
     <bottom>
         <HBox spacing="10" alignment="CENTER">
-            <MinecraftButton fx:id="join" text="Join Server"/>
+            <MinecraftButton fx:id="confirm" text="Confirm"/>
             <MinecraftButton fx:id="cancel" text="Cancel"/>
         </HBox>
     </bottom>

@@ -1,5 +1,6 @@
 package net.coosanta.meldmc.gui.controllers.joinserver;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -8,8 +9,10 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
+import net.coosanta.meldmc.gui.views.MainWindow;
 import net.coosanta.meldmc.minecraft.GameInstance;
 import net.coosanta.meldmc.minecraft.InstanceManager;
+import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import net.coosanta.meldmc.utility.ResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -41,9 +44,10 @@ public class ModDownloadConfirmation extends BorderPane {
     private VBox newUntrustedMods;
 
     @FXML
-    private MinecraftButton join;
+    private MinecraftButton confirm;
     @FXML
     private MinecraftButton cancel;
+
     // TODO: What if the user didn't acknowledge the changed mods but then it updates and thinks that the use did???
     // TODO: Refactor this to scan mod files instead of JSON shit
     public ModDownloadConfirmation(String address) { // TODO Mod deleting information too
@@ -58,7 +62,7 @@ public class ModDownloadConfirmation extends BorderPane {
         serverInstance = InstanceManager.getInstance(address);
 
         cancel.setOnAction(this::cancelClicked);
-        join.setOnAction(this::joinClicked);
+        confirm.setOnAction(this::confirmClicked);
 
         warning.setText(buildWarningMessage(address));
 
@@ -74,8 +78,6 @@ public class ModDownloadConfirmation extends BorderPane {
         modifyNodeVisibility(modrinthTitle, !newModrinthMods.getChildren().isEmpty());
         modifyNodeVisibility(serverSentTitle, !newServerMods.getChildren().isEmpty());
         modifyNodeVisibility(untrustedTitle, !newUntrustedMods.getChildren().isEmpty());
-
-
     }
 
     private @NotNull String buildWarningMessage(String address) {
@@ -98,8 +100,21 @@ public class ModDownloadConfirmation extends BorderPane {
         node.setManaged(visible);
     }
 
-    private void joinClicked(ActionEvent event) {
-        log.debug("Join server button clicked");
+    private void confirmClicked(ActionEvent event) {
+        log.debug("Confirm and join server button clicked");
+
+        var progressPanel = new DownloadProgressPanel();
+        MainWindow.getInstance().getController().showScreen(progressPanel);
+
+        var progressTracker = new UnifiedProgressTracker();
+
+        progressTracker.setBytesCallback((downloaded, total, unused) ->
+                Platform.runLater(() -> progressPanel.updateBytesProgress(downloaded, total)));
+
+        progressTracker.setFilesCallback((downloaded, total, unused) ->
+                Platform.runLater(() -> progressPanel.updateFilesProgress(downloaded, total)));
+
+        serverInstance.downloadMods(progressTracker);
     }
 
     private void cancelClicked(ActionEvent event) {

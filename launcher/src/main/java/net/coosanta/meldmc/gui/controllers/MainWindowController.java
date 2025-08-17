@@ -10,7 +10,6 @@ import net.coosanta.meldmc.gui.controllers.joinserver.ModDownloadConfirmation;
 import net.coosanta.meldmc.gui.controllers.meldserverinfo.MeldInfoPanel;
 import net.coosanta.meldmc.gui.controllers.serverselection.SelectionPanel;
 import net.coosanta.meldmc.gui.views.Background;
-import net.coosanta.meldmc.gui.views.LoadingScreen;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,11 +69,6 @@ public class MainWindowController {
     public void showMeldInfoPanel(ServerInfo server) {
         log.debug("Showing Meld Info Panel");
         showScreen(new MeldInfoPanel(server));
-    }
-
-    public void showLoadingScreen(Node contents) {
-        log.debug("Showing loading screen");
-        showScreen(new LoadingScreen(contents));
     }
 
     public void showModDownloadConfirmation(String address) {

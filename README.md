@@ -11,7 +11,8 @@ Launches mods the easy way
     - [ ] Delete warnings
   - [ ] Version changing
   - [ ] Downloading mods
-  - [ ] Download warning screen
+    - [ ] Proper handling of IOException
+    - [ ] See TODOs in `WebDownloader` and `GameInstance`.
   - [ ] akdfjsdkfjhweiudjsakdjcskdjfhkjdsjvkdf
 - [ ] Fix incorrect placement and styling of errors `ButtonPanel`
 - [ ] Hardcoded value in `CentrePanel`
@@ -22,6 +23,7 @@ Launches mods the easy way
 - [x] NullPointerException when no MeldData `InstanceManager`/`GameInstance`
   - [x] Buttons not being enabled when server is pinging.
 - [ ] Deleting Instance With callback
+  - [ ] Backup progress indicator
 - [ ] Hash verifying (done?????) `MeldData`
 - [ ] Remove Debug + Do something about the <0.5 ping time display bug assuming timeout even when there is ping `Pinger`
 - [ ] Resource + Shader packs

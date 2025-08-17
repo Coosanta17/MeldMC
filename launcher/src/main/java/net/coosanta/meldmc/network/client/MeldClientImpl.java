@@ -2,6 +2,7 @@ package net.coosanta.meldmc.network.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.coosanta.meldmc.network.ProgressCallback;
+import net.coosanta.meldmc.network.ProgressTrackingInputStream;
 import net.coosanta.meldmc.utility.SSLUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -110,7 +111,7 @@ public class MeldClientImpl implements MeldClient {
     private @NotNull Set<Path> processZipResponse(Path destination, HttpURLConnection connection, long contentLength) throws IOException {
         Set<Path> extractedFiles = new HashSet<>();
 
-        try (ProgressTrackingInputStream progressStream = new ProgressTrackingInputStream(connection.getInputStream(), contentLength);
+        try (ProgressTrackingInputStream progressStream = new ProgressTrackingInputStream(connection.getInputStream(), contentLength, false, progressCallback);
              ZipInputStream zipIn = new ZipInputStream(progressStream)) {
 
             ZipEntry entry;
@@ -173,56 +174,6 @@ public class MeldClientImpl implements MeldClient {
     public static class CompletionException extends RuntimeException {
         public CompletionException(String message, Throwable cause) {
             super(message, cause);
-        }
-    }
-
-    /**
-     * Input stream that tracks progress and notifies callbacks.
-     */
-    private class ProgressTrackingInputStream extends InputStream {
-        private final InputStream wrapped;
-        private final long totalSize;
-        private long bytesRead = 0;
-        private String currentFileName;
-
-        public ProgressTrackingInputStream(InputStream wrapped, long totalSize) {
-            this.wrapped = wrapped;
-            this.totalSize = totalSize;
-        }
-
-        public void setCurrentFileName(String fileName) {
-            this.currentFileName = fileName;
-        }
-
-        @Override
-        public int read() throws IOException {
-            int b = wrapped.read();
-            if (b != -1) {
-                bytesRead++;
-                updateProgress();
-            }
-            return b;
-        }
-
-        @Override
-        public int read(byte @NotNull [] b, int off, int len) throws IOException {
-            int bytesRead = wrapped.read(b, off, len);
-            if (bytesRead > 0) {
-                this.bytesRead += bytesRead;
-                updateProgress();
-            }
-            return bytesRead;
-        }
-
-        private void updateProgress() {
-            if (progressCallback != null) {
-                progressCallback.onProgress(bytesRead, totalSize, currentFileName);
-            }
-        }
-
-        @Override
-        public void close() throws IOException {
-            wrapped.close();
         }
     }
 }
