@@ -25,7 +25,14 @@ buildscript {
 apply(plugin = "org.openjfx.javafxplugin")
 
 javafx {
-    modules("javafx.controls", "javafx.graphics", "javafx.base", "javafx.media", "javafx.fxml")
+    version = "21.0.2"
+    modules(
+        "javafx.controls",
+        "javafx.graphics",
+        "javafx.base",
+        "javafx.media",
+        "javafx.fxml"
+    )
 }
 
 repositories {
@@ -96,22 +103,20 @@ application {
     mainClass = mainClassName
 }
 
-val supportedPlatforms: () -> List<String> = {
-    listOf(
-        "win",
-        "mac",
-        "mac-aarch64",
-        "linux",
-        "linux-aarch64"
-    )
-}
+val supportedPlatforms = listOf(
+    "win",
+    "mac",
+    "mac-aarch64",
+    "linux",
+    "linux-aarch64"
+)
 
 // Append `-Pplatform=<win|mac|mac-aarch64|linux|linux-aarch64>` if needed. No support for win-aarch64 yet.
 tasks.named<ShadowJar>("shadowJar") {
     val configuredBuildPlatform: String = project.findProperty("platform") as? String
         ?: javafx.platform.classifier
 
-    if (configuredBuildPlatform !in supportedPlatforms()) {
+    if (configuredBuildPlatform !in supportedPlatforms) {
         throw IllegalArgumentException("Unsupported platform: $configuredBuildPlatform. Supported platforms are: $supportedPlatforms")
     }
 
@@ -125,9 +130,14 @@ tasks.named<ShadowJar>("shadowJar") {
         println("Building for $configuredBuildPlatform")
     }
 
-    dependencies {
-        include { it.moduleGroup == "org.openjfx" }
-    }
+
+// TODO: Use libraries instead of packaging everything into one
+
+//    dependencies {
+//        include { it.moduleGroup == "org.openjfx" }
+//    }
+
+//    minimize()
 
     manifest {
         attributes["Main-Class"] = mainClassName
@@ -167,11 +177,15 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("mavenSnapshot") {
+            val platform = (project.findProperty("platform") as? String)
+                ?: javafx.platform.classifier
+
             groupId = "net.coosanta"
             artifactId = "meldmc"
             version = project.version.toString()
-            from(components["java"])
+
+            from(components["shadow"])
         }
     }
 }

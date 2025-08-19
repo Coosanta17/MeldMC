@@ -119,5 +119,7 @@ public class ModDownloadConfirmation extends BorderPane {
 
     private void cancelClicked(ActionEvent event) {
         log.debug("Cancel server clicked");
+//
+//        MainWindow.getInstance().getController().showMeldInfoPanel();
     }
 }
