@@ -6,7 +6,10 @@ import javafx.scene.image.Image;
 /**
  * Utility class for texture scaling operations, currently only 9-slice scaling.
  */
-public class TextureScalingUtil {
+public final class TextureScalingUtil {
+
+    private TextureScalingUtil() {
+    }
 
     /**
      * Draws a texture using the tiling approach.

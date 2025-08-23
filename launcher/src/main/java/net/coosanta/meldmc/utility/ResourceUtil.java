@@ -18,11 +18,14 @@ import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.Map;
 
-public class ResourceUtil {
+public final class ResourceUtil {
     private static final Logger log = LoggerFactory.getLogger(ResourceUtil.class);
 
     private static final Map<String, Image> imageCache = new HashMap<>();
     private static final Map<String, AudioClip> audioCache = new HashMap<>();
+
+    private ResourceUtil() {
+    }
 
     public static Image getImage(String path) {
         return imageCache.computeIfAbsent(path, p -> {
@@ -66,7 +69,15 @@ public class ResourceUtil {
     }
 
     public static String calculateSHA512(File file) throws IOException, NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-512");
+        return calculateHash(file, "SHA-512");
+    }
+
+    public static String calculateSHA1(File file) throws IOException, NoSuchAlgorithmException {
+        return calculateHash(file, "SHA-1");
+    }
+
+    private static String calculateHash(File file, String algorithm) throws IOException, NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance(algorithm);
         try (InputStream is = Files.newInputStream(file.toPath())) {
             byte[] buffer = new byte[8192];
             int bytesRead;

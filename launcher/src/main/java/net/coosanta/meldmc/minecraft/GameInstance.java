@@ -7,7 +7,7 @@ import net.coosanta.meldmc.network.ProgressCallback;
 import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import net.coosanta.meldmc.network.client.MeldClientRegistry;
 import net.coosanta.meldmc.network.client.MeldData;
-import net.coosanta.meldmc.network.client.WebDownloader;
+import net.coosanta.meldmc.network.client.WebModsDownloader;
 import net.coosanta.meldmc.utility.ResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -267,7 +267,7 @@ public class GameInstance {
         removeDeletedMods();
 
         @SuppressWarnings("resource") // closed in whenComplete at end of method.
-        var webDownloader = new WebDownloader();
+        var webDownloader = new WebModsDownloader();
 
         webDownloader.setTotalProgressCallback((deltaBytes, total, unused) ->
                 progressTracker.addBytesProgress(deltaBytes));

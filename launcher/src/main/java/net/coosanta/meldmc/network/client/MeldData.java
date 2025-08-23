@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 public record MeldData(String mcVersion, ModLoader modLoader, String modLoaderVersion,
-                       Map<String, ClientMod> modMap) { // Todo: hash verifying
+                       String versionId, Map<String, ClientMod> modMap) { // Todo: hash verifying
 
     public enum ModLoader {
         VANILLA,
@@ -26,7 +26,7 @@ public record MeldData(String mcVersion, ModLoader modLoader, String modLoaderVe
             try {
                 URI uri = new URI(url);
                 if ("https".equalsIgnoreCase(uri.getScheme()) &&
-                        "cdn.modrinth.com".equalsIgnoreCase(uri.getHost())) {
+                    "cdn.modrinth.com".equalsIgnoreCase(uri.getHost())) {
                     return ModSource.MODRINTH;
                 }
             } catch (URISyntaxException ignored) {

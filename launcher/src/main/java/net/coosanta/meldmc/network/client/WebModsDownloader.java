@@ -22,8 +22,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class WebDownloader implements AutoCloseable {
-    private static final Logger log = LoggerFactory.getLogger(WebDownloader.class);
+public class WebModsDownloader implements AutoCloseable {
+    private static final Logger log = LoggerFactory.getLogger(WebModsDownloader.class);
     private final HttpClient client;
     private final ExecutorService downloadExecutor;
     private final ExecutorService coordinationExecutor;
@@ -34,16 +34,16 @@ public class WebDownloader implements AutoCloseable {
     private volatile ProgressCallback fileProgressCallback;
     private volatile long totalExpectedFiles;
 
-    public WebDownloader() {
+    public WebModsDownloader() {
         coordinationExecutor = Executors.newSingleThreadExecutor(r -> {
-            var t = new Thread(r, "WebDownloader-Coordinator");
+            var t = new Thread(r, "WebModsDownloader-Coordinator");
             t.setDaemon(true);
             return t;
         });
         downloadExecutor = Executors.newFixedThreadPool(
                 3 * Runtime.getRuntime().availableProcessors(),
                 r -> {
-                    var t = new Thread(r, "WebDownloader-Worker");
+                    var t = new Thread(r, "WebModsDownloader-Worker");
                     t.setDaemon(true);
                     return t;
                 }

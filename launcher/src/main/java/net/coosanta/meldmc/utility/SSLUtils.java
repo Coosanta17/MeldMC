@@ -1,13 +1,21 @@
 package net.coosanta.meldmc.utility;
 
-import javax.net.ssl.*;
-import java.security.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 /**
  * Utilities for SSL/TLS configuration.
  */
-public class SSLUtils {
+public final class SSLUtils {
+
+    private SSLUtils() {
+    }
 
     /**
      * Creates an SSL context that accepts self-signed certificates.

@@ -1,6 +1,7 @@
 package net.coosanta.meldmc;
 
 import net.coosanta.meldmc.gui.views.MainWindow;
+import net.coosanta.meldmc.minecraft.launcher.LaunchArgs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,26 +19,17 @@ public class Main {
 
     private static Dimension windowsSize;
     private static List<String> gameArgs;
+    private static LaunchArgs launchArgs;
 
     public static void main(String[] args) {
         gameArgs = new ArrayList<>(List.of(args));
-
-        int widthArgIndex = gameArgs.indexOf("--width");
-        int heightArgIndex = gameArgs.indexOf("--height");
-
-        int width = DESIGN_WIDTH;
-        int height = DESIGN_HEIGHT;
-
         try {
-            if (widthArgIndex != -1 && heightArgIndex != -1) {
-                width = Math.max(Integer.parseInt(gameArgs.get(widthArgIndex + 1)), DESIGN_WIDTH);
-                height = Math.max(Integer.parseInt(gameArgs.get(heightArgIndex + 1)), DESIGN_HEIGHT);
-            }
-        } catch (NumberFormatException e) {
-            log.error("Invalid window size arguments", e);
+            launchArgs = LaunchArgs.parse(args);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to parse launch args", e);
         }
 
-        windowsSize = new Dimension(width, height);
+        windowsSize = new Dimension(launchArgs.getWidth(), launchArgs.getHeight());
 
         try {
             MainWindow.launch(MainWindow.class);
@@ -59,7 +51,9 @@ public class Main {
 //        if (gameDirArgIndex == -1) throw new IllegalArgumentException("Missing gameDir argument");
 //        return Path.of(getGameArgs().get(gameDirArgIndex + 1));
 
-        // Debug for windows:
+//        return launchArgs.getGameDir();
+
+        // Debug for windows: TODO: REMOVE
         String appdata = System.getenv("APPDATA");
         if (appdata == null) {
             throw new IllegalStateException("APPDATA environment variable is not set");
