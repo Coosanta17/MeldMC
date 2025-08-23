@@ -30,7 +30,7 @@ buildscript {
 apply(plugin = "org.openjfx.javafxplugin")
 
 javafx {
-    version = "21.0.2"
+    version = "21.0.1"
     modules(
         "javafx.controls",
         "javafx.graphics",
@@ -41,7 +41,6 @@ javafx {
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 
     // For NBT and Minecraft
@@ -59,6 +58,9 @@ repositories {
     }
     maven {
         url = uri("https://repo.opencollab.dev/maven-releases/")
+    }
+    maven {
+        url = uri("https://nexus.gluonhq.com/nexus/content/repositories/releases/")
     }
 }
 
@@ -86,7 +88,7 @@ dependencies {
 //    implementation("org.geysermc.mcprotocollib:protocol:1.21.5-SNAPSHOT")
 
     // https://repo.opencollab.dev/maven-snapshots/ dependencies: https://repo.opencollab.dev/maven-releases/
-    implementation("org.geysermc.mcprotocollib:protocol:1.21.6-SNAPSHOT")
+    implementation("org.geysermc.mcprotocollib:protocol:1.21.6-SNAPSHOT") // FIXME: stupid 404 thing
 
     // https://mvnrepository.com/artifact/net.kyori/adventure-text-minimessage/4.19.0
     implementation("net.kyori:adventure-text-minimessage:4.19.0")
@@ -121,8 +123,7 @@ val supportedPlatforms = listOf(
 
 // Append `-Pplatform=<win|mac|mac-aarch64|linux|linux-aarch64>` if needed. No support for win-aarch64 yet.
 tasks.named<ShadowJar>("shadowJar") {
-    val configuredBuildPlatform: String = project.findProperty("platform") as? String
-        ?: javafx.platform.classifier
+    val configuredBuildPlatform: String = project.findProperty("platform") as? String ?: javafx.platform.classifier
 
     if (configuredBuildPlatform !in supportedPlatforms) {
         throw IllegalArgumentException("Unsupported platform: $configuredBuildPlatform. Supported platforms are: $supportedPlatforms")
@@ -138,20 +139,31 @@ tasks.named<ShadowJar>("shadowJar") {
         println("Building for $configuredBuildPlatform")
     }
 
-
-// TODO: Use libraries instead of packaging everything into one
-
     dependencies {
         include { it.moduleGroup == "org.openjfx" }
     }
-
-//    minimize()
 
     manifest {
         attributes["Main-Class"] = mainClassName
     }
 
-    archiveFileName.set("meld-loader-${project.version}-$configuredBuildPlatform-javafx.jar")
+    archiveFileName.set("meldmc-loader-${project.version}-$configuredBuildPlatform-javafx.jar")
+}
+
+val gradlew =
+    if (System.getProperty("os.name").lowercase(Locale.ROOT).contains("windows")) "gradlew.bat" else "./gradlew"
+
+supportedPlatforms.forEach { platform ->
+    tasks.register<Exec>("shadowJar_${platform.replace("-", "_")}") {
+        group = "build"
+        workingDir = rootProject.projectDir
+        commandLine(gradlew, ":launcher:shadowJar", "-Pplatform=$platform")
+    }
+}
+
+tasks.register("shadowJarAllPlatforms") {
+    group = "build"
+    dependsOn(supportedPlatforms.map { "shadowJar_${it.replace("-", "_")}" })
 }
 
 tasks.named<Test>("test") {
@@ -185,281 +197,123 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("mavenSnapshot") {
-            val platform = (project.findProperty("platform") as? String)
-                ?: javafx.platform.classifier
-
+        create<MavenPublication>("mavenOnePlatform") {
             groupId = "net.coosanta"
             artifactId = "meldmc"
             version = project.version.toString()
 
             from(components["shadow"])
         }
+        create<MavenPublication>("mavenAllPlatforms") {
+            groupId = "net.coosanta"
+            artifactId = "meldmc"
+            version = project.version.toString()
+
+            supportedPlatforms.forEach { platform ->
+                artifact(
+                    layout.buildDirectory.file("libs/meldmc-loader-${project.version}-$platform-javafx.jar")
+                        .get().asFile
+                ) {
+                    classifier = platform
+                }
+            }
+        }
     }
 }
 
-tasks.register("generateLauncherJson") {
+tasks.register("generateLauncherJsons") {
+    dependsOn("shadowJarAllPlatforms")
     doLast {
-        val libraries = mutableListOf<String>()
+        val version = project.version.toString()
+        val timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'+00:00'").format(Date())
+
+        val seen = mutableSetOf<String>()
         val librariesJson = mutableListOf<Map<String, Any>>()
 
-        // Get all resolved configurations
-        project.configurations.filter { config ->
-            // Only consider configurations that can be resolved
-            config.isCanBeResolved
-        }.forEach { config ->
-            try {
-                config.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
-                    val group = artifact.moduleVersion.id.group
-                    val name = artifact.moduleVersion.id.name
-                    val version = artifact.moduleVersion.id.version
-                    val libraryName = "$group:$name:$version"
+        val artifacts = configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts
+        artifacts.forEach { artifact ->
+            val group = artifact.moduleVersion.id.group
+            val name = artifact.moduleVersion.id.name
+            val projectVersion = artifact.moduleVersion.id.version
+            val id = "$group:$name:$projectVersion"
 
-                    if (!libraries.contains(libraryName)) {
-                        libraries.add(libraryName)
+            val excludedGroups = setOf(
+                "ch.qos.logback",
+                "org.openjfx",
+                "io.netty"
+            )
 
-                        val file = artifact.file
-                        val path = "${group.replace('.', '/')}/$name/$version/$name-$version.jar"
-                        val sha1 = calculateSha1(file)
-                        val size = file.length()
-
-                        val url = getArtifactUrl(artifact)
-
-                        val libraryJson = mapOf(
-                            "downloads" to mapOf(
-                                "artifact" to mapOf(
-                                    "path" to path,
-                                    "sha1" to sha1,
-                                    "size" to size,
-                                    "url" to url
-                                )
-                            ),
-                            "name" to libraryName
-                        )
-
-                        librariesJson.add(libraryJson)
-                    }
-                }
-            } catch (e: Exception) {
-                println("Couldn't resolve configuration ${config.name}: ${e.message}")
+            if (seen.add(id) && excludedGroups.none { group.startsWith(it) } && !name.startsWith("javafx-")) {
+                librariesJson.add(
+                    buildLibraryEntry(
+                        artifact.file,
+                        group,
+                        name,
+                        projectVersion,
+                        getArtifactUrl(artifact)
+                    )
+                )
             }
         }
 
-        // Build the complete launcher JSON
-        val version = project.version.toString()
-        val currentTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'+00:00'").format(Date())
+        supportedPlatforms.forEach { platform ->
+            val localJar = layout.buildDirectory.file("libs/meldmc-loader-$version-$platform-javafx.jar").get().asFile
+            val libsJson = librariesJson.toMutableList().also {
+                it.add(
+                    buildLibraryEntry(
+                        localJar,
+                        "net.coosanta",
+                        "meldmc",
+                        version,
+                        "https://repo.coosanta.net/snapshots/net/coosanta/meldmc/$version/meldmc-$version-$platform.jar"
+                    )
+                )
+            }
 
-        val gameArguments = listOf(
-            "--username",
-            "\${auth_player_name}",
-            "--version",
-            "\${version_name}",
-            "--gameDir",
-            "\${game_directory}",
-            "--assetsDir",
-            "\${assets_root}",
-            "--assetIndex",
-            "\${assets_index_name}",
-            "--uuid",
-            "\${auth_uuid}",
-            "--accessToken",
-            "\${auth_access_token}",
-            "--clientId",
-            "\${clientid}",
-            "--xuid",
-            "\${auth_xuid}",
-            "--userType",
-            "\${user_type}",
-            "--versionType",
-            "\${version_type}",
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "features" to mapOf(
-                            "is_demo_user" to true
-                        )
-                    )
-                ),
-                "value" to "--demo"
-            ),
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "features" to mapOf(
-                            "has_custom_resolution" to true
-                        )
-                    )
-                ),
-                "value" to listOf(
-                    "--width",
-                    "\${resolution_width}",
-                    "--height",
-                    "\${resolution_height}"
-                )
-            ),
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "features" to mapOf(
-                            "has_quick_plays_support" to true
-                        )
-                    )
-                ),
-                "value" to listOf(
-                    "--quickPlayPath",
-                    "\${quickPlayPath}"
-                )
-            ),
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "features" to mapOf(
-                            "is_quick_play_singleplayer" to true
-                        )
-                    )
-                ),
-                "value" to listOf(
-                    "--quickPlaySingleplayer",
-                    "\${quickPlaySingleplayer}"
-                )
-            ),
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "features" to mapOf(
-                            "is_quick_play_multiplayer" to true
-                        )
-                    )
-                ),
-                "value" to listOf(
-                    "--quickPlayMultiplayer",
-                    "\${quickPlayMultiplayer}"
-                )
-            ),
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "features" to mapOf(
-                            "is_quick_play_realms" to true
-                        )
-                    )
-                ),
-                "value" to listOf(
-                    "--quickPlayRealms",
-                    "\${quickPlayRealms}"
-                )
+            val launcherJson = mapOf(
+                "inheritsFrom" to "1.21.4",
+                "id" to "meldmc-$version",
+                "javaVersion" to mapOf("component" to "java-runtime-delta", "majorVersion" to 21),
+                "libraries" to libsJson,
+                "mainClass" to "net.coosanta.meldmc.Main",
+//                "minimumLauncherVersion" to 21,
+                "releaseTime" to timestamp,
+                "time" to timestamp,
+                "type" to "release"
             )
-        )
 
-        val jvmArguments = listOf(
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "os" to mapOf(
-                            "name" to "osx"
-                        )
-                    )
-                ),
-                "value" to listOf(
-                    "-XstartOnFirstThread"
-                )
-            ),
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "os" to mapOf(
-                            "name" to "windows"
-                        )
-                    )
-                ),
-                "value" to "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump"
-            ),
-            mapOf(
-                "rules" to listOf(
-                    mapOf(
-                        "action" to "allow",
-                        "os" to mapOf(
-                            "arch" to "x86"
-                        )
-                    )
-                ),
-                "value" to "-Xss1M"
-            ),
-            "-Djava.library.path=\${natives_directory}",
-            "-Djna.tmpdir=\${natives_directory}",
-            "-Dorg.lwjgl.system.SharedLibraryExtractPath=\${natives_directory}",
-            "-Dio.netty.native.workdir=\${natives_directory}",
-            "-Dminecraft.launcher.brand=\${launcher_name}",
-            "-Dminecraft.launcher.version=\${launcher_version}",
-            "-cp",
-            "\${classpath}"
-        )
-
-        val launcherJson = mapOf(
-            "arguments" to mapOf(
-                "game" to gameArguments,
-                "jvm" to jvmArguments
-            ),
-            "assetIndex" to mapOf(
-                "id" to "26", // FIXME
-                "sha1" to "placeholder_sha1",
-                "size" to 0,
-                "totalSize" to 0,
-                "url" to "placeholder_url"
-            ),
-            "assets" to "26", // Placeholder
-            "complianceLevel" to 1,
-            "downloads" to mapOf(
-                "client" to mapOf(
-                    "sha1" to "placeholder_sha1",
-                    "size" to 0,
-                    "url" to "https://repo.coosanta.net/snapshots/net/coosanta/meldmc/$version/meldmc-$version.jar"
-                )
-            ),
-            "id" to version,
-            "javaVersion" to mapOf(
-                "component" to "java-runtime-delta",
-                "majorVersion" to 21
-            ),
-            "libraries" to librariesJson,
-            "logging" to mapOf(
-                "client" to mapOf(
-                    "argument" to "-Dlog4j.configurationFile=\${path}",
-                    "file" to mapOf(
-                        "id" to "client-log4j2.xml",
-                        "sha1" to "placeholder_sha1",
-                        "size" to 0,
-                        "url" to "placeholder_url"
-                    ),
-                    "type" to "log4j2-xml"
-                )
-            ),
-            "mainClass" to "net.minecraft.client.main.Main", // Update this as needed
-            "minimumLauncherVersion" to 21,
-            "releaseTime" to currentTime,
-            "time" to currentTime,
-            "type" to "release"
-        )
-
-        // Write JSON to file
-        val gson = JsonOutput.prettyPrint(JsonOutput.toJson(launcherJson))
-        val outputFile = File("$buildDir/versions/client.json")
-        outputFile.parentFile.mkdirs()
-        outputFile.writeText(gson)
-
-        println("Client JSON generated at: ${outputFile.absolutePath}")
+            val out = layout.buildDirectory.file("versions/client-$platform.json").get().asFile
+            out.parentFile.mkdirs()
+            out.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(launcherJson)))
+            println("Generated client JSON for $platform at: ${out.absolutePath}")
+        }
     }
 }
 
-// Helper function to calculate SHA1 hash
+fun buildLibraryEntry(
+    file: File,
+    group: String,
+    name: String,
+    version: String,
+    url: String
+): Map<String, Any> {
+    val path = "${group.replace('.', '/')}/$name/$version/$name-$version.jar"
+    val sha1 = calculateSha1(file)
+    val size = file.length()
+
+    return mapOf(
+        "name" to "$group:$name:$version",
+        "downloads" to mapOf(
+            "artifact" to mapOf(
+                "path" to path,
+                "sha1" to sha1,
+                "size" to size,
+                "url" to url
+            )
+        ),
+    )
+}
+
 fun calculateSha1(file: File): String {
     val md = MessageDigest.getInstance("SHA-1")
     file.inputStream().use { input ->
@@ -528,7 +382,7 @@ fun getArtifactUrl(artifact: ResolvedArtifact): String {
         group.startsWith("com.google.guava") -> "https://repo1.maven.org/maven2"
 
         // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        group.startsWith("net.coosanta") -> "https://repo.coosanta.net/snapshots"
+        group.startsWith("net.coosanta") -> "https://repo.coosanta.net/releases"
 
         // Stupid
         else -> "https://repo1.maven.org/maven2"
