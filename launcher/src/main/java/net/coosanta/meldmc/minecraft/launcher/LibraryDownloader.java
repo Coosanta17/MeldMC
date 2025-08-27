@@ -3,6 +3,7 @@ package net.coosanta.meldmc.minecraft.launcher;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import net.coosanta.meldmc.utility.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,47 +27,68 @@ public class LibraryDownloader {
     private final Path nativesDir;
     private final ExecutorService downloadExecutor;
     private final RuleEvaluator ruleEvaluator;
+    private final UnifiedProgressTracker progressTracker;
 
-    public LibraryDownloader(Path librariesDir, Path nativesDir, ExecutorService downloadExecutor, RuleEvaluator ruleEvaluator) {
+    public LibraryDownloader(Path librariesDir, Path nativesDir, ExecutorService downloadExecutor, RuleEvaluator ruleEvaluator, UnifiedProgressTracker progressTracker) {
         this.librariesDir = librariesDir;
         this.nativesDir = nativesDir;
         this.downloadExecutor = downloadExecutor;
         this.ruleEvaluator = ruleEvaluator;
+        this.progressTracker = progressTracker;
     }
 
     /**
      * Download all required libraries and return classpath
      */
     public List<Path> downloadLibraries(ObjectNode clientData) {
-        List<CompletableFuture<Void>> tasks = new ArrayList<>();
-        List<Path> classpath = new ArrayList<>();
-
-        if (!clientData.has("libraries")) return classpath;
+        if (!clientData.has("libraries")) return List.of();
 
         ArrayNode libraries = (ArrayNode) clientData.get("libraries");
-        for (JsonNode libElement : libraries) {
-            ObjectNode lib = (ObjectNode) libElement;
 
+        List<LibraryEntry> entries = new ArrayList<>();
+        for (JsonNode node : libraries) {
+            ObjectNode lib = (ObjectNode) node;
             if (!ruleEvaluator.passesOsRule(lib)) continue;
 
             boolean isNative = isNativeLibrary(lib);
-            ObjectNode artifactNode = resolveArtifactNode(lib, isNative);
+            ObjectNode artifact = resolveArtifactNode(lib, isNative);
+            if (artifact == null) continue;
 
-            if (artifactNode == null) continue;
+            Path path = getLibraryPath(artifact, lib);
+            entries.add(new LibraryEntry(lib, artifact, isNative, path));
+        }
 
-            Path libPath = getLibraryPath(artifactNode, lib);
-            if (!isNative) classpath.add(libPath);
+        // First pass - compute sizes
+        long totalBytes = 0;
+        int count = 0;
+        for (LibraryEntry e : entries) {
+            if (Files.exists(e.path) && isValidFile(e.artifact, e.path)) continue;
+            totalBytes += e.artifact.has("size") ? e.artifact.get("size").asLong() : 0;
+            count++;
+        }
+        if (progressTracker != null) {
+            progressTracker.setTotalExpected(totalBytes, count);
+        }
 
-            if (Files.exists(libPath) && isValidFile(artifactNode, libPath)) {
-                if (isNative) tasks.add(extractAsync(libPath));
-                continue;
+        // Second pass - download
+        List<Path> classpath = new ArrayList<>();
+        List<CompletableFuture<Void>> tasks = new ArrayList<>();
+        for (LibraryEntry e : entries) {
+            if (!e.isNative) classpath.add(e.path);
+
+            boolean existsValid = Files.exists(e.path) && isValidFile(e.artifact, e.path);
+            if (existsValid && e.isNative) {
+                tasks.add(extractAsync(e.path));
+            } else if (!existsValid) {
+                tasks.add(downloadAndMaybeExtract(e.lib, e.artifact, e.path, e.isNative));
             }
-
-            tasks.add(downloadAndMaybeExtract(lib, artifactNode, libPath, isNative));
         }
 
         CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
         return classpath;
+    }
+
+    private record LibraryEntry(ObjectNode lib, ObjectNode artifact, boolean isNative, Path path) {
     }
 
     private boolean isNativeLibrary(ObjectNode lib) {
@@ -138,7 +160,16 @@ public class LibraryDownloader {
             try {
                 String url = getLibraryUrl(artifactNode, lib);
                 Files.createDirectories(libPath.getParent());
-                FileDownloader.downloadFile(url, libPath);
+
+                if (progressTracker != null) {
+                    FileDownloader.downloadFile(url, libPath, (bytesRead, totalSize, context) -> {
+                        progressTracker.addBytesProgress(bytesRead);
+                    });
+                    progressTracker.addFileProgress(1);
+                } else {
+                    FileDownloader.downloadFile(url, libPath);
+                }
+
                 log.debug("Downloaded library: {}", lib.path("name").asText());
 
                 if (isNative) extractNative(libPath);

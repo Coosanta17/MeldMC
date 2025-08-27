@@ -5,10 +5,15 @@ import java.util.concurrent.atomic.AtomicLong;
 public class UnifiedProgressTracker {
     private final AtomicLong totalBytesDownloaded = new AtomicLong();
     private final AtomicLong totalFilesDownloaded = new AtomicLong();
+
     private volatile long totalExpectedBytes;
     private volatile long totalExpectedFiles;
+
     private volatile ProgressCallback bytesCallback;
     private volatile ProgressCallback filesCallback;
+    private volatile ProgressCallback stageCallback;
+
+    private LaunchStage stage = LaunchStage.INITIAL;
 
     public void setTotalExpected(long bytes, long files) {
         this.totalExpectedBytes = bytes;
@@ -21,6 +26,22 @@ public class UnifiedProgressTracker {
 
     public void setFilesCallback(ProgressCallback callback) {
         this.filesCallback = callback;
+    }
+
+    public void setStageCallback(ProgressCallback callback) {
+        this.stageCallback = callback;
+    }
+
+    public enum LaunchStage {
+        INITIAL,
+        MODS,
+        LIBRARIES,
+        STARTING
+    }
+
+    public void setStage(LaunchStage stage) {
+        this.stage = stage;
+        stageCallback.onProgress(0, 0, stage);
     }
 
     public void addBytesProgress(long bytes) {

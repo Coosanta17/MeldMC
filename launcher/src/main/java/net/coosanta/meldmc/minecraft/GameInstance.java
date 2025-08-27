@@ -3,6 +3,8 @@ package net.coosanta.meldmc.minecraft;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import net.coosanta.meldmc.Main;
+import net.coosanta.meldmc.minecraft.launcher.ClientLauncher;
+import net.coosanta.meldmc.minecraft.launcher.LaunchArgs;
 import net.coosanta.meldmc.network.ProgressCallback;
 import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import net.coosanta.meldmc.network.client.MeldClientRegistry;
@@ -46,7 +48,7 @@ public class GameInstance {
 
         // Handle illegal characters
         String dirName = "meldinstances/" + address.replaceAll("[:\\\\/*?\"<>|]", "_");
-        this.instanceDir = Main.getGameDir().resolve(dirName);
+        this.instanceDir = Main.getLaunchArgs().getGameDir().resolve(dirName);
 
         this.meldJson = instanceDir.resolve("meld.json");
 
@@ -159,7 +161,7 @@ public class GameInstance {
     public CompletableFuture<Path> backupInstanceDirectory(@Nullable ProgressCallback progressCallback) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Path baseBackupDir = Main.getGameDir().resolve("backups/meld_instances");
+                Path baseBackupDir = Main.getLaunchArgs().getGameDir().resolve("backups/meld_instances");
                 Files.createDirectories(baseBackupDir);
 
                 String baseFileName = instanceDir.getFileName().toString();
@@ -249,7 +251,16 @@ public class GameInstance {
         }
     }
 
-    public void downloadMods(UnifiedProgressTracker progressTracker) {
+    public void downloadModsAndLaunch(UnifiedProgressTracker progressTracker, LaunchArgs launchArgs) {
+        // Skip mod downloading if there are no changed mods
+        if (changedMods.isEmpty()) {
+            log.info("No mods to download, proceeding to launch");
+            removeDeletedMods();
+            progressTracker.completeAllProgress();
+            Platform.runLater(() -> launchGame(launchArgs, progressTracker));
+            return;
+        }
+
         var webMods = getChangedMods().values().stream()
                 .filter(mod -> mod.modSource() != MeldData.ClientMod.ModSource.SERVER)
                 .collect(Collectors.toSet());
@@ -274,6 +285,8 @@ public class GameInstance {
 
         webDownloader.setFileProgressCallback((deltaDownloadedFiles, total, unused) ->
                 progressTracker.addFileProgress(deltaDownloadedFiles));
+
+        progressTracker.setStage(UnifiedProgressTracker.LaunchStage.MODS);
 
         // Web downloads
         CompletableFuture<Set<Path>> webDownloadFuture = webMods.isEmpty()
@@ -300,7 +313,7 @@ public class GameInstance {
         }
 
         // Wait for both downloads to complete
-        CompletableFuture<Set<Path>> finalServerDownloadFuture = serverDownloadFuture; // Effectively final for lambda
+        CompletableFuture<Set<Path>> finalServerDownloadFuture = serverDownloadFuture;
         CompletableFuture.allOf(webDownloadFuture, serverDownloadFuture)
                 .thenAccept(v -> {
                     try {
@@ -328,22 +341,48 @@ public class GameInstance {
                             }
                         }
 
-                        Platform.runLater(() -> {
-                            // TODO: Complete download handling
-                        });
+                        Platform.runLater(() -> launchGame(launchArgs, progressTracker));
                     } catch (Exception e) {
                         log.error("Error retrieving download results", e);
+                        Platform.runLater(() -> {
+                            // TODO: Error
+                        });
                     }
                 })
                 .exceptionally(ex -> {
                     log.error("Mod download failed", ex);
                     Platform.runLater(() -> {
-                        // TODO: Error handling
+                        // TODO: Error
                     });
                     return null;
                 })
                 .whenComplete((v, ex) -> webDownloader.close());
+    }
 
+    private void launchGame(LaunchArgs launchArgs, UnifiedProgressTracker progressTracker) {
+        try {
+            if (meldData == null) {
+                log.error("Cannot launch game: MeldData is null");
+                return;
+            }
+
+            log.info("Launching Minecraft for instance: {}", address);
+
+            var launcher = new ClientLauncher(progressTracker);
+            Process process = launcher.launch(this, launchArgs);
+
+            log.info("Game launched successfully (PID: {})", process.pid());
+
+            process.onExit().thenRun(() -> {
+                Platform.exit();
+                System.exit(0);
+            });
+
+            Platform.exit();
+        } catch (Exception e) {
+            log.error("Failed to launch game", e);
+            // TODO: Show error in GUI
+        }
     }
 
     public @Nullable MeldData getMeldData() {

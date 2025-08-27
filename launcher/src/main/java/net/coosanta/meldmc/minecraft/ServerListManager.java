@@ -30,7 +30,7 @@ public class ServerListManager {
     private final List<ServerInfo> serverCache = new ArrayList<>();
 
     private ServerListManager() {
-        gameDir = Main.getGameDir();
+        gameDir = Main.getLaunchArgs().getGameDir();
         loadServersDat();
     }
 
@@ -205,7 +205,7 @@ public class ServerListManager {
     /**
      * Removes a server from the list
      *
-     * @param index The index of the server to remove
+     * @param index        The index of the server to remove
      * @param createBackup If there should be a server instance backup created.
      * @throws IndexOutOfBoundsException If the index is out of range
      */
@@ -248,7 +248,7 @@ public class ServerListManager {
         try {
             ListTag<CompoundTag> serversList = extractServersList();
             if (fromIndex < 0 || fromIndex >= serversList.size() ||
-                    toIndex < 0 || toIndex >= serversList.size()) {
+                toIndex < 0 || toIndex >= serversList.size()) {
                 throw new IndexOutOfBoundsException("Server index out of range");
             }
 

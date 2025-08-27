@@ -7,13 +7,15 @@ Launches mods the easy way
   - [ ] Offline server info viewer / instance
   - [ ] Update warnings
     - [x] New Mods 
-    - [ ] Unacknowledged warnings
+    - [x] Unacknowledged warnings
     - [ ] Delete warnings
   - [ ] Version changing
   - [ ] Downloading mods
     - [ ] Proper handling of IOException
     - [ ] See TODOs in `WebDownloader` and `GameInstance`.
   - [ ] akdfjsdkfjhweiudjsakdjcskdjfhkjdsjvkdf
+  - [x] Starting the game
+    - [x] FIX: Wrong assets used.
 - [ ] Fix incorrect placement and styling of errors `ButtonPanel`
 - [ ] Hardcoded value in `CentrePanel`
 - [ ] Implement name length limit. Description length limit. Modern MC Component text formatting `ServerEntry`

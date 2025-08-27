@@ -21,7 +21,7 @@ import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
 public class CentrePanel extends VBox {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private ExecutorService pingTask;
-    private final Path gameDir = Main.getGameDir();
+    private final Path gameDir = Main.getLaunchArgs().getGameDir();
     private SelectionPanel selectionPanel;
     private List<ServerEntry> serverList;
 

@@ -6,9 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.Dimension;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
@@ -18,11 +15,10 @@ public class Main {
     public static int SCALE_FACTOR = 1;
 
     private static Dimension windowsSize;
-    private static List<String> gameArgs;
     private static LaunchArgs launchArgs;
 
     public static void main(String[] args) {
-        gameArgs = new ArrayList<>(List.of(args));
+        if (args.length == 0) throw new IllegalArgumentException("No launch arguments provided");
         try {
             launchArgs = LaunchArgs.parse(args);
         } catch (Exception e) {
@@ -42,22 +38,7 @@ public class Main {
         return new Dimension(windowsSize);
     }
 
-    public static List<String> getGameArgs() {
-        return new ArrayList<>(gameArgs);
-    }
-
-    public static Path getGameDir() {
-//        int gameDirArgIndex = getGameArgs().indexOf("--gameDir");
-//        if (gameDirArgIndex == -1) throw new IllegalArgumentException("Missing gameDir argument");
-//        return Path.of(getGameArgs().get(gameDirArgIndex + 1));
-
-//        return launchArgs.getGameDir();
-
-        // Debug for windows: TODO: REMOVE
-        String appdata = System.getenv("APPDATA");
-        if (appdata == null) {
-            throw new IllegalStateException("APPDATA environment variable is not set");
-        }
-        return Path.of(appdata, ".minecraft");
+    public static LaunchArgs getLaunchArgs() {
+        return launchArgs;
     }
 }

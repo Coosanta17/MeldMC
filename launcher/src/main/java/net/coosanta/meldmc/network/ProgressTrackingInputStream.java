@@ -60,9 +60,12 @@ public class ProgressTrackingInputStream extends InputStream {
 
     private void updateProgress() {
         if (progressCallback != null) {
-            progressCallback.onProgress(isCumulative ? bytesRead : bytesSinceLastUpdate, totalSize, currentFileName);
+            long progressValue = isCumulative ? bytesRead : bytesSinceLastUpdate;
+            progressCallback.onProgress(progressValue, totalSize, currentFileName);
         }
-        bytesSinceLastUpdate = 0;
+        if (!isCumulative) {
+            bytesSinceLastUpdate = 0;
+        }
     }
 
     @Override

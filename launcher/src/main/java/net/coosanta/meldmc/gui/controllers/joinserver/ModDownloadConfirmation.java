@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
 import net.coosanta.meldmc.gui.views.MainWindow;
 import net.coosanta.meldmc.minecraft.GameInstance;
@@ -49,17 +50,18 @@ public class ModDownloadConfirmation extends BorderPane {
     private MinecraftButton cancel;
 
     // TODO: What if the user didn't acknowledge the changed mods but then it updates and thinks that the use did???
-    // TODO: Refactor this to scan mod files instead of JSON shit
     public ModDownloadConfirmation(String address) { // TODO Mod deleting information too
         setPrefWidth(DESIGN_WIDTH);
         setMaxWidth(DESIGN_WIDTH);
+
+        serverInstance = InstanceManager.getInstance(address);
+        if (serverInstance.getChangedMods().isEmpty()) confirmClicked(null);
 
         try {
             ResourceUtil.loadFXML("/fxml/joinserver/ModDownloadConfirmation.fxml", this).load();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        serverInstance = InstanceManager.getInstance(address);
 
         cancel.setOnAction(this::cancelClicked);
         confirm.setOnAction(this::confirmClicked);
@@ -114,7 +116,16 @@ public class ModDownloadConfirmation extends BorderPane {
         progressTracker.setFilesCallback((downloaded, total, unused) ->
                 Platform.runLater(() -> progressPanel.updateFilesProgress(downloaded, total)));
 
-        serverInstance.downloadMods(progressTracker);
+        progressTracker.setStageCallback((ø, æ, stage) ->
+                Platform.runLater(() -> progressPanel.setStatusMessage(switch ((UnifiedProgressTracker.LaunchStage) ((Object[]) stage)[0]) {
+                    case INITIAL -> "Starting download...";
+                    case MODS -> "Downloading mods...";
+                    case LIBRARIES -> "Downloading libraries...";
+                    case STARTING -> "Launching the game...";
+                }))
+        );
+
+        serverInstance.downloadModsAndLaunch(progressTracker, Main.getLaunchArgs());
     }
 
     private void cancelClicked(ActionEvent event) {

@@ -16,11 +16,6 @@
                 <VBox spacing="10">
                     <Label fx:id="warning" styleClass="white" wrapText="true"/>
 
-                    <TitledPane fx:id="modrinthTitle" text="Modrinth" expanded="false"
-                                style="-fx-background-color: white">
-                        <VBox fx:id="newModrinthMods" spacing="10"/>
-                    </TitledPane>
-
                     <TitledPane fx:id="serverSentTitle" text="Server Sent" expanded="false"
                                 style="-fx-background-color: white">
                         <VBox fx:id="newServerMods" spacing="10"/>
@@ -29,6 +24,11 @@
                     <TitledPane fx:id="untrustedTitle" text="Untrusted" expanded="false"
                                 style="-fx-background-color: white">
                         <VBox fx:id="newUntrustedMods" spacing="10"/>
+                    </TitledPane>
+
+                    <TitledPane fx:id="modrinthTitle" text="Modrinth" expanded="false"
+                                style="-fx-background-color: white">
+                        <VBox fx:id="newModrinthMods" spacing="10"/>
                     </TitledPane>
                 </VBox>
             </StackPane>

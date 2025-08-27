@@ -3,6 +3,7 @@ package net.coosanta.meldmc.minecraft.launcher;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.coosanta.meldmc.minecraft.GameInstance;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -29,10 +30,10 @@ public class CommandBuilder {
     /**
      * Build the complete launch command
      */
-    public List<String> buildCommand(ObjectNode clientData, List<Path> classpath, LaunchArgs launchArgs) {
+    public List<String> buildCommand(ObjectNode clientData, List<Path> classpath, LaunchArgs launchArgs, GameInstance instance) {
         List<String> command = new ArrayList<>();
 
-        buildPlaceholders(launchArgs, classpath);
+        buildPlaceholders(launchArgs, classpath, instance);
 
         var javaExec = JavaLocator.javaPathFromPid();
         if (javaExec.isEmpty())
@@ -125,10 +126,10 @@ public class CommandBuilder {
         return false;
     }
 
-    private void buildPlaceholders(LaunchArgs launchArgs, List<Path> classpath) {
+    private void buildPlaceholders(LaunchArgs launchArgs, List<Path> classpath, GameInstance instance) {
         placeholders.put("auth_player_name", launchArgs.getUsername());
         placeholders.put("version_name", launchArgs.getVersion());
-        placeholders.put("game_directory", launchArgs.getGameDir().toString());
+        placeholders.put("game_directory", instance.getInstanceDir().toString());
         placeholders.put("assets_root", launchArgs.getAssetsDir().toString());
         placeholders.put("assets_index_name", launchArgs.getAssetIndex());
         placeholders.put("auth_uuid", launchArgs.getUuid());
@@ -139,6 +140,7 @@ public class CommandBuilder {
         placeholders.put("version_type", launchArgs.getVersionType());
         placeholders.put("resolution_width", launchArgs.getWidth().toString());
         placeholders.put("resolution_height", launchArgs.getHeight().toString());
+
         placeholders.put("quickPlayPath", launchArgs.getQuickPlayPath());
         placeholders.put("quickPlaySingleplayer", launchArgs.getQuickPlaySingleplayer());
         placeholders.put("quickPlayMultiplayer", launchArgs.getQuickPlayMultiplayer());
@@ -150,7 +152,6 @@ public class CommandBuilder {
         placeholders.put("library_directory", librariesDir.toString());
 
         placeholders.put("classpath", buildClasspathString(classpath));
-
     }
 
     private String replaceVariables(String input, LaunchArgs launchArgs) {

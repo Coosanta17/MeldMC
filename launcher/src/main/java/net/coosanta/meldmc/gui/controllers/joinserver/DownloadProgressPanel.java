@@ -11,10 +11,14 @@ public class DownloadProgressPanel extends VBox {
     private final ProgressBar bytesProgressBar;
     private final Label bytesLabel;
     private final Label filesLabel;
+    private final Label statusLabel;
 
     public DownloadProgressPanel() {
         setAlignment(Pos.CENTER);
         setSpacing(10);
+
+        statusLabel = new Label("Preparing download...");
+        statusLabel.getStyleClass().add("white");
 
         bytesProgressBar = new ProgressBar();
         bytesProgressBar.setPrefWidth(DESIGN_WIDTH * 0.8);
@@ -27,17 +31,27 @@ public class DownloadProgressPanel extends VBox {
         filesLabel = new Label("Files: 0 / 0");
         filesLabel.getStyleClass().add("white");
 
-        getChildren().addAll(bytesProgressBar, bytesLabel, filesLabel);
+        getChildren().addAll(statusLabel, bytesProgressBar, bytesLabel, filesLabel);
     }
 
     public void updateBytesProgress(long downloaded, long total) {
         double progress = total > 0 ? (double) downloaded / total : 0;
         bytesProgressBar.setProgress(progress);
         bytesLabel.setText(String.format("Downloading: %s / %s", formatBytes(downloaded), formatBytes(total)));
+
+        if (progress >= 1.0) {
+            statusLabel.setText("Download complete! Launching game...");
+        } else if (downloaded > 0) {
+            statusLabel.setText("Downloading mods...");
+        }
     }
 
     public void updateFilesProgress(long downloaded, long total) {
         filesLabel.setText(String.format("Files: %d / %d", downloaded, total));
+    }
+
+    public void setStatusMessage(String message) {
+        statusLabel.setText(message);
     }
 
     private String formatBytes(long bytes) {

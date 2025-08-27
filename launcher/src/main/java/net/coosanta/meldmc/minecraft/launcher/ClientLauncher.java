@@ -2,6 +2,7 @@ package net.coosanta.meldmc.minecraft.launcher;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.coosanta.meldmc.minecraft.GameInstance;
+import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,8 @@ public class ClientLauncher {
     static final Path assetsDir;
     static final Path nativesDir;
 
-    // Components
+    private final UnifiedProgressTracker progressTracker;
+
     private final ClientJsonResolver jsonResolver;
     private final LibraryDownloader libraryDownloader;
     private final CommandBuilder commandBuilder;
@@ -65,7 +67,7 @@ public class ClientLauncher {
         }));
     }
 
-    public ClientLauncher() {
+    public ClientLauncher(UnifiedProgressTracker progressTracker) {
         createDirectories();
 
         ExecutorService downloadExecutor = Executors.newFixedThreadPool(
@@ -76,10 +78,12 @@ public class ClientLauncher {
                     return t;
                 });
 
-        this.jsonResolver = new ClientJsonResolver(versionsDir);
         var ruleEvaluator = new RuleEvaluator();
-        this.libraryDownloader = new LibraryDownloader(librariesDir, nativesDir, downloadExecutor, ruleEvaluator);
+
+        this.jsonResolver = new ClientJsonResolver(versionsDir);
+        this.libraryDownloader = new LibraryDownloader(librariesDir, nativesDir, downloadExecutor, ruleEvaluator, progressTracker);
         this.commandBuilder = new CommandBuilder(ruleEvaluator);
+        this.progressTracker = progressTracker;
     }
 
     private void createDirectories() {
@@ -107,16 +111,13 @@ public class ClientLauncher {
 
         addClientJarToClasspath(clientData, classpath);
 
-        List<String> command = commandBuilder.buildCommand(clientData, classpath, launchArgs);
+        List<String> command = commandBuilder.buildCommand(clientData, classpath, launchArgs, instance);
 
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.directory(instance.getInstanceDir().toFile());
         pb.inheritIO();
 
-        Process process = pb.start();
-        log.info("Started Minecraft process (PID: {})", process.pid());
-
-        return process;
+        return pb.start();
     }
 
     private void addClientJarToClasspath(ObjectNode clientData, List<Path> classpath) {
@@ -140,7 +141,7 @@ public class ClientLauncher {
                 return;
             }
 
-            FileDownloader.downloadFile(url, jarPath);
+            FileDownloader.downloadFile(url, jarPath); // TODO - If jar does download then progress track
         } catch (Exception e) {
             log.error("Client jar download failed.", e);
         }
@@ -161,7 +162,7 @@ public class ClientLauncher {
         List<Path> classpath = libraryDownloader.downloadLibraries(clientData);
         addClientJarToClasspath(clientData, classpath);
 
-        List<String> command = commandBuilder.buildCommand(clientData, classpath, launchArgs);
+        List<String> command = commandBuilder.buildCommand(clientData, classpath, launchArgs, new GameInstance("dude.wtf"));
 
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.directory(instanceDir.toFile());
@@ -200,7 +201,7 @@ public class ClientLauncher {
             }
         }
 
-        ClientLauncher launcher = new ClientLauncher();
+        ClientLauncher launcher = new ClientLauncher(null);
         Process p = launcher.launchStandalone(versionId, instanceDir, launchArgs);
         int exit = p.waitFor();
         System.out.println("Minecraft exited with code: " + exit);
