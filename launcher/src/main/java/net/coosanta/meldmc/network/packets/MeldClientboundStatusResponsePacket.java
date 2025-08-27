@@ -77,7 +77,7 @@ public class MeldClientboundStatusResponsePacket extends ClientboundStatusRespon
 
         if (meldSupported) {
             if (!jsonData.has("meldAddress") || !jsonData.has("meldPort") ||
-                    !jsonData.has("meldIsHttps") || !jsonData.has("meldSelfSigned")) {
+                !jsonData.has("meldIsHttps") || !jsonData.has("meldSelfSigned")) {
                 throw new IllegalArgumentException("Missing fields in meldSupported response");
             }
 

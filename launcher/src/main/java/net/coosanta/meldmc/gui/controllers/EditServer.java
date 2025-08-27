@@ -22,7 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static net.coosanta.meldmc.Main.*;
+import static net.coosanta.meldmc.Main.DESIGN_HEIGHT;
+import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
 
 public class EditServer extends BorderPane implements ScaleFactorCssProperty.ScaleFactorContainer {
     private static final Logger log = LoggerFactory.getLogger(EditServer.class);

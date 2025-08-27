@@ -99,7 +99,7 @@ public class ProgressTrackingInputStream extends InputStream {
     }
 
     @Override
-    public void reset() throws IOException {
+    public void reset() {
         throw new UnsupportedOperationException("Reset the input stream with thy calls. I would thou couldst.");
     }
 

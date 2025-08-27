@@ -205,15 +205,15 @@ public class ServerInfo {
     @Override
     public String toString() {
         return "ServerInfo{" +
-                "name='" + name + '\'' +
-                ", address='" + address + '\'' +
-                ", description=" + description +
-                ", favicon=" + Arrays.toString(favicon) +
-                ", ping=" + ping +
-                ", players=" + players +
-                ", versionInfo=" + versionInfo +
-                ", status=" + status +
-                '}';
+               "name='" + name + '\'' +
+               ", address='" + address + '\'' +
+               ", description=" + description +
+               ", favicon=" + Arrays.toString(favicon) +
+               ", ping=" + ping +
+               ", players=" + players +
+               ", versionInfo=" + versionInfo +
+               ", status=" + status +
+               '}';
     }
 
     @Override

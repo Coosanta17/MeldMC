@@ -91,11 +91,11 @@ public class MinecraftButtonSkin extends SkinBase<MinecraftButton> {
         double scaleFactor = getSkinnable().getScaleFactor();
 
         TextureScalingUtil.drawNineSliceTexture(
-            gc, image,
-            MinecraftButton.LEFT_BORDER, MinecraftButton.RIGHT_BORDER,
-            MinecraftButton.TOP_BORDER, MinecraftButton.BOTTOM_BORDER,
-            0, 0, canvas.getWidth(), canvas.getHeight(),
-            scaleFactor
+                gc, image,
+                MinecraftButton.LEFT_BORDER, MinecraftButton.RIGHT_BORDER,
+                MinecraftButton.TOP_BORDER, MinecraftButton.BOTTOM_BORDER,
+                0, 0, canvas.getWidth(), canvas.getHeight(),
+                scaleFactor
         );
     }
 
