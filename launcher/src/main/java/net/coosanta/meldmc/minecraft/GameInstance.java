@@ -11,6 +11,9 @@ import net.coosanta.meldmc.network.client.MeldClientRegistry;
 import net.coosanta.meldmc.network.client.MeldData;
 import net.coosanta.meldmc.network.client.WebModsDownloader;
 import net.coosanta.meldmc.utility.ResourceUtil;
+import net.querz.nbt.io.NBTUtil;
+import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.ListTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -62,6 +65,7 @@ public class GameInstance {
     public void setMeldData(MeldData meldData) {
         this.meldData = meldData;
         createInstanceDirectory();
+        addServersDat();
         if (!Objects.equals(cachedMeldData, meldData)) {
             boolean noCachedData = cachedMeldData == null;
             modLoaderChanged = noCachedData || cachedMeldData.modLoader() != meldData.modLoader();
@@ -91,7 +95,6 @@ public class GameInstance {
         log.debug("Detected {} new or changed mods", changedMods.size());
 
         saveInstanceData();
-
     }
 
     private void checkChanges(Path path, Map<String, MeldData.@NotNull ClientMod> newModsByName) {
@@ -132,6 +135,39 @@ public class GameInstance {
             Files.createDirectories(instanceDir);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create instance directory for server: " + address, e);
+        }
+    }
+
+    private void addServersDat() {
+        if (meldData == null) return;
+
+        ServerListManager serverManager = ServerListManager.getInstance();
+        List<ServerInfo> servers = serverManager.getServers();
+
+        // Find the server that matches this instance's address
+        ServerInfo matchingServer = servers.stream()
+                .filter(server -> address.equals(server.getAddress()))
+                .findFirst()
+                .orElse(null);
+
+        if (matchingServer == null) {
+            log.error("Server with address {} not found in server list", address);
+            return;
+        }
+
+        try {
+            Path instanceServersDat = instanceDir.resolve("servers.dat");
+
+            CompoundTag serversDat = new CompoundTag();
+            ListTag<CompoundTag> serversList = new ListTag<>(CompoundTag.class);
+            serversList.add(matchingServer.toNbt());
+            serversDat.put("servers", serversList);
+
+            NBTUtil.write(serversDat, instanceServersDat.toFile(), false);
+
+            log.debug("Created instance servers.dat with server: {}", address);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create instance servers.dat for " + address, e);
         }
     }
 
@@ -341,6 +377,7 @@ public class GameInstance {
                             }
                         }
 
+                        // Launching the game!!!!!
                         Platform.runLater(() -> launchGame(launchArgs, progressTracker));
                     } catch (Exception e) {
                         log.error("Error retrieving download results", e);
@@ -373,10 +410,7 @@ public class GameInstance {
 
             log.info("Game launched successfully (PID: {})", process.pid());
 
-            process.onExit().thenRun(() -> {
-                Platform.exit();
-                System.exit(0);
-            });
+            process.onExit().thenRun(() -> System.exit(0));
 
             Platform.exit();
         } catch (Exception e) {

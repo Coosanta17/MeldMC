@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static net.coosanta.meldmc.network.UnifiedProgressTracker.LaunchStage.LIBRARIES;
+import static net.coosanta.meldmc.network.UnifiedProgressTracker.LaunchStage.STARTING;
+
 public class ClientLauncher {
     private static final Logger log = LoggerFactory.getLogger(ClientLauncher.class);
 
@@ -105,11 +108,15 @@ public class ClientLauncher {
 
         log.info("Launching Minecraft for instance: {}", instance.getAddress());
 
+        progressTracker.setStage(LIBRARIES);
+
         ObjectNode clientData = jsonResolver.loadClientJson(instance.getMeldData().versionId());
 
         List<Path> classpath = libraryDownloader.downloadLibraries(clientData);
 
         addClientJarToClasspath(clientData, classpath);
+
+        progressTracker.setStage(STARTING);
 
         List<String> command = commandBuilder.buildCommand(clientData, classpath, launchArgs, instance);
 

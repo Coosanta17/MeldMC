@@ -54,8 +54,12 @@ public class ModDownloadConfirmation extends BorderPane {
         setPrefWidth(DESIGN_WIDTH);
         setMaxWidth(DESIGN_WIDTH);
 
+        // TODO: refactor direct launch process
         serverInstance = InstanceManager.getInstance(address);
-        if (serverInstance.getChangedMods().isEmpty()) confirmClicked(null);
+        if (serverInstance.getChangedMods().isEmpty()) {
+            confirmClicked(null);
+            return;
+        }
 
         try {
             ResourceUtil.loadFXML("/fxml/joinserver/ModDownloadConfirmation.fxml", this).load();
