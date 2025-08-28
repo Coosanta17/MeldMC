@@ -18,8 +18,28 @@ public class MeldClientRegistry {
      */
     public static MeldClient getOrCreateClient(ServerInfo info) {
         return CLIENTS.computeIfAbsent(info.getAddress(), key -> {
-            String host = info.getMeldAddress().equals("0.0.0.0") ? info.getAddress() : info.getMeldAddress();
-            return new MeldClientImpl(host, info.getMeldPort(), info.isHttps(), info.isSelfSigned());
+            String queryAddress = info.getMeldAddress();
+            String host;
+            int port;
+            boolean https = info.isHttps();
+            boolean selfSigned = info.isSelfSigned();
+
+            if (queryAddress != null && !queryAddress.equals("0.0.0.0:0")) {
+                if (queryAddress.startsWith("https://")) {
+                    https = true;
+                    queryAddress = queryAddress.substring(8);
+                } else if (queryAddress.startsWith("http://")) {
+                    queryAddress = queryAddress.substring(7);
+                }
+
+                String[] parts = queryAddress.split(":");
+                host = parts[0].equals("0.0.0.0") ? info.getAddress() : parts[0];
+                port = parts.length > 1 ? Integer.parseInt(parts[1].split("/")[0]) : 80;
+            } else {
+                throw new IllegalArgumentException("Meld address is not configured for server: " + info.getName());
+            }
+
+            return new MeldClientImpl(host, port, https, selfSigned);
         });
     }
 

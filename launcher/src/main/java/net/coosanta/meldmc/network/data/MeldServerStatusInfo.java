@@ -8,24 +8,17 @@ import org.jetbrains.annotations.Nullable;
 
 public class MeldServerStatusInfo extends ServerStatusInfo {
     private final String address;
-    private final int port;
     private final boolean isHttps;
     private final boolean selfSigned;
 
     public MeldServerStatusInfo(Component description, @Nullable PlayerInfo playerInfo,
-                                @Nullable VersionInfo versionInfo, byte[] iconPng,
-                                boolean enforcesSecureChat, String address, int port,
-                                boolean isHttps, boolean selfSigned) {
+                                @Nullable VersionInfo versionInfo, byte[] iconPng, boolean enforcesSecureChat,
+                                String address, boolean isHttps, boolean selfSigned) {
 
         super(description, playerInfo, versionInfo, iconPng, enforcesSecureChat);
         this.address = address;
-        this.port = port;
         this.isHttps = isHttps;
         this.selfSigned = selfSigned;
-    }
-
-    public int getPort() {
-        return port;
     }
 
     public String getAddress() {

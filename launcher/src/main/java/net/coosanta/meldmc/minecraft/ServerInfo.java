@@ -33,7 +33,6 @@ public class ServerInfo {
     private ServerInfo.Status status = Status.INITIAL;
     private boolean meldSupported;
     private String meldAddress;
-    private int meldPort;
     private boolean isHttps;
     private boolean selfSigned;
     private MeldData meldData;
@@ -80,7 +79,6 @@ public class ServerInfo {
         this.description = serverInfo.description;
         this.meldSupported = serverInfo.meldSupported;
         this.meldAddress = serverInfo.meldAddress;
-        this.meldPort = serverInfo.meldPort;
         this.isHttps = serverInfo.isHttps;
         this.selfSigned = serverInfo.selfSigned;
         this.meldData = serverInfo.meldData;
@@ -113,7 +111,6 @@ public class ServerInfo {
         if (statusInfo instanceof MeldServerStatusInfo meldStatus) {
             this.meldSupported = true; // Meld support checked in MeldClientboundStatusResponsePacket
             this.meldAddress = meldStatus.getAddress();
-            this.meldPort = meldStatus.getPort();
             this.isHttps = meldStatus.isHttps();
             this.selfSigned = meldStatus.isSelfSigned();
         }
@@ -180,10 +177,6 @@ public class ServerInfo {
 
     public boolean isMeldSupported() {
         return meldSupported;
-    }
-
-    public int getMeldPort() {
-        return meldPort;
     }
 
     public String getMeldAddress() {

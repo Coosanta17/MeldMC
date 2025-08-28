@@ -111,6 +111,7 @@ public class WebModsDownloader implements AutoCloseable {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(mod.url()))
+                .header("User-Agent", "Coosanta17/MeldMC (client) (https://github.com/Coosanta17/MeldMC)")
                 .GET()
                 .build();
 

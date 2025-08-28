@@ -29,7 +29,7 @@ Launches mods the easy way
 - [ ] Hash verifying (done?????) `MeldData`
 - [ ] Remove Debug + Do something about the <0.5 ping time display bug assuming timeout even when there is ping `Pinger`
 - [ ] Resource + Shader packs
-- [ ] Modrinth custom `User-Agent` header.
+- [x] Modrinth custom `User-Agent` header.
 - [ ] Translations
 - [ ] Extra client mods that aren't specified by the server.
 - [ ] Everything else that I haven't though of.

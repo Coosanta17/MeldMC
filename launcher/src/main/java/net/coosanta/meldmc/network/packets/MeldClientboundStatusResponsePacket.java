@@ -76,17 +76,15 @@ public class MeldClientboundStatusResponsePacket extends ClientboundStatusRespon
         }
 
         if (meldSupported) {
-            if (!jsonData.has("meldAddress") || !jsonData.has("meldPort") ||
-                !jsonData.has("meldIsHttps") || !jsonData.has("meldSelfSigned")) {
+            if (!jsonData.has("meldAddress") || !jsonData.has("meldIsHttps") || !jsonData.has("meldSelfSigned")) {
                 throw new IllegalArgumentException("Missing fields in meldSupported response");
             }
 
             var address = jsonData.get("meldAddress").getAsString();
-            var port = jsonData.get("meldPort").getAsInt();
             var isHttps = jsonData.get("meldIsHttps").getAsBoolean();
             var selfSigned = jsonData.get("meldSelfSigned").getAsBoolean();
 
-            return new MeldServerStatusInfo(description, players, version, icon, enforcesSecureChat, address, port, isHttps, selfSigned);
+            return new MeldServerStatusInfo(description, players, version, icon, enforcesSecureChat, address, isHttps, selfSigned);
         }
         return new ServerStatusInfo(description, players, version, icon, enforcesSecureChat);
     }
