@@ -47,8 +47,8 @@ jobs:
 
       - name: Update version in build.gradle.kts
         run: |
-          sed -i 's/project\.version = "[^"]*"/project.version = "${{ steps.version.outputs.VERSION }}"/' build.gradle.kts
-          sed -i 's/val isRelease = false/val isRelease = true/' build.gradle.kts
+          sed -i 's/project\.version = "[^"]*"/project.version = "${{ steps.version.outputs.VERSION }}"/' ./launcher/build.gradle.kts
+          sed -i 's/val isRelease = false/val isRelease = true/' ./launcher/build.gradle.kts
 
       - name: Publish to Maven Repository
         env:
