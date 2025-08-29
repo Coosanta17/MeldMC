@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 project.version = "0.0.2"
-val isRelease = true
+val isRelease = false
 
 val mainClassName = "net.coosanta.meldmc.Main"
 
