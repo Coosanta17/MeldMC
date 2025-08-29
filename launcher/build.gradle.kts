@@ -5,7 +5,9 @@ import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
 
-project.version = "0.0.1e"
+project.version = "0.0.2"
+val isRelease = true
+
 val mainClassName = "net.coosanta.meldmc.Main"
 
 plugins {
@@ -88,7 +90,7 @@ dependencies {
 //    implementation("org.geysermc.mcprotocollib:protocol:1.21.5-SNAPSHOT")
 
     // https://repo.opencollab.dev/maven-snapshots/ dependencies: https://repo.opencollab.dev/maven-releases/
-    implementation("org.geysermc.mcprotocollib:protocol:1.21.6-SNAPSHOT") // FIXME: stupid 404 thing
+    implementation("org.geysermc.mcprotocollib:protocol:1.21.6-SNAPSHOT")
 
     // https://mvnrepository.com/artifact/net.kyori/adventure-text-minimessage/4.19.0
     implementation("net.kyori:adventure-text-minimessage:4.19.0")
@@ -117,11 +119,10 @@ val supportedPlatforms = listOf(
     "win",
     "mac",
     "mac-aarch64",
-    "linux",
-    "linux-aarch64"
+    "linux"
 )
 
-// Append `-Pplatform=<win|mac|mac-aarch64|linux|linux-aarch64>` if needed. No support for win-aarch64 yet.
+// Append `-Pplatform=<win|mac|mac-aarch64|linux>` if needed. No support for win-aarch64 or linux-aarch64 yet.
 tasks.named<ShadowJar>("shadowJar") {
     val configuredBuildPlatform: String = project.findProperty("platform") as? String ?: javafx.platform.classifier
 
@@ -203,6 +204,14 @@ publishing {
             version = project.version.toString()
 
             from(components["shadow"])
+
+            val currentPlatform = project.findProperty("platform") as? String ?: javafx.platform.classifier
+            artifact(
+                layout.buildDirectory.file("versions/client-$currentPlatform.json").get().asFile
+            ) {
+                classifier = "client-$currentPlatform"
+                extension = "json"
+            }
         }
         create<MavenPublication>("mavenAllPlatforms") {
             groupId = "net.coosanta"
@@ -216,9 +225,20 @@ publishing {
                 ) {
                     classifier = platform
                 }
+
+                artifact(
+                    layout.buildDirectory.file("versions/client-$platform.json").get().asFile
+                ) {
+                    classifier = "client-$platform"
+                    extension = "json"
+                }
             }
         }
     }
+}
+
+tasks.withType<PublishToMavenRepository> {
+    dependsOn("generateLauncherJsons", "shadowJarAllPlatforms")
 }
 
 tasks.register("generateLauncherJsons") {
@@ -243,6 +263,15 @@ tasks.register("generateLauncherJsons") {
                 "io.netty"
             )
 
+            // Special handling for mcprotocollib
+            if (group == "org.geysermc.mcprotocollib" && name == "protocol" && projectVersion == "1.21.6-SNAPSHOT") {
+                val url = getArtifactUrl(artifact)
+                if (url == "https://repo.opencollab.dev/maven-snapshots/org/geysermc/mcprotocollib/protocol/1.21.6-SNAPSHOT/protocol-1.21.6-SNAPSHOT.jar") {
+                    librariesJson.add(staticMcprotocollibJson())
+                    return@forEach
+                }
+            }
+
             if (seen.add(id) && excludedGroups.none { group.startsWith(it) } && !name.startsWith("javafx-")) {
                 librariesJson.add(
                     buildLibraryEntry(
@@ -265,7 +294,7 @@ tasks.register("generateLauncherJsons") {
                         "net.coosanta",
                         "meldmc",
                         version,
-                        "https://repo.coosanta.net/snapshots/net/coosanta/meldmc/$version/meldmc-$version-$platform.jar"
+                        "${getCoosantaRepoBase()}/net/coosanta/meldmc/$version/meldmc-$version-$platform.jar"
                     )
                 )
             }
@@ -289,6 +318,19 @@ tasks.register("generateLauncherJsons") {
         }
     }
 }
+
+// Add this helper function for static mcprotocollib JSON
+fun staticMcprotocollibJson(): Map<String, Any> = mapOf(
+    "name" to "org.geysermc.mcprotocollib:protocol:1.21.6-SNAPSHOT",
+    "downloads" to mapOf(
+        "artifact" to mapOf(
+            "path" to "org/geysermc/mcprotocollib/protocol/1.21.6-SNAPSHOT/protocol-1.21.6-SNAPSHOT.jar",
+            "sha1" to "ada983d6983a46f3b78318849f0641252b4fbabc",
+            "size" to 1350227,
+            "url" to "https://repo.opencollab.dev/maven-snapshots/org/geysermc/mcprotocollib/protocol/1.21.6-SNAPSHOT/protocol-1.21.6-20250702.161144-8.jar"
+        )
+    )
+)
 
 fun buildLibraryEntry(
     file: File,
@@ -392,3 +434,7 @@ fun getArtifactUrl(artifact: ResolvedArtifact): String {
     println("Using fallback URL for ${group}:${name}:${version}: $fallbackUrl")
     return fallbackUrl
 }
+
+// Helper to get coosanta repo base URL
+fun getCoosantaRepoBase(): String =
+    if (isRelease) "https://repo.coosanta.net/releases" else "https://repo.coosanta.net/snapshots"
