@@ -293,7 +293,7 @@ public class GameInstance {
             log.info("No mods to download, proceeding to launch");
             removeDeletedMods();
             progressTracker.completeAllProgress();
-            Platform.runLater(() -> launchGame(launchArgs, progressTracker));
+            CompletableFuture.runAsync(() -> launchGame(launchArgs, progressTracker));
             return;
         }
 

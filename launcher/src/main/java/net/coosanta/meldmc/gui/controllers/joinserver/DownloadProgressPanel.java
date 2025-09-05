@@ -38,12 +38,6 @@ public class DownloadProgressPanel extends VBox {
         double progress = total > 0 ? (double) downloaded / total : 0;
         bytesProgressBar.setProgress(progress);
         bytesLabel.setText(String.format("Downloading: %s / %s", formatBytes(downloaded), formatBytes(total)));
-
-        if (progress >= 1.0) {
-            statusLabel.setText("Download complete! Launching game...");
-        } else if (downloaded > 0) {
-            statusLabel.setText("Downloading mods...");
-        }
     }
 
     public void updateFilesProgress(long downloaded, long total) {
@@ -52,6 +46,12 @@ public class DownloadProgressPanel extends VBox {
 
     public void setStatusMessage(String message) {
         statusLabel.setText(message);
+    }
+
+    public void hideProgressInfo() {
+        bytesLabel.setVisible(false);
+        filesLabel.setVisible(false);
+        bytesProgressBar.setVisible(false);
     }
 
     private String formatBytes(long bytes) {

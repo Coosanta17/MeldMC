@@ -9,6 +9,7 @@ import javafx.scene.text.TextFlow;
 import net.coosanta.meldmc.gui.controllers.ConfirmationScreen;
 import net.coosanta.meldmc.gui.controllers.MainWindowController;
 import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
+import net.coosanta.meldmc.gui.views.MainWindow;
 import net.coosanta.meldmc.minecraft.GameInstance;
 import net.coosanta.meldmc.minecraft.InstanceManager;
 import net.coosanta.meldmc.minecraft.ServerInfo;
@@ -106,9 +107,9 @@ public class ButtonPanel extends GridPane {
         deleteButton.setDisable(false);
     }
 
-    // Placeholder methods.
     private void handleJoinServer() {
         log.debug("Join server clicked");
+        MainWindow.getInstance().getController().showModDownloadConfirmation(getSelectedServerInfo().getAddress());
     }
 
     private void handleServerInfo() {
@@ -183,6 +184,7 @@ public class ButtonPanel extends GridPane {
 
     private void handleSettings() {
         log.debug("Settings clicked");
+        // TODO
     }
 
     private ServerInfo getSelectedServerInfo() {

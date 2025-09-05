@@ -44,50 +44,54 @@ final class NativeExtractor {
 
             ZipEntry e;
             while ((e = zin.getNextEntry()) != null) {
-                String name = e.getName();
-                if (e.isDirectory() || name.startsWith("META-INF/") || !isNativeFile(name)) continue;
+                extractNative(targetDir, e, zin);
+            }
+        }
+    }
 
-                Path out = targetDir.resolve(name.substring(name.lastIndexOf('/') + 1)).toAbsolutePath().normalize();
-                Files.createDirectories(out.getParent() == null ? targetDir : out.getParent());
+    private static void extractNative(Path targetDir, ZipEntry e, ZipInputStream zin) throws IOException {
+        String name = e.getName();
+        if (e.isDirectory() || name.startsWith("META-INF/") || !isNativeFile(name)) return;
 
-                Object lock = LOCKS.computeIfAbsent(out, p -> new Object());
-                synchronized (lock) {
-                    if (Files.exists(out)) {
-                        continue;
-                    }
+        Path out = targetDir.resolve(name.substring(name.lastIndexOf('/') + 1)).toAbsolutePath().normalize();
+        Files.createDirectories(out.getParent() == null ? targetDir : out.getParent());
 
-                    Path tmp = Files.createTempFile(targetDir, "native-", ".tmp");
+        Object lock = LOCKS.computeIfAbsent(out, p -> new Object());
+        synchronized (lock) {
+            if (Files.exists(out)) {
+                return;
+            }
+
+            Path tmp = Files.createTempFile(targetDir, "native-", ".tmp");
+            try {
+                Files.copy(zin, tmp, StandardCopyOption.REPLACE_EXISTING);
+                try {
+                    Files.move(tmp, out, StandardCopyOption.ATOMIC_MOVE);
+                } catch (AtomicMoveNotSupportedException ex) {
+                    // Fallback to non-atomic
                     try {
-                        Files.copy(zin, tmp, StandardCopyOption.REPLACE_EXISTING);
-                        try {
-                            Files.move(tmp, out, StandardCopyOption.ATOMIC_MOVE);
-                        } catch (AtomicMoveNotSupportedException ex) {
-                            // Fallback to non-atomic
-                            try {
-                                Files.move(tmp, out);
-                            } catch (FileAlreadyExistsException ignore) {
-                                // Another thread won the race
-                            }
-                        }
-                    } catch (AccessDeniedException | FileAlreadyExistsException ignore) {
-                        // Already locked
-                    } finally {
-                        Files.deleteIfExists(tmp);
+                        Files.move(tmp, out);
+                    } catch (FileAlreadyExistsException ignore) {
+                        // Another thread won the race
                     }
+                }
+            } catch (AccessDeniedException | FileAlreadyExistsException ignore) {
+                // Already locked
+            } finally {
+                Files.deleteIfExists(tmp);
+            }
 
-                    // Ensure executable bit on Unix
-                    if (currentOS() != OS.WINDOWS) {
-                        try {
-                            Set<PosixFilePermission> perms = EnumSet.of(
-                                    PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE,
-                                    PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE,
-                                    PosixFilePermission.OTHERS_READ, PosixFilePermission.OTHERS_EXECUTE
-                            );
-                            Files.setPosixFilePermissions(out, perms);
-                        } catch (UnsupportedOperationException ignored) {
-                            // Non-POSIX FS
-                        }
-                    }
+            // Ensure executable bit on Unix
+            if (currentOS() != OS.WINDOWS) {
+                try {
+                    Set<PosixFilePermission> perms = EnumSet.of(
+                            PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE,
+                            PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE,
+                            PosixFilePermission.OTHERS_READ, PosixFilePermission.OTHERS_EXECUTE
+                    );
+                    Files.setPosixFilePermissions(out, perms);
+                } catch (UnsupportedOperationException ignored) {
+                    // Non-POSIX FS
                 }
             }
         }

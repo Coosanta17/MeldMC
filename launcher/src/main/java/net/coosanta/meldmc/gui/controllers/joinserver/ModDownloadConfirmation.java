@@ -1,6 +1,5 @@
 package net.coosanta.meldmc.gui.controllers.joinserver;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -8,12 +7,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import net.coosanta.meldmc.Main;
 import net.coosanta.meldmc.gui.nodes.button.MinecraftButton;
-import net.coosanta.meldmc.gui.views.MainWindow;
 import net.coosanta.meldmc.minecraft.GameInstance;
-import net.coosanta.meldmc.minecraft.InstanceManager;
-import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import net.coosanta.meldmc.utility.ResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -22,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
+import static net.coosanta.meldmc.gui.controllers.joinserver.LaunchConfigurer.configureAndLaunch;
 
 public class ModDownloadConfirmation extends BorderPane {
     private static final Logger log = LoggerFactory.getLogger(ModDownloadConfirmation.class);
@@ -50,16 +46,9 @@ public class ModDownloadConfirmation extends BorderPane {
     private MinecraftButton cancel;
 
     // TODO: What if the user didn't acknowledge the changed mods but then it updates and thinks that the use did???
-    public ModDownloadConfirmation(String address) { // TODO Mod deleting information too
+    public ModDownloadConfirmation(@NotNull GameInstance serverInstance) { // TODO Mod deleting information too
         setPrefWidth(DESIGN_WIDTH);
         setMaxWidth(DESIGN_WIDTH);
-
-        // TODO: refactor direct launch process
-        serverInstance = InstanceManager.getInstance(address);
-        if (serverInstance.getChangedMods().isEmpty()) {
-            confirmClicked(null);
-            return;
-        }
 
         try {
             ResourceUtil.loadFXML("/fxml/joinserver/ModDownloadConfirmation.fxml", this).load();
@@ -68,9 +57,9 @@ public class ModDownloadConfirmation extends BorderPane {
         }
 
         cancel.setOnAction(this::cancelClicked);
-        confirm.setOnAction(this::confirmClicked);
+        confirm.setOnAction(ð -> configureAndLaunch(serverInstance));
 
-        warning.setText(buildWarningMessage(address));
+        warning.setText(buildWarningMessage(serverInstance.getAddress()));
 
         serverInstance.getChangedMods().values().forEach(mod -> {
             switch (mod.modSource()) {
@@ -84,9 +73,11 @@ public class ModDownloadConfirmation extends BorderPane {
         modifyNodeVisibility(modrinthTitle, !newModrinthMods.getChildren().isEmpty());
         modifyNodeVisibility(serverSentTitle, !newServerMods.getChildren().isEmpty());
         modifyNodeVisibility(untrustedTitle, !newUntrustedMods.getChildren().isEmpty());
+        this.serverInstance = serverInstance;
     }
 
     private @NotNull String buildWarningMessage(String address) {
+        assert serverInstance != null;
         int changed = serverInstance.getChangedMods().size();
         return """
                 You are about to download and run %d new or updated mod%s requested by the Minecraft server at address '%s'.
@@ -104,32 +95,6 @@ public class ModDownloadConfirmation extends BorderPane {
     private void modifyNodeVisibility(Node node, boolean visible) {
         node.setVisible(visible);
         node.setManaged(visible);
-    }
-
-    private void confirmClicked(ActionEvent event) {
-        log.debug("Confirm and join server button clicked");
-
-        var progressPanel = new DownloadProgressPanel();
-        MainWindow.getInstance().getController().showScreen(progressPanel);
-
-        var progressTracker = new UnifiedProgressTracker();
-
-        progressTracker.setBytesCallback((downloaded, total, unused) ->
-                Platform.runLater(() -> progressPanel.updateBytesProgress(downloaded, total)));
-
-        progressTracker.setFilesCallback((downloaded, total, unused) ->
-                Platform.runLater(() -> progressPanel.updateFilesProgress(downloaded, total)));
-
-        progressTracker.setStageCallback((ø, æ, stage) ->
-                Platform.runLater(() -> progressPanel.setStatusMessage(switch ((UnifiedProgressTracker.LaunchStage) ((Object[]) stage)[0]) {
-                    case INITIAL -> "Starting download...";
-                    case MODS -> "Downloading mods...";
-                    case LIBRARIES -> "Downloading libraries...";
-                    case STARTING -> "Launching the game...";
-                }))
-        );
-
-        serverInstance.downloadModsAndLaunch(progressTracker, Main.getLaunchArgs());
     }
 
     private void cancelClicked(ActionEvent event) {

@@ -12,6 +12,7 @@ public class UnifiedProgressTracker {
     private volatile ProgressCallback bytesCallback;
     private volatile ProgressCallback filesCallback;
     private volatile ProgressCallback stageCallback;
+    private volatile Runnable hideCallback;
 
     private LaunchStage stage = LaunchStage.INITIAL;
 
@@ -30,6 +31,10 @@ public class UnifiedProgressTracker {
 
     public void setStageCallback(ProgressCallback callback) {
         this.stageCallback = callback;
+    }
+
+    public void setHideCallback(Runnable callback) {
+        this.hideCallback = callback;
     }
 
     public enum LaunchStage {
@@ -59,8 +64,12 @@ public class UnifiedProgressTracker {
     }
 
     public void completeAllProgress() {
-        if (bytesCallback != null) bytesCallback.onProgress(totalExpectedBytes, totalExpectedBytes);
-        if (filesCallback != null) filesCallback.onProgress(totalExpectedFiles, totalExpectedFiles);
+        if (hideCallback == null) {
+            if (bytesCallback != null) bytesCallback.onProgress(totalExpectedBytes, totalExpectedBytes);
+            if (filesCallback != null) filesCallback.onProgress(totalExpectedFiles, totalExpectedFiles);
+        } else {
+            hideCallback.run();
+        }
     }
 
     public long getCurrentBytes() {

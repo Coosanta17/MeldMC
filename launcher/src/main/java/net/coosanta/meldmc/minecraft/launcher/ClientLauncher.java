@@ -115,6 +115,7 @@ public class ClientLauncher {
 
         addClientJarToClasspath(clientData, classpath);
 
+        progressTracker.completeAllProgress();
         progressTracker.setStage(STARTING);
 
         List<String> command = commandBuilder.buildCommand(clientData, classpath, launchArgs, instance);

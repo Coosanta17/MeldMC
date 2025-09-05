@@ -16,6 +16,7 @@ Launches mods the easy way
   - [ ] akdfjsdkfjhweiudjsakdjcskdjfhkjdsjvkdf
   - [x] Starting the game
     - [x] FIX: Wrong assets used.
+    - [ ] Extra: Customise JVM Args.
 - [ ] Fix incorrect placement and styling of errors `ButtonPanel`
 - [ ] Hardcoded value in `CentrePanel`
 - [ ] Implement name length limit. Description length limit. Modern MC Component text formatting `ServerEntry`
@@ -33,4 +34,5 @@ Launches mods the easy way
 - [ ] Translations
 - [ ] Extra client mods that aren't specified by the server.
 - [ ] Everything else that I haven't though of.
+- [ ] Moving servers.
 - [ ] Bugs Bugs Bugs!!!
