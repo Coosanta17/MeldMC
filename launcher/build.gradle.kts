@@ -5,7 +5,7 @@ import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
 
-project.version = "0.0.2"
+project.version = "0.2.1"
 val isRelease = false
 
 val mainClassName = "net.coosanta.meldmc.Main"
