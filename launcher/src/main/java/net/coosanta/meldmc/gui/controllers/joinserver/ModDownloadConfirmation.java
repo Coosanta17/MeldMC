@@ -47,6 +47,8 @@ public class ModDownloadConfirmation extends BorderPane {
 
     // TODO: What if the user didn't acknowledge the changed mods but then it updates and thinks that the use did???
     public ModDownloadConfirmation(@NotNull GameInstance serverInstance) { // TODO Mod deleting information too
+        this.serverInstance = serverInstance;
+
         setPrefWidth(DESIGN_WIDTH);
         setMaxWidth(DESIGN_WIDTH);
 
@@ -73,7 +75,6 @@ public class ModDownloadConfirmation extends BorderPane {
         modifyNodeVisibility(modrinthTitle, !newModrinthMods.getChildren().isEmpty());
         modifyNodeVisibility(serverSentTitle, !newServerMods.getChildren().isEmpty());
         modifyNodeVisibility(untrustedTitle, !newUntrustedMods.getChildren().isEmpty());
-        this.serverInstance = serverInstance;
     }
 
     private @NotNull String buildWarningMessage(String address) {
@@ -99,7 +100,7 @@ public class ModDownloadConfirmation extends BorderPane {
 
     private void cancelClicked(ActionEvent event) {
         log.debug("Cancel server clicked");
-//
+// tODO figure out what to do with the cancel button - where put it?
 //        MainWindow.getInstance().getController().showMeldInfoPanel();
     }
 }
