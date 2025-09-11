@@ -6,8 +6,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-public record MeldData(String mcVersion, ModLoader modLoader, String modLoaderVersion,
-                       String versionId, Map<String, ClientMod> modMap) { // Todo: hash verifying
+public record MeldData(
+        String mcVersion,
+        ModLoader modLoader,
+        String modLoaderVersion,
+        String versionId,
+        Map<String, ClientMod> // K: SHA-512 hash. V: corresponding mod
+        modMap
+) { // Todo: hash verifying
 
     public enum ModLoader {
         VANILLA,
@@ -17,9 +23,19 @@ public record MeldData(String mcVersion, ModLoader modLoader, String modLoaderVe
         QUILT
     }
 
-    public record ClientMod(String modVersion, String hash, @Nullable String url, @Nullable String projectUrl,
-                            @Nullable String projectId, String filename, String modname, String modId, String authors,
-                            String description, long fileSize) {
+    public record ClientMod(
+            String modVersion,
+            String hash,
+            @Nullable String url,
+            @Nullable String projectUrl,
+            @Nullable String projectId,
+            String filename,
+            String modname,
+            String modId,
+            String authors,
+            String description,
+            long fileSize
+    ) {
 
         public ModSource modSource() {
             if (url == null) return ModSource.SERVER;

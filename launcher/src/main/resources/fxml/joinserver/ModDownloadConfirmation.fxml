@@ -30,6 +30,11 @@
                                 style="-fx-background-color: white">
                         <VBox fx:id="newModrinthMods" spacing="10"/>
                     </TitledPane>
+
+                    <TitledPane fx:id="deletedTitle" text="Removed" expanded="false"
+                                style="-fx-background-color: white">
+                        <VBox fx:id="oldDeletedMods" spacing="10"/>
+                    </TitledPane>
                 </VBox>
             </StackPane>
         </ScrollPane>

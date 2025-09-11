@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
 import static net.coosanta.meldmc.gui.controllers.joinserver.LaunchConfigurer.configureAndLaunch;
@@ -32,6 +33,8 @@ public class ModDownloadConfirmation extends BorderPane {
     private TitledPane serverSentTitle;
     @FXML
     private TitledPane untrustedTitle;
+    @FXML
+    private TitledPane deletedTitle;
 
     @FXML
     private VBox newModrinthMods;
@@ -39,14 +42,15 @@ public class ModDownloadConfirmation extends BorderPane {
     private VBox newServerMods;
     @FXML
     private VBox newUntrustedMods;
+    @FXML
+    private VBox oldDeletedMods;
 
     @FXML
     private MinecraftButton confirm;
     @FXML
     private MinecraftButton cancel;
 
-    // TODO: What if the user didn't acknowledge the changed mods but then it updates and thinks that the use did???
-    public ModDownloadConfirmation(@NotNull GameInstance serverInstance) { // TODO Mod deleting information too
+    public ModDownloadConfirmation(@NotNull GameInstance serverInstance) {
         this.serverInstance = serverInstance;
 
         setPrefWidth(DESIGN_WIDTH);
@@ -71,10 +75,27 @@ public class ModDownloadConfirmation extends BorderPane {
                 case UNTRUSTED -> newUntrustedMods.getChildren().add(new ModSummary(mod));
             }
         });
+        serverInstance.getDeletedMods().values().forEach(modPath -> {
+            String modHash;
+            try {
+                modHash = ResourceUtil.calculateSHA512(modPath.toFile());
+            } catch (IOException | NoSuchAlgorithmException e) {
+                throw new RuntimeException("Failed to calculate hash of deleted mod at path " + modPath, e);
+            }
+            var mod = serverInstance.getCachedMeldData().modMap().get(modHash); // FIXME possible nullptr ex on non-meld or cached servers
+            if (mod != null) {
+                oldDeletedMods.getChildren().add(new ModSummary(mod));
+            } else {
+                var modLabel = new Label(modPath.getFileName().toString());
+                modLabel.getStyleClass().add("black");
+                oldDeletedMods.getChildren().add(modLabel);
+            }
+        });
 
         modifyNodeVisibility(modrinthTitle, !newModrinthMods.getChildren().isEmpty());
         modifyNodeVisibility(serverSentTitle, !newServerMods.getChildren().isEmpty());
         modifyNodeVisibility(untrustedTitle, !newUntrustedMods.getChildren().isEmpty());
+        modifyNodeVisibility(deletedTitle, !oldDeletedMods.getChildren().isEmpty());
     }
 
     private @NotNull String buildWarningMessage(String address) {

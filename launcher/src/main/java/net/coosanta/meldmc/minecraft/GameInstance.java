@@ -34,7 +34,7 @@ public class GameInstance {
     private static final Logger log = LoggerFactory.getLogger(GameInstance.class);
 
     private final String address;
-    private @Nullable MeldData cachedMeldData;
+    private @Nullable MeldData cachedMeldData; // FIXME cache updating automatically instead of on confirmation of downloading mods
     private @Nullable MeldData meldData;
     private final Path instanceDir;
     private final Path meldJson;
@@ -76,7 +76,7 @@ public class GameInstance {
         changedMods.clear();
         deletedMods.clear();
 
-        var newModsByName = meldData.modMap().values().stream()
+        Map<String, MeldData.ClientMod> newModsByName = meldData.modMap().values().stream()
                 .collect(Collectors.toMap(MeldData.ClientMod::filename, m -> m));
 
         // scan files for tampering or extras TODO: Non-blocking, with slow disk handling
@@ -141,8 +141,7 @@ public class GameInstance {
     private void addServersDat() {
         if (meldData == null) return;
 
-        ServerListManager serverManager = ServerListManager.getInstance();
-        List<ServerInfo> servers = serverManager.getServers();
+        List<ServerInfo> servers = ServerListManager.getInstance().getServers();
 
         // Find the server that matches this instance's address
         ServerInfo matchingServer = servers.stream()

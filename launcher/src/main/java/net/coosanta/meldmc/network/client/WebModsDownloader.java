@@ -73,10 +73,12 @@ public class WebModsDownloader implements AutoCloseable {
                         .filter(mod -> mod.url() != null)
                         .map(mod -> downloadMod(mod, destinationDir)
                                 .exceptionally(ex -> {
-                                    log.error("Failed to download {}: ", mod.filename(), ex);
-                                    // Ignoring failed mods, because it will either be sent by server or user error
-                                    // TODO: Handle IOException
-                                    return null;
+                                    if (ex instanceof IOException) {
+                                        // TODO: GUI ERROR
+                                    }
+                                    log.error("Failed to download {} from {}: ", mod.filename(), mod.url(), ex);
+                                    throw new RuntimeException(ex); // FIXME
+//                                    return null;
                                 }))
                         .collect(Collectors.toSet());
 

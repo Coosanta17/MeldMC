@@ -15,7 +15,7 @@ public final class LaunchConfigurer {
 
     public static Node decideLaunchScreen(String address) {
         GameInstance serverInstance = InstanceManager.getInstance(address);
-        if (serverInstance.getChangedMods().isEmpty()) {
+        if (serverInstance.getChangedMods().isEmpty() && serverInstance.getDeletedMods().isEmpty()) {
             return configureAndLaunch(serverInstance);
         } else {
             return new ModDownloadConfirmation(serverInstance);
