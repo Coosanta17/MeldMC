@@ -3,6 +3,7 @@ package net.coosanta.meldmc.minecraft.launcher;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import net.coosanta.meldmc.utility.ResourceUtil;
 import org.slf4j.Logger;
@@ -143,7 +144,7 @@ public class LibraryDownloader {
     }
 
     private CompletableFuture<Void> extractAsync(Path libPath) {
-        return CompletableFuture.runAsync(() -> extractNative(libPath), downloadExecutor);
+        return GlobalExceptionHandler.runAsync(() -> extractNative(libPath), downloadExecutor);
     }
 
     private void extractNative(Path libPath) {
@@ -156,7 +157,7 @@ public class LibraryDownloader {
     }
 
     private CompletableFuture<Void> downloadAndMaybeExtract(ObjectNode lib, ObjectNode artifactNode, Path libPath, boolean isNative) {
-        return CompletableFuture.runAsync(() -> {
+        return GlobalExceptionHandler.runAsync(() -> {
             try {
                 String url = getLibraryUrl(artifactNode, lib);
                 Files.createDirectories(libPath.getParent());

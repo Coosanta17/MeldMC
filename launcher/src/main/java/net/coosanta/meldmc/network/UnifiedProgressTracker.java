@@ -64,6 +64,7 @@ public class UnifiedProgressTracker {
     }
 
     public void completeAllProgress() {
+        setStage(LaunchStage.STARTING);
         if (hideCallback == null) {
             if (bytesCallback != null) bytesCallback.onProgress(totalExpectedBytes, totalExpectedBytes);
             if (filesCallback != null) filesCallback.onProgress(totalExpectedFiles, totalExpectedFiles);

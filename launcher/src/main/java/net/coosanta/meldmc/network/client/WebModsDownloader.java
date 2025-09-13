@@ -1,5 +1,6 @@
 package net.coosanta.meldmc.network.client;
 
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.network.ProgressCallback;
 import net.coosanta.meldmc.network.ProgressTrackingInputStream;
 import org.slf4j.Logger;
@@ -35,18 +36,12 @@ public class WebModsDownloader implements AutoCloseable {
     private volatile long totalExpectedFiles;
 
     public WebModsDownloader() {
-        coordinationExecutor = Executors.newSingleThreadExecutor(r -> {
-            var t = new Thread(r, "WebModsDownloader-Coordinator");
-            t.setDaemon(true);
-            return t;
-        });
+        coordinationExecutor = Executors.newSingleThreadExecutor(
+            GlobalExceptionHandler.threadFactory("web-mods-coordinator")
+        );
         downloadExecutor = Executors.newFixedThreadPool(
                 3 * Runtime.getRuntime().availableProcessors(),
-                r -> {
-                    var t = new Thread(r, "WebModsDownloader-Worker");
-                    t.setDaemon(true);
-                    return t;
-                }
+                GlobalExceptionHandler.threadFactory("web-mods-downloader")
         );
 
         this.client = HttpClient.newBuilder()
@@ -155,13 +150,25 @@ public class WebModsDownloader implements AutoCloseable {
         this.fileProgressCallback = callback;
     }
 
-    @Override
-    public void close() {
-        shutdown();
-    }
-
     public void shutdown() {
         coordinationExecutor.shutdown();
         downloadExecutor.shutdown();
+        try {
+            if (!coordinationExecutor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                coordinationExecutor.shutdownNow();
+            }
+            if (!downloadExecutor.awaitTermination(10, java.util.concurrent.TimeUnit.SECONDS)) {
+                downloadExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            coordinationExecutor.shutdownNow();
+            downloadExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    @Override
+    public void close() {
+        shutdown();
     }
 }

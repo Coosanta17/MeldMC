@@ -3,7 +3,7 @@ package net.coosanta.meldmc.minecraft;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import net.coosanta.meldmc.Main;
-import net.coosanta.meldmc.gui.views.MainWindow;
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.minecraft.launcher.ClientLauncher;
 import net.coosanta.meldmc.minecraft.launcher.LaunchArgs;
 import net.coosanta.meldmc.network.ProgressCallback;
@@ -26,6 +26,8 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -33,6 +35,9 @@ import java.util.zip.ZipOutputStream;
 
 public class GameInstance {
     private static final Logger log = LoggerFactory.getLogger(GameInstance.class);
+    private static final Executor FILE_OPERATIONS_EXECUTOR = Executors.newFixedThreadPool(
+            2, GlobalExceptionHandler.threadFactory("game-instance-file-ops")
+    );
 
     private final String address;
     private @Nullable MeldData cachedMeldData; // FIXME cache updating automatically instead of on confirmation of downloading mods
@@ -247,21 +252,21 @@ public class GameInstance {
             } catch (IOException e) {
                 throw new RuntimeException("Backup failed", e);
             }
-        });
+        }, FILE_OPERATIONS_EXECUTOR);
     }
 
     public CompletableFuture<@Nullable Path> deleteInstance(boolean createBackup, @Nullable ProgressCallback progressCallback) {
-        if (!Files.exists(instanceDir)) return null;
+        if (!Files.exists(instanceDir)) return CompletableFuture.completedFuture(null);
 
         if (createBackup) {
-            return backupInstanceDirectory(progressCallback).thenApply(backupPath -> {
+            return backupInstanceDirectory(progressCallback).thenApplyAsync(backupPath -> {
                 try {
                     deleteInstanceFiles();
                     return backupPath;
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to delete instance after backup", e);
                 }
-            });
+            }, FILE_OPERATIONS_EXECUTOR);
         } else {
             return CompletableFuture.supplyAsync(() -> {
                 try {
@@ -270,7 +275,7 @@ public class GameInstance {
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to delete instance", e);
                 }
-            });
+            }, FILE_OPERATIONS_EXECUTOR);
         }
     }
 
@@ -293,7 +298,10 @@ public class GameInstance {
             log.info("No mods to download, proceeding to launch");
             removeDeletedMods();
             progressTracker.completeAllProgress();
-            CompletableFuture.runAsync(() -> launchGame(launchArgs, progressTracker));
+            GlobalExceptionHandler.runAsync(
+                    () -> launchGame(launchArgs, progressTracker),
+                    GlobalExceptionHandler.singleThreadExecutor("game-launcher")
+            );
             return;
         }
 
@@ -351,7 +359,7 @@ public class GameInstance {
         // Wait for both downloads to complete
         CompletableFuture<Set<Path>> finalServerDownloadFuture = serverDownloadFuture;
         CompletableFuture.allOf(webDownloadFuture, serverDownloadFuture)
-                .thenAccept(v -> {
+                .thenAcceptAsync(v -> {
                     try {
                         Set<Path> webPaths = webDownloadFuture.join();
                         Set<Path> serverPaths = finalServerDownloadFuture.join();
@@ -378,19 +386,20 @@ public class GameInstance {
                         }
 
                         // Launching the game!!!!!
-                        Platform.runLater(() -> launchGame(launchArgs, progressTracker));
+                        GlobalExceptionHandler.runAsync(() -> launchGame(launchArgs, progressTracker),
+                                        Executors.newSingleThreadExecutor(GlobalExceptionHandler.threadFactory("game-launcher")))
+                                .exceptionally(ex -> {
+                                    Platform.runLater(() -> GlobalExceptionHandler.handle(ex));
+                                    return null;
+                                });
                     } catch (Exception e) {
                         log.error("Error retrieving download results", e);
-                        Platform.runLater(() -> {
-                            // TODO: Error
-                        });
+                        Platform.runLater(() -> GlobalExceptionHandler.handle(e));
                     }
-                })
+                }, FILE_OPERATIONS_EXECUTOR)
                 .exceptionally(ex -> {
                     log.error("Mod download failed", ex);
-                    Platform.runLater(() -> {
-                        // TODO: Error
-                    });
+                    Platform.runLater(() -> GlobalExceptionHandler.handle(ex));
                     return null;
                 })
                 .whenComplete((v, ex) -> webDownloader.close());
@@ -400,7 +409,7 @@ public class GameInstance {
         try {
             if (meldData == null) {
                 log.error("Cannot launch game: MeldData is null");
-                return;
+                throw new IllegalStateException("Cannot launch game: MeldData is null");
             }
 
             log.info("Launching Minecraft for instance: {}", address);
@@ -415,8 +424,8 @@ public class GameInstance {
             Platform.exit();
         } catch (Exception e) {
             log.error("Failed to launch game", e);
-            // FIXME: fix it not appearing
-            Platform.runLater(() -> MainWindow.getInstance().getController().showExceptionScreen(e)); // FIXME: global variable causing strong coupling
+            // Rethrow to let CompletableFuture.exceptionally handle it
+            throw new RuntimeException("Failed to launch game: " + e.getMessage(), e);
         }
     }
 

@@ -1,6 +1,7 @@
 package net.coosanta.meldmc.network;
 
 import javafx.application.Platform;
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.gui.controllers.serverselection.ServerEntry;
 import net.coosanta.meldmc.minecraft.InstanceManager;
 import net.coosanta.meldmc.minecraft.ServerInfo;
@@ -77,7 +78,8 @@ public class Pinger {
                         log.warn("Server ping timed out after 10 seconds: {}", serverInfo.getAddress());
                     } else {
                         serverInfo.setStatus(ServerInfo.Status.UNREACHABLE);
-                        log.error("Error pinging server {}: {}", serverInfo.getAddress(), e.getMessage(), e);
+                        log.error("Error pinging server {}: {}", serverInfo.getAddress(), e.getMessage());
+                        GlobalExceptionHandler.handle(e);
                     }
                     Platform.runLater(serverEntry::updateComponents);
                     return null;

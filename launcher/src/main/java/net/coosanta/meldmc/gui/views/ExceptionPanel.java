@@ -1,6 +1,5 @@
-package net.coosanta.meldmc.gui.controllers;
+package net.coosanta.meldmc.gui.views;
 
-import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
@@ -9,15 +8,16 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import net.coosanta.meldmc.exceptions.ClientJsonNotFoundException;
-import net.coosanta.meldmc.gui.views.MainWindow;
 
 import java.awt.Desktop;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
 
-public class ExceptionGUI extends StackPane {
-    public ExceptionGUI(Throwable exception) {
+public class ExceptionPanel extends StackPane {
+    public ExceptionPanel(Throwable exception) {
         StringWriter sw = new StringWriter();
         exception.printStackTrace(new PrintWriter(sw));
         String exceptionText = sw.toString();
@@ -27,7 +27,7 @@ public class ExceptionGUI extends StackPane {
         textArea.setWrapText(false);
         textArea.setFont(Font.font("Monospaced"));
         textArea.setStyle("-fx-control-inner-background: white; -fx-text-fill: black;");
-        textArea.setPrefRowCount(20);
+        textArea.setPrefRowCount(40);
         textArea.setPrefColumnCount(60);
 
         Button copyButton = new Button("Copy to Clipboard");
@@ -41,14 +41,23 @@ public class ExceptionGUI extends StackPane {
         VBox vbox = new VBox(10, textArea, copyButton);
         vbox.setStyle("-fx-padding: 10;");
 
-        if (exception instanceof ClientJsonNotFoundException cj && cj.isForge()) {
+        ClientJsonNotFoundException cj = null;
+        Throwable current = exception;
+        while (current != null) {
+            if (current instanceof ClientJsonNotFoundException found && found.isForge()) {
+                cj = found;
+                break;
+            }
+            current = current.getCause();
+        }
+
+        if (cj != null) {
             Button downloadForge = new Button("Download Forge");
             downloadForge.setOnAction(evt -> {
                 try {
                     Desktop.getDesktop().browse(new URI("https://files.minecraftforge.net/net/minecraftforge/forge/index_1.20.1.html"));
-                } catch (Exception e) {
-                    Platform.runLater(() -> MainWindow.getInstance().getController().showExceptionScreen(e)); // lmao
-
+                } catch (IOException | URISyntaxException e) {
+                    throw new RuntimeException(e);
                 }
             });
             vbox.getChildren().add(downloadForge);

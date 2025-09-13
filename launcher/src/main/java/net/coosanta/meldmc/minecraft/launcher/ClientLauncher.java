@@ -2,6 +2,7 @@ package net.coosanta.meldmc.minecraft.launcher;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.coosanta.meldmc.exceptions.ClientJsonNotFoundException;
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.minecraft.GameInstance;
 import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class ClientLauncher {
     static final Path nativesDir;
 
     private final UnifiedProgressTracker progressTracker;
+    private final ExecutorService downloadExecutor;
 
     private final ClientJsonResolver jsonResolver;
     private final LibraryDownloader libraryDownloader;
@@ -73,13 +75,9 @@ public class ClientLauncher {
     public ClientLauncher(UnifiedProgressTracker progressTracker) {
         createDirectories();
 
-        ExecutorService downloadExecutor = Executors.newFixedThreadPool(
+        this.downloadExecutor = GlobalExceptionHandler.fixedThreadPool(
                 3 * Runtime.getRuntime().availableProcessors(),
-                r -> {
-                    Thread t = new Thread(r, "library-downloader");
-                    t.setDaemon(true);
-                    return t;
-                });
+                "library-downloader");
 
         var ruleEvaluator = new RuleEvaluator();
 
@@ -152,6 +150,20 @@ public class ClientLauncher {
             FileDownloader.downloadFile(url, jarPath); // TODO - If jar does download then progress track
         } catch (Exception e) {
             log.error("Client jar download failed.", e);
+        }
+    }
+
+    public void shutdown() {
+        if (downloadExecutor != null && !downloadExecutor.isShutdown()) {
+            downloadExecutor.shutdown();
+            try {
+                if (!downloadExecutor.awaitTermination(10, java.util.concurrent.TimeUnit.SECONDS)) {
+                    downloadExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                downloadExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

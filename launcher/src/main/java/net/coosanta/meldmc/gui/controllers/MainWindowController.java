@@ -10,6 +10,7 @@ import net.coosanta.meldmc.gui.controllers.joinserver.LaunchConfigurer;
 import net.coosanta.meldmc.gui.controllers.meldserverinfo.MeldInfoPanel;
 import net.coosanta.meldmc.gui.controllers.serverselection.SelectionPanel;
 import net.coosanta.meldmc.gui.views.Background;
+import net.coosanta.meldmc.gui.views.ExceptionPanel;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ public class MainWindowController {
     public void showExceptionScreen(Throwable e) {
         log.debug("Showing exception GUI");
 
-        showScreen(new ExceptionGUI(e));
+        showScreen(new ExceptionPanel(e));
     }
 
     public void showScreen(Node screen) {

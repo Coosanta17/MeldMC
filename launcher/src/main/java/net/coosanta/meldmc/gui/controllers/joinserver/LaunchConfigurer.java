@@ -30,6 +30,7 @@ public final class LaunchConfigurer {
 
         var progressTracker = new UnifiedProgressTracker();
 
+        // TODO: Refactor using idiomatic Task rather than this complex slop
         progressTracker.setBytesCallback((downloaded, total, unused) ->
                 Platform.runLater(() -> progressPanel.updateBytesProgress(downloaded, total)));
 

@@ -1,6 +1,7 @@
 package net.coosanta.meldmc.network.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.network.ProgressCallback;
 import net.coosanta.meldmc.network.ProgressTrackingInputStream;
 import net.coosanta.meldmc.utility.SSLUtils;
@@ -32,7 +33,9 @@ public class MeldClientImpl implements MeldClient {
     private final String baseUrl;
     private final boolean isHttps;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
+    private final ExecutorService executorService = Executors.newCachedThreadPool(
+        GlobalExceptionHandler.threadFactory("meld-client")
+    );
     private final SSLContext sslContext;
     private ProgressCallback progressCallback;
 
@@ -142,6 +145,14 @@ public class MeldClientImpl implements MeldClient {
     @Override
     public void close() {
         executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(10, java.util.concurrent.TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     private HttpURLConnection setupConnection(URL url, String method) throws IOException {

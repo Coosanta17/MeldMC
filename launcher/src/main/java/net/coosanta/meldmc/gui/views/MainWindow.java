@@ -1,11 +1,13 @@
 package net.coosanta.meldmc.gui.views;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import net.coosanta.meldmc.Main;
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.gui.controllers.MainWindowController;
 import net.coosanta.meldmc.utility.ResourceUtil;
 import org.slf4j.Logger;
@@ -50,6 +52,7 @@ public class MainWindow extends Application {
         StackPane root = loader.load();
 
         controller = loader.getController();
+        GlobalExceptionHandler.installOnFxThread();
 
         Scene scene = new Scene(root, windowDimension.width, windowDimension.height);
         scene.getStylesheets().add(ResourceUtil.loadResource("/styles/base-style.css").toExternalForm());

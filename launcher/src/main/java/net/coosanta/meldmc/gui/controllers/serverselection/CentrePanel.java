@@ -2,6 +2,7 @@ package net.coosanta.meldmc.gui.controllers.serverselection;
 
 import javafx.scene.layout.VBox;
 import net.coosanta.meldmc.Main;
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.minecraft.ServerInfo;
 import net.coosanta.meldmc.minecraft.ServerListManager;
 import net.coosanta.meldmc.utility.ResourceUtil;
@@ -20,7 +21,7 @@ import static net.coosanta.meldmc.Main.DESIGN_WIDTH;
 
 public class CentrePanel extends VBox {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private ExecutorService pingTask;
+    private ExecutorService pingExecutor;
     private final Path gameDir = Main.getLaunchArgs().getGameDir();
     private SelectionPanel selectionPanel;
     private List<ServerEntry> serverList;
@@ -32,14 +33,17 @@ public class CentrePanel extends VBox {
 
         setManaged(true);
 
-        pingTask = newPingtask();
+        pingExecutor = createPingExecutor();
 
         loadFXML();
         loadServers();
     }
 
-    private ExecutorService newPingtask() {
-        return Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()));
+    private ExecutorService createPingExecutor() {
+        return Executors.newFixedThreadPool(
+            Math.min(4, Runtime.getRuntime().availableProcessors()),
+            GlobalExceptionHandler.threadFactory("server-ping")
+        );
     }
 
     private void loadFXML() {
@@ -61,7 +65,7 @@ public class CentrePanel extends VBox {
 
         List<ServerInfo> servers = manager.getServers();
         for (int i = 0; i < servers.size(); i++) {
-            ServerEntry entry = new ServerEntry(i, pingTask);
+            ServerEntry entry = new ServerEntry(i, pingExecutor);
             int index = serverList.size();
             entry.setOnMouseClicked(event -> selectionPanel.selectEntry(entry, index));
             serverList.add(entry);
@@ -80,19 +84,27 @@ public class CentrePanel extends VBox {
     }
 
     public void reload() {
-        shutDownPingTasks();
-        pingTask = newPingtask();
+        shutdownPingExecutor();
+        pingExecutor = createPingExecutor();
         getChildren().clear();
         loadServers();
     }
 
-    private void shutDownPingTasks() {
-        if (pingTask != null && !pingTask.isShutdown()) {
-            pingTask.shutdownNow();
+    private void shutdownPingExecutor() {
+        if (pingExecutor != null && !pingExecutor.isShutdown()) {
+            pingExecutor.shutdown();
+            try {
+                if (!pingExecutor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                    pingExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                pingExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
     public void dispose() {
-        shutDownPingTasks();
+        shutdownPingExecutor();
     }
 }

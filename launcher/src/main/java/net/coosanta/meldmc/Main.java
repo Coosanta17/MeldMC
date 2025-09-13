@@ -1,5 +1,6 @@
 package net.coosanta.meldmc;
 
+import net.coosanta.meldmc.exceptions.GlobalExceptionHandler;
 import net.coosanta.meldmc.gui.views.MainWindow;
 import net.coosanta.meldmc.minecraft.launcher.LaunchArgs;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class Main {
         windowsSize = new Dimension(launchArgs.getWidth(), launchArgs.getHeight());
 
         try {
+            GlobalExceptionHandler.installGlobal();
             MainWindow.launch(MainWindow.class);
         } catch (Exception e) {
             log.error("Failed to launch application", e);
