@@ -3,6 +3,7 @@ package net.coosanta.meldmc.minecraft.launcher;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.coosanta.meldmc.exceptions.ClientJsonNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,18 +31,18 @@ public class ClientJsonResolver {
     }
 
     /**
-     * Load client JSON with inheritance resolution
+     * Load client JSON with version inheritance resolution.
      */
-    public ObjectNode loadClientJson(String id) throws IOException {
+    public ObjectNode loadClientJson(String id) throws IOException, ClientJsonNotFoundException {
         Path clientJson = findClientJson(id);
         if (!Files.exists(clientJson)) {
-            throw new IllegalStateException("No client.json found for version: " + id);
+            throw new ClientJsonNotFoundException("No client.json found for version: " + id);
         }
 
         return loadAndResolveClientJson(clientJson);
     }
 
-    private Path findClientJson(String id) throws IOException {
+    private Path findClientJson(String id) throws IOException, ClientJsonNotFoundException {
         Path clientJson = versionsDir.resolve(id).resolve(id + ".json");
         if (Files.exists(clientJson)) {
             return clientJson;
@@ -57,7 +58,7 @@ public class ClientJsonResolver {
                 return targetJson;
             }
         }
-        throw new IllegalStateException("No version found for id: " + id);
+        throw new ClientJsonNotFoundException("No client.json found for version: " + id);
     }
 
     private Set<Map<String, String>> loadVersionsManifest() throws IOException {
@@ -75,7 +76,7 @@ public class ClientJsonResolver {
         return versions;
     }
 
-    private ObjectNode loadAndResolveClientJson(Path clientJson) throws IOException {
+    private ObjectNode loadAndResolveClientJson(Path clientJson) throws IOException, ClientJsonNotFoundException {
         ObjectNode clientData = loadJsonFile(clientJson);
 
         // Resolve inheritance

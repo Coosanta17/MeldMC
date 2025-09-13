@@ -1,6 +1,7 @@
 package net.coosanta.meldmc.minecraft.launcher;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.coosanta.meldmc.exceptions.ClientJsonNotFoundException;
 import net.coosanta.meldmc.minecraft.GameInstance;
 import net.coosanta.meldmc.network.UnifiedProgressTracker;
 import org.slf4j.Logger;
@@ -102,7 +103,7 @@ public class ClientLauncher {
     /**
      * Launch Minecraft using LaunchArgs configuration
      */
-    public Process launch(GameInstance instance, LaunchArgs launchArgs) throws Exception {
+    public Process launch(GameInstance instance, LaunchArgs launchArgs) throws IOException, ClientJsonNotFoundException {
         if (instance.getMeldData() == null) throw new IllegalStateException("Instance is missing Meld data");
 
         log.info("Launching Minecraft for instance: {}", instance.getAddress());

@@ -3,6 +3,7 @@ package net.coosanta.meldmc.minecraft;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import net.coosanta.meldmc.Main;
+import net.coosanta.meldmc.gui.views.MainWindow;
 import net.coosanta.meldmc.minecraft.launcher.ClientLauncher;
 import net.coosanta.meldmc.minecraft.launcher.LaunchArgs;
 import net.coosanta.meldmc.network.ProgressCallback;
@@ -414,7 +415,8 @@ public class GameInstance {
             Platform.exit();
         } catch (Exception e) {
             log.error("Failed to launch game", e);
-            // TODO: Show error in GUI
+            // FIXME: fix it not appearing
+            Platform.runLater(() -> MainWindow.getInstance().getController().showExceptionScreen(e)); // FIXME: global variable causing strong coupling
         }
     }
 

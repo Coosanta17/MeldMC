@@ -37,13 +37,13 @@ public final class LaunchConfigurer {
                 Platform.runLater(() -> progressPanel.updateFilesProgress(downloaded, total)));
 
         progressTracker.setStageCallback((ø, æ, stage) ->
-                Platform.runLater(() -> progressPanel.setStatusMessage(switch ((UnifiedProgressTracker.LaunchStage) ((Object[]) stage)[0]) {
-                    case INITIAL -> "Starting download...";
-                    case MODS -> "Downloading mods...";
-                    case LIBRARIES -> "Downloading libraries...";
-                    case STARTING -> "Launching the game...";
-                }))
-        );
+                Platform.runLater(() -> progressPanel.setStatusMessage(
+                        switch ((UnifiedProgressTracker.LaunchStage) ((Object[]) stage)[0]) {
+                            case INITIAL -> "Starting download...";
+                            case MODS -> "Downloading mods...";
+                            case LIBRARIES -> "Downloading libraries...";
+                            case STARTING -> "Launching the game..."; // FIXME it's not showing
+                        })));
 
         progressTracker.setHideCallback(progressPanel::hideProgressInfo);
 

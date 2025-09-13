@@ -85,6 +85,12 @@ public class MainWindowController {
         }
     }
 
+    public void showExceptionScreen(Throwable e) {
+        log.debug("Showing exception GUI");
+
+        showScreen(new ExceptionGUI(e));
+    }
+
     public void showScreen(Node screen) {
         clearTheBoardMike();
         root.getChildren().add(screen);
