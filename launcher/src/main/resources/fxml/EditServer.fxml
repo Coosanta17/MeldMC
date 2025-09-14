@@ -4,7 +4,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import net.coosanta.meldmc.gui.nodes.button.MinecraftButton?>
-
 <fx:root type="BorderPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
          BorderPane.alignment="CENTER"
          StackPane.alignment="TOP_CENTER"

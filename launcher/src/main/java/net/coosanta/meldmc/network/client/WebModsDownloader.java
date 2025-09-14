@@ -37,7 +37,7 @@ public class WebModsDownloader implements AutoCloseable {
 
     public WebModsDownloader() {
         coordinationExecutor = Executors.newSingleThreadExecutor(
-            GlobalExceptionHandler.threadFactory("web-mods-coordinator")
+                GlobalExceptionHandler.threadFactory("web-mods-coordinator")
         );
         downloadExecutor = Executors.newFixedThreadPool(
                 3 * Runtime.getRuntime().availableProcessors(),

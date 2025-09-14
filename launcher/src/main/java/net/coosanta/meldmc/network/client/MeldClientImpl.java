@@ -34,7 +34,7 @@ public class MeldClientImpl implements MeldClient {
     private final boolean isHttps;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ExecutorService executorService = Executors.newCachedThreadPool(
-        GlobalExceptionHandler.threadFactory("meld-client")
+            GlobalExceptionHandler.threadFactory("meld-client")
     );
     private final SSLContext sslContext;
     private ProgressCallback progressCallback;

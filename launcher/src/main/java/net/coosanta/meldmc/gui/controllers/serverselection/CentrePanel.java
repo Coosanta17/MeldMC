@@ -41,8 +41,8 @@ public class CentrePanel extends VBox {
 
     private ExecutorService createPingExecutor() {
         return Executors.newFixedThreadPool(
-            Math.min(4, Runtime.getRuntime().availableProcessors()),
-            GlobalExceptionHandler.threadFactory("server-ping")
+                Math.min(4, Runtime.getRuntime().availableProcessors()),
+                GlobalExceptionHandler.threadFactory("server-ping")
         );
     }
 

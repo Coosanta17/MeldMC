@@ -188,9 +188,11 @@
     -fx-border-color: transparent;
     -fx-padding: 0;
 }
+
 .selectable-textfield-white {
     -fx-text-fill: white;
 }
+
 .selectable-textfield-black {
     -fx-text-fill: black;
 }

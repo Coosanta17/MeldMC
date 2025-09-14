@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.GridPane?>
-<?import net.coosanta.meldmc.gui.nodes.button.MinecraftButton?>
-
-<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.*?>
+<?import net.coosanta.meldmc.gui.nodes.button.*?>
 <fx:root type="GridPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
          hgap="10" vgap="10" alignment="BOTTOM_CENTER">
     <padding>
@@ -12,18 +10,18 @@
     </padding>
 
     <columnConstraints>
-        <ColumnConstraints percentWidth="8.33" /> <!-- 100/12 -->
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
-        <ColumnConstraints percentWidth="8.33" />
+        <ColumnConstraints percentWidth="8.33"/> <!-- 100/12 -->
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
+        <ColumnConstraints percentWidth="8.33"/>
     </columnConstraints>
 
     <!-- First row -->
