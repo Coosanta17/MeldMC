@@ -90,7 +90,7 @@ dependencies {
 //    implementation("org.geysermc.mcprotocollib:protocol:1.21.5-SNAPSHOT")
 
     // https://repo.opencollab.dev/maven-snapshots/ dependencies: https://repo.opencollab.dev/maven-releases/
-    implementation("org.geysermc.mcprotocollib:protocol:1.21.6-SNAPSHOT")
+    implementation("org.geysermc.mcprotocollib:protocol:1.21.7-1")
 
     // https://mvnrepository.com/artifact/net.kyori/adventure-text-minimessage/4.19.0
     implementation("net.kyori:adventure-text-minimessage:4.19.0")
@@ -181,7 +181,7 @@ tasks.jar {
 publishing {
     repositories {
         maven {
-            name = "snapshot"
+            name = "snapshots"
             url = uri("https://repo.coosanta.net/snapshots")
             credentials(PasswordCredentials::class)
             authentication {
@@ -262,15 +262,6 @@ tasks.register("generateLauncherJsons") {
                 "org.openjfx",
                 "io.netty"
             )
-
-            // Special handling for mcprotocollib
-            if (group == "org.geysermc.mcprotocollib" && name == "protocol" && projectVersion == "1.21.6-SNAPSHOT") {
-                val url = getArtifactUrl(artifact)
-                if (url == "https://repo.opencollab.dev/maven-snapshots/org/geysermc/mcprotocollib/protocol/1.21.6-SNAPSHOT/protocol-1.21.6-SNAPSHOT.jar") {
-                    librariesJson.add(staticMcprotocollibJson())
-                    return@forEach
-                }
-            }
 
             if (seen.add(id) && excludedGroups.none { group.startsWith(it) } && !name.startsWith("javafx-")) {
                 librariesJson.add(
@@ -394,39 +385,18 @@ fun getArtifactUrl(artifact: ResolvedArtifact): String {
         }
     }
 
-    // fall back to pattern matching - stupid approach but ok.
+    // fall back to pattern matching - stupid approach but ok. TODO: REMOVE THIS!!!!!!!!!!!!
     val baseUrl = when {
-        // JavaFX modules - Maven Central
         group.startsWith("org.openjfx") -> "https://repo1.maven.org/maven2"
-
-        // Geyser MC Protocol - OpenCollab snapshots
         group.startsWith("org.geysermc") -> "https://repo.opencollab.dev/maven-snapshots"
-
-        // JitPack dependencies
         group.startsWith("com.github") -> "https://jitpack.io"
-
-        // Fabric dependencies
         group.startsWith("net.fabricmc") -> "https://maven.fabricmc.net"
-
-        // Kyori Adventure - Maven Central
         group.startsWith("net.kyori") -> "https://repo1.maven.org/maven2"
-
-        // Logback - Maven Central
         group.startsWith("ch.qos.logback") -> "https://repo1.maven.org/maven2"
-
-        // SLF4J - Maven Central
         group.startsWith("org.slf4j") -> "https://repo1.maven.org/maven2"
-
-        // Jackson - Maven Central
         group.startsWith("com.fasterxml.jackson") -> "https://repo1.maven.org/maven2"
-
-        // Guava - Maven Central
         group.startsWith("com.google.guava") -> "https://repo1.maven.org/maven2"
-
-        // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
         group.startsWith("net.coosanta") -> "https://repo.coosanta.net/releases"
-
-        // Stupid
         else -> "https://repo1.maven.org/maven2"
     }
 
@@ -435,6 +405,5 @@ fun getArtifactUrl(artifact: ResolvedArtifact): String {
     return fallbackUrl
 }
 
-// Helper to get coosanta repo base URL
 fun getCoosantaRepoBase(): String =
     if (isRelease) "https://repo.coosanta.net/releases" else "https://repo.coosanta.net/snapshots"

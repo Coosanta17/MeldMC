@@ -9,6 +9,14 @@ on:
         description: 'Version to release'
         required: true
         type: string
+      repository:
+        description: 'Release repository'
+        required: true
+        type: choice
+        options:
+          - releases
+          - snapshots
+        default: 'releases'
 
 jobs:
   release:
@@ -45,6 +53,17 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: $VERSION"
 
+      - name: Determine repository and credentials
+        id: repository
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            REPOSITORY="releases"
+          else
+            REPOSITORY="${{ github.event.inputs.repository }}"
+          fi
+          echo "REPOSITORY=$REPOSITORY" >> $GITHUB_OUTPUT
+          echo "Publishing to: $REPOSITORY"
+
       - name: Update version in build.gradle.kts
         run: |
           sed -i 's/project\.version = "[^"]*"/project.version = "${{ steps.version.outputs.VERSION }}"/' ./launcher/build.gradle.kts
@@ -54,4 +73,11 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_releasesUsername: ${{ secrets.MAVEN_USERNAME }}
           ORG_GRADLE_PROJECT_releasesPassword: ${{ secrets.MAVEN_PASSWORD }}
-        run: ./gradlew publishMavenAllPlatformsPublicationToReleasesRepository --parallel
+          ORG_GRADLE_PROJECT_snapshotsUsername: ${{ secrets.SNAPSHOTS_MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_snapshotsPassword: ${{ secrets.SNAPSHOTS_MAVEN_PASSWORD }}
+        run: |
+          if [ "${{ steps.repository.outputs.REPOSITORY }}" = "snapshots" ]; then
+            ./gradlew publishMavenAllPlatformsPublicationToSnapshotsRepository --parallel
+          else
+            ./gradlew publishMavenAllPlatformsPublicationToReleasesRepository --parallel
+          fi

@@ -314,7 +314,7 @@ public class GameInstance {
                 .collect(Collectors.toSet());
 
         long totalBytes = webMods.stream().mapToLong(MeldData.ClientMod::fileSize).sum() +
-                          serverMods.stream().mapToLong(MeldData.ClientMod::fileSize).sum();
+                serverMods.stream().mapToLong(MeldData.ClientMod::fileSize).sum();
         long totalFiles = webMods.size() + serverMods.size();
 
         progressTracker.setTotalExpected(totalBytes, totalFiles);
